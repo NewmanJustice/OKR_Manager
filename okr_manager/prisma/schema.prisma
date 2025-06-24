@@ -1,0 +1,145 @@
+// Prisma schema for OKR Management System
+// Based on the provided scoping document
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                Int      @id @default(autoincrement())
+  email             String   @unique
+  password_hash     String
+  name              String
+  role              Role
+  notify_preferences Json
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  teams             Team[]   @relation("PDMTeams")
+  created_teams     Team[]   @relation("AdminCreatedTeams")
+  objectives        Objective[]
+  created_objectives Objective[] @relation("AdminCreatedObjectives")
+  progress_updates  ProgressUpdate[]
+  monthly_reviews   MonthlyReview[]
+  quarterly_reviews QuarterlyReview[]
+  created_key_results KeyResult[] @relation("UserCreatedKeyResults")
+}
+
+enum Role {
+  ADMIN
+  PDM
+}
+
+model Team {
+  id           Int      @id @default(autoincrement())
+  name         String
+  service_area String
+  pdm          User?    @relation("PDMTeams", fields: [pdm_id], references: [id])
+  pdm_id       Int?
+  description  String?
+  created_by   User     @relation("AdminCreatedTeams", fields: [created_by_id], references: [id])
+  created_by_id Int
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  progress_updates ProgressUpdate[]
+}
+
+model Objective {
+  id              Int      @id @default(autoincrement())
+  title           String
+  description     String
+  pdm             User?    @relation(fields: [pdm_id], references: [id])
+  pdm_id          Int?
+  quarter         Int
+  year            Int
+  objective_number Int
+  created_by      User     @relation("AdminCreatedObjectives", fields: [created_by_id], references: [id])
+  created_by_id   Int
+  assigned_at     DateTime?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  key_results     KeyResult[]
+}
+
+model KeyResult {
+  id            Int      @id @default(autoincrement())
+  objective     Objective @relation(fields: [objective_id], references: [id])
+  objective_id  Int
+  title         String
+  description   String
+  target_value  Float?
+  current_value Float?
+  unit          String?
+  due_date      DateTime?
+  status        Status
+  created_by    User     @relation("UserCreatedKeyResults", fields: [created_by_id], references: [id])
+  created_by_id Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  progress_updates ProgressUpdate[]
+}
+
+enum Status {
+  ON_TRACK
+  AT_RISK
+  COMPLETE
+}
+
+model ProgressUpdate {
+  id            Int      @id @default(autoincrement())
+  key_result    KeyResult @relation(fields: [key_result_id], references: [id])
+  key_result_id Int
+  team          Team      @relation(fields: [team_id], references: [id])
+  team_id       Int
+  progress_value Float?
+  comments      String?
+  evidence_url  String?
+  updated_by    User      @relation(fields: [updated_by_id], references: [id])
+  updated_by_id Int
+  created_at    DateTime  @default(now())
+}
+
+model MonthlyReview {
+  id                Int      @id @default(autoincrement())
+  pdm               User     @relation(fields: [pdm_id], references: [id])
+  pdm_id            Int
+  review_date       DateTime
+  quarter           Int
+  year              Int
+  progress_summary  String
+  blockers_identified String
+  resource_needs    String
+  forward_planning  String
+  submitted_at      DateTime
+  created_at        DateTime @default(now())
+}
+
+model QuarterlyReview {
+  id                  Int      @id @default(autoincrement())
+  pdm                 User     @relation(fields: [pdm_id], references: [id])
+  pdm_id              Int
+  review_date         DateTime
+  quarter             Int
+  year                Int
+  okr_grading         Json
+  lessons_learned     String
+  strategic_adjustments String
+  next_quarter_planning String
+  stakeholder_feedback String
+  submitted_at        DateTime
+  created_at          DateTime @default(now())
+}
+
+model ReviewMeeting {
+  id             Int      @id @default(autoincrement())
+  type           String
+  scheduled_date DateTime
+  attendees      Json
+  agenda         String?
+  outcomes       String?
+  action_items   Json
+}

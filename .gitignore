@@ -1,0 +1,42 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js
+.next/
+out/
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+
+# Prisma
+prisma/dev.db
+prisma/dev.db-journal
+
+# VSCode
+.vscode/
+
+# Docker
+*.local
+.docker/
+
+# Misc
+coverage/
+dist/
+
+# Jupyter
+*.ipynb_checkpoints/
+
+# Build
+build/

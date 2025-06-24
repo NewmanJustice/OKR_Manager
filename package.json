@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@prisma/client": "^6.10.1",
+    "@rottitime/govuk-design-react": "^0.8.2",
+    "bcrypt": "^6.0.0",
+    "chart.js": "^4.5.0",
+    "multer": "^2.0.1",
+    "prisma": "^6.10.1",
+    "recharts": "^3.0.0"
+  }
+}
