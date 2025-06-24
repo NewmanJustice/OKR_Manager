@@ -203,7 +203,6 @@ export default function LandingPage() {
               required
             >
               <Option value="PDM">Principal Development Manager</Option>
-              <Option value="ADMIN">Administrator</Option>
             </Select>
             <Button fullWidth variant="solid" color="primary" sx={{ mt: 1, mb: 2 }} type="submit">
               Register
