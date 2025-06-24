@@ -6,6 +6,9 @@ import ListItemButton from '@mui/joy/ListItemButton';
 import ListItemDecorator from '@mui/joy/ListItemDecorator';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import GroupIcon from '@mui/icons-material/Group';
 import Link from 'next/link';
 import Card from '@mui/joy/Card';
 import Typography from '@mui/joy/Typography';
@@ -49,6 +52,30 @@ export default function AdminHomeClient() {
                 <AssignmentIcon />
               </ListItemDecorator>
               Create OKRs
+            </ListItemButton>
+          </ListItem>
+          <ListItem>
+            <ListItemButton component={Link} href="/admin/assign-okrs">
+              <ListItemDecorator>
+                <PersonAddIcon />
+              </ListItemDecorator>
+              Assign OKRs to User
+            </ListItemButton>
+          </ListItem>
+          <ListItem>
+            <ListItemButton component={Link} href="/admin/progress">
+              <ListItemDecorator>
+                <TrendingUpIcon />
+              </ListItemDecorator>
+              OKR Progress
+            </ListItemButton>
+          </ListItem>
+          <ListItem>
+            <ListItemButton component={Link} href="/admin/my-team">
+              <ListItemDecorator>
+                <GroupIcon />
+              </ListItemDecorator>
+              My Team
             </ListItemButton>
           </ListItem>
           {/* Add more admin feature links here as needed */}

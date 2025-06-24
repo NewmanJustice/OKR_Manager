@@ -1,6 +1,7 @@
 import { getSessionUserFromCookies } from '@/utils/session';
 import { redirect } from 'next/navigation';
 import EvidenceUpload from './evidence-upload';
+import PDMUserObjectivesClientWrapper from './PDMUserObjectivesClientWrapper';
 
 export default async function PDMDashboard() {
   // Server-side session check
@@ -13,6 +14,9 @@ export default async function PDMDashboard() {
       <h1 className="text-2xl font-bold mb-4">PDM Dashboard</h1>
       <p className="mb-8">Welcome, {user?.email} (Principal Development Manager)</p>
       <EvidenceUpload />
+      <div className="mt-8">
+        <PDMUserObjectivesClientWrapper />
+      </div>
       {/* Add PDM features here */}
     </main>
   );
