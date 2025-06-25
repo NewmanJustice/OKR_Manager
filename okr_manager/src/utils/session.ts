@@ -15,7 +15,7 @@ export async function setSessionCookie(res: NextResponse, user: { id: number; em
     name: COOKIE_NAME,
     value: token,
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: false, // Always false in dev for local testing
     path: '/',
     sameSite: 'lax',
     maxAge: 60 * 60 * 24 * 7,

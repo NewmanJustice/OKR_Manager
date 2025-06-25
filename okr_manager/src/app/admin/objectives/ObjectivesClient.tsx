@@ -64,7 +64,7 @@ export default function ObjectivesClient() {
       description: obj.description,
       quarter: obj.quarter,
       year: obj.year,
-      keyResults: (obj.keyResults || []).filter(kr => kr && (kr.text !== undefined || kr.title !== undefined)),
+      keyResults: (obj.key_results || []).filter((kr: any) => kr && (kr.text !== undefined || kr.title !== undefined)),
     });
   };
   const cancelEdit = () => {
@@ -103,22 +103,44 @@ export default function ObjectivesClient() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 pt-4">
       <Card variant="outlined" sx={{ width: 500, maxWidth: '95vw', p: 4, mb: 6, boxShadow: 'lg', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <form onSubmit={handleSubmit} className="w-full flex flex-col" style={{ gap: '0.5em' }}>
-          <Input name="title" placeholder="Title" value={form.title} onChange={handleFormChange} required />
-          <Input name="description" placeholder="Description" value={form.description} onChange={handleFormChange} />
-          <Input name="quarter" placeholder="Quarter (e.g. 2)" value={form.quarter} onChange={handleFormChange} required type="number" />
-          <Input name="year" placeholder="Year (e.g. 2025)" value={form.year} onChange={handleFormChange} required type="number" />
-          <Typography level="body-sm">Key Results:</Typography>
-          {form.keyResults.map((kr, idx) => (
-            <div key={idx} className="flex" style={{ gap: '0.5em', marginBottom: '0.5em' }}>
-              <Input value={kr.text} onChange={e => handleKRChange(idx, e.target.value)} placeholder={`Key Result ${idx + 1}`} required />
-              <Button type="button" color="danger" onClick={() => removeKR(idx)} disabled={form.keyResults.length === 1}>Remove</Button>
+        {editingId !== null && editForm ? (
+          <form onSubmit={handleEditSubmit} className="w-full flex flex-col" style={{ gap: '0.5em' }}>
+            <Input name="title" placeholder="Title" value={editForm.title} onChange={handleEditFormChange} required />
+            <Input name="description" placeholder="Description" value={editForm.description} onChange={handleEditFormChange} />
+            <Input name="quarter" placeholder="Quarter (e.g. 2)" value={editForm.quarter} onChange={handleEditFormChange} required type="number" />
+            <Input name="year" placeholder="Year (e.g. 2025)" value={editForm.year} onChange={handleEditFormChange} required type="number" />
+            <Typography level="body-sm">Key Results:</Typography>
+            {editForm.keyResults.map((kr: any, idx: number) => (
+              <div key={idx} className="flex" style={{ gap: '0.5em', marginBottom: '0.5em' }}>
+                <Input value={kr.text || kr.title || ''} onChange={e => handleEditKRChange(idx, e.target.value)} placeholder={`Key Result ${idx + 1}`} required />
+                <Button type="button" color="danger" onClick={() => removeEditKR(idx)} disabled={editForm.keyResults.length === 1}>Remove</Button>
+              </div>
+            ))}
+            <Button type="button" onClick={addEditKR} color="neutral">Add Key Result</Button>
+            <div className="flex" style={{ gap: '0.5em' }}>
+              <Button type="submit" color="primary">Save Changes</Button>
+              <Button type="button" color="neutral" onClick={cancelEdit}>Cancel</Button>
             </div>
-          ))}
-          <Button type="button" onClick={addKR} color="neutral">Add Key Result</Button>
-          <Button type="submit" color="primary">Create Objective</Button>
-          {error && <Typography color="danger">{error}</Typography>}
-        </form>
+            {error && <Typography color="danger">{error}</Typography>}
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="w-full flex flex-col" style={{ gap: '0.5em' }}>
+            <Input name="title" placeholder="Title" value={form.title} onChange={handleFormChange} required />
+            <Input name="description" placeholder="Description" value={form.description} onChange={handleFormChange} />
+            <Input name="quarter" placeholder="Quarter (e.g. 2)" value={form.quarter} onChange={handleFormChange} required type="number" />
+            <Input name="year" placeholder="Year (e.g. 2025)" value={form.year} onChange={handleFormChange} required type="number" />
+            <Typography level="body-sm">Key Results:</Typography>
+            {form.keyResults.map((kr, idx) => (
+              <div key={idx} className="flex" style={{ gap: '0.5em', marginBottom: '0.5em' }}>
+                <Input value={kr.text} onChange={e => handleKRChange(idx, e.target.value)} placeholder={`Key Result ${idx + 1}`} required />
+                <Button type="button" color="danger" onClick={() => removeKR(idx)} disabled={form.keyResults.length === 1}>Remove</Button>
+              </div>
+            ))}
+            <Button type="button" onClick={addKR} color="neutral">Add Key Result</Button>
+            <Button type="submit" color="primary">Create Objective</Button>
+            {error && <Typography color="danger">{error}</Typography>}
+          </form>
+        )}
       </Card>
       {objectives.length > 0 && (
         <Table variant="outlined" sx={{ width: 900, maxWidth: '98vw', mb: 4, background: 'white', boxShadow: 'sm' }}>
@@ -141,8 +163,8 @@ export default function ObjectivesClient() {
                 <td>{obj.year}</td>
                 <td>
                   <ul style={{ paddingLeft: 16 }}>
-                    {obj.keyResults?.map((kr: any, i: number) => (
-                      <li key={kr.id || i}>{kr.text}</li>
+                    {(obj.key_results || []).map((kr: any, i: number) => (
+                      <li key={kr.id || i}>{kr.text || kr.title}</li>
                     ))}
                   </ul>
                 </td>

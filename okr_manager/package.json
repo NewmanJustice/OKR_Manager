@@ -25,9 +25,6 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.27.2",
-    "@babel/preset-react": "^7.27.1",
-    "@babel/preset-typescript": "^7.27.1",
     "@eslint/eslintrc": "^3",
     "@prisma/client": "^6.10.1",
     "@testing-library/jest-dom": "^6.6.3",
@@ -39,8 +36,6 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
-    "babel-jest": "^30.0.2",
-    "babel-loader": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.4",
     "jest": "^30.0.2",

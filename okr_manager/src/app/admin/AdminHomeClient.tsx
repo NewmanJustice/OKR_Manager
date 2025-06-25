@@ -51,7 +51,7 @@ export default function AdminHomeClient() {
               <ListItemDecorator>
                 <AssignmentIcon />
               </ListItemDecorator>
-              Create OKRs
+              Create and Manage OKRs
             </ListItemButton>
           </ListItem>
           <ListItem>

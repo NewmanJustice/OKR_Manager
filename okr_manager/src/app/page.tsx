@@ -131,7 +131,7 @@ export default function LandingPage() {
           <Button onClick={() => setTab('register')} variant={tab === 'register' ? 'solid' : 'soft'} className="flex-1 rounded-l-none">Register</Button>
         </div>
         {tab === 'login' ? (
-          <form onSubmit={handleLoginSubmit} className="w-full">
+          <form onSubmit={handleLoginSubmit} className="w-full mb-4" style={{ paddingTop: '1em' }}>
             {loginError && <Typography color="danger" level="body-sm" sx={{ mb: 2 }}>{loginError}</Typography>}
             <Input
               placeholder="Email Address"
@@ -155,12 +155,12 @@ export default function LandingPage() {
               name="password"
               autoComplete="current-password"
             />
-            <Button fullWidth variant="solid" color="primary" sx={{ mt: 1, mb: 2 }} type="submit">
+            <Button fullWidth variant="solid" color="primary" sx={{ mb: 2 }} type="submit">
               Sign In
             </Button>
           </form>
         ) : (
-          <form onSubmit={handleRegisterSubmit} className="w-full">
+          <form onSubmit={handleRegisterSubmit} className="w-full mb-4" style={{ paddingTop: '1em' }}>
             {registerError && <Typography color="danger" level="body-sm" sx={{ mb: 2 }}>{registerError}</Typography>}
             <Input
               placeholder="Name"
@@ -204,7 +204,7 @@ export default function LandingPage() {
             >
               <Option value="PDM">Principal Development Manager</Option>
             </Select>
-            <Button fullWidth variant="solid" color="primary" sx={{ mt: 1, mb: 2 }} type="submit">
+            <Button fullWidth variant="solid" color="primary" sx={{ mb: 2 }} type="submit">
               Register
             </Button>
           </form>

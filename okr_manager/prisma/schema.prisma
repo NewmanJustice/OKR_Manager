@@ -27,6 +27,7 @@ model User {
   okrAssignments       OkrAssignment[]
   adminTeamMemberships TeamMembership[] @relation("AdminTeamMemberships")
   userTeamMemberships  TeamMembership[] @relation("UserTeamMemberships")
+  key_result_progresses KeyResultProgress[]
 }
 
 model Team {
@@ -77,6 +78,7 @@ model KeyResult {
   created_by       User             @relation("UserCreatedKeyResults", fields: [created_by_id], references: [id])
   objective        Objective        @relation(fields: [objective_id], references: [id])
   progress_updates ProgressUpdate[]
+  key_result_progresses KeyResultProgress[]
 }
 
 model ProgressUpdate {
@@ -154,4 +156,23 @@ model TeamMembership {
   createdAt DateTime @default(now())
 
   @@unique([adminId, userId])
+}
+
+model KeyResultProgress {
+  id            Int      @id @default(autoincrement())
+  key_result_id Int
+  user_id       Int
+  month         Int      // 1-12
+  year          Int
+  status        String
+  metric_value  Float?
+  evidence      String?
+  comments      String?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  key_result    KeyResult @relation(fields: [key_result_id], references: [id])
+  user          User      @relation(fields: [user_id], references: [id])
+
+  @@unique([key_result_id, user_id, month, year])
 }

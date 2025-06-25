@@ -18,6 +18,7 @@ export default function LoginPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
+      credentials: "include", // Ensure cookies are sent and received
     });
     if (res.ok) {
       router.push("/");

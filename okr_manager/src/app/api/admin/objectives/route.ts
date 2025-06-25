@@ -23,6 +23,11 @@ export async function POST(req: NextRequest) {
   if (!session?.id) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
+  // Validate key results
+  const validKeyResults = (keyResults || []).filter((kr: any) => (kr.text || kr.title || '').trim() !== '');
+  if (validKeyResults.length === 0) {
+    return NextResponse.json({ error: 'At least one key result is required and must not be empty.' }, { status: 400 });
+  }
   // Calculate next objective_number for the year/quarter
   const lastObj = await prisma.objective.findFirst({
     where: { year, quarter },
@@ -40,7 +45,7 @@ export async function POST(req: NextRequest) {
         created_by_id: session.id,
         objective_number: nextObjectiveNumber,
         key_results: {
-          create: (keyResults || []).map(kr => ({
+          create: validKeyResults.map((kr: any) => ({
             title: kr.title || kr.text || '',
             description: kr.description || '',
             status: kr.status || 'Not Started',

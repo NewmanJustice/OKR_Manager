@@ -46,8 +46,8 @@ export default function UserObjectivesClient() {
                   <td>{obj.year}</td>
                   <td>
                     <ul style={{ paddingLeft: 16 }}>
-                      {obj.keyResults?.map((kr: any, i: number) => (
-                        <li key={kr.id || i}>{kr.text}</li>
+                      {(obj.key_results || []).map((kr: any, i: number) => (
+                        <li key={kr.id || i}>{kr.text || kr.title}</li>
                       ))}
                     </ul>
                   </td>

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/utils/prisma';
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const id = Number(params.id);
+    const { params } = context;
+    const awaitedParams = await params;
+    const id = Number(awaitedParams.id);
     const { title, description, quarter, year, pdm_id, keyResults } = await req.json();
     if (!title || !quarter || !year) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -28,6 +30,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     });
     // Upsert key results
     for (const kr of keyResults || []) {
+      if (!kr.id && !kr.created_by_id) {
+        return NextResponse.json({ error: 'Missing created_by_id for new key result' }, { status: 400 });
+      }
       if (kr.id) {
         await prisma.keyResult.update({
           where: { id: kr.id },
@@ -44,7 +49,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             description: kr.description || '',
             status: kr.status || 'Not Started',
             objective_id: id,
-            created_by_id: kr.created_by_id || 1, // fallback, ideally use session
+            created_by_id: kr.created_by_id, // Do not fallback to 1, require explicit value
           },
         });
       }
@@ -60,9 +65,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const id = Number(params.id);
+    const { params } = context;
+    const awaitedParams = await params;
+    const id = Number(awaitedParams.id);
     // Delete related key results first
     await prisma.keyResult.deleteMany({ where: { objective_id: id } });
     // Delete assignments (if any)
