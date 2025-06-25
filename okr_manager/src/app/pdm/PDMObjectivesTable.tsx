@@ -108,124 +108,124 @@ export default function PDMObjectivesTable() {
 
   if (loading) return <div>Loading...</div>;
   return (
-    <Card variant="outlined" sx={{ width: 900, maxWidth: '98vw', p: 4, mb: 6, boxShadow: 'lg', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Typography level="h4" sx={{ mb: 2, textAlign: 'center' }}>My Assigned OKRs</Typography>
-      {error && <Typography color="danger" sx={{ mb: 2 }}>{error}</Typography>}
-      <Table variant="outlined" sx={{ width: '100%', background: 'white', boxShadow: 'sm' }}>
-        <thead>
-          <tr>
-            <th>Objective</th>
-            <th>Quarter</th>
-            <th>Year</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {objectives.map(obj => (
-            <React.Fragment key={obj.id}>
-              <tr>
-                <td>{obj.title}</td>
-                <td>{obj.quarter}</td>
-                <td>{obj.year}</td>
-                <td>
-                  <Link href={`/pdm/objective/${obj.id}`}>
-                    <Button size="sm">
-                      View Key Results
-                    </Button>
-                  </Link>
-                </td>
-              </tr>
-              {expandedId === obj.id && (
+    <div style={{ width: '90vw', maxWidth: 1200, minWidth: 320, margin: '0 auto' }}>
+      <Card variant="outlined" sx={{ width: '100%', maxWidth: 1200, minWidth: 320, p: 4, mb: 6, boxShadow: 'lg', display: 'flex', flexDirection: 'column', alignItems: 'center', mx: 'auto' }}>
+        <Typography level="h4" sx={{ mb: 2, textAlign: 'center' }}>My OKRs</Typography>
+        {error && <Typography color="danger" sx={{ mb: 2 }}>{error}</Typography>}
+        <Table variant="outlined" sx={{ width: '100%', background: 'white', boxShadow: 'sm' }}>
+          <thead>
+            <tr>
+              <th>Objective</th>
+              <th>Quarter</th>
+              <th>Year</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {objectives.map(obj => (
+              <React.Fragment key={obj.id}>
                 <tr>
-                  <td colSpan={4}>
-                    <Table size="sm" variant="soft" sx={{ mt: 2, mb: 2 }}>
-                      <thead>
-                        <tr>
-                          <th>Key Result</th>
-                          <th>Status</th>
-                          <th>Progress</th>
-                          <th>Evidence/Comments</th>
-                          <th>Blockers</th>
-                          <th>Resources Needed</th>
-                          <th>Saved Progress</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {obj.key_results.map((kr: any) => {
-                          const now = new Date();
-                          const month = now.getMonth() + 1;
-                          const year = now.getFullYear();
-                          const saved = savedProgress[kr.id];
-                          return (
-                            <tr key={kr.id}>
-                              <td>{kr.title}</td>
-                              <td>{kr.status}</td>
-                              <td>
-                                <input
-                                  type="text"
-                                  placeholder="Metric/Value"
-                                  style={{ width: 100 }}
-                                  value={progress[kr.id] || ''}
-                                  onChange={e => handleProgressChange(kr.id, e.target.value)}
-                                  disabled={saving[kr.id]}
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="text"
-                                  placeholder="Evidence or comments"
-                                  style={{ width: 180 }}
-                                  value={evidence[kr.id] || ''}
-                                  onChange={e => handleEvidenceChange(kr.id, e.target.value)}
-                                  disabled={saving[kr.id]}
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="text"
-                                  placeholder="Blockers"
-                                  style={{ width: 120 }}
-                                  value={blockers[kr.id] || ''}
-                                  onChange={e => handleBlockersChange(kr.id, e.target.value)}
-                                  disabled={saving[kr.id]}
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="text"
-                                  placeholder="Resources needed"
-                                  style={{ width: 120 }}
-                                  value={resources[kr.id] || ''}
-                                  onChange={e => handleResourcesChange(kr.id, e.target.value)}
-                                  disabled={saving[kr.id]}
-                                />
-                              </td>
-                              <td style={{ fontSize: 12 }}>
-                                {saved ? (
-                                  <div>
-                                    <div><b>Value:</b> {saved.metric_value ?? ''}</div>
-                                    <div><b>Evidence:</b> {saved.evidence ?? ''}</div>
-                                    <div><b>Blockers:</b> {saved.blockers ?? ''}</div>
-                                    <div><b>Resources:</b> {saved.resources_needed ?? ''}</div>
-                                  </div>
-                                ) : <span style={{ color: '#888' }}>No progress</span>}
-                              </td>
-                              <td>
-                                <Button size="sm" color="primary" onClick={() => handleSave(kr.id, month, year)} disabled={saving[kr.id]}>Save</Button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </Table>
+                  <td>{obj.title}</td>
+                  <td>{obj.quarter}</td>
+                  <td>{obj.year}</td>
+                  <td>
+                    <Link href={`/pdm/objective/${obj.id}`} style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                      View
+                    </Link>
                   </td>
                 </tr>
-              )}
-            </React.Fragment>
-          ))}
-        </tbody>
-      </Table>
-    </Card>
+                {expandedId === obj.id && (
+                  <tr>
+                    <td colSpan={4}>
+                      <Table size="sm" variant="soft" sx={{ mt: 2, mb: 2 }}>
+                        <thead>
+                          <tr>
+                            <th>Key Result</th>
+                            <th>Status</th>
+                            <th>Progress</th>
+                            <th>Evidence/Comments</th>
+                            <th>Blockers</th>
+                            <th>Resources Needed</th>
+                            <th>Saved Progress</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {obj.key_results.map((kr: any) => {
+                            const now = new Date();
+                            const month = now.getMonth() + 1;
+                            const year = now.getFullYear();
+                            const saved = savedProgress[kr.id];
+                            return (
+                              <tr key={kr.id}>
+                                <td>{kr.title}</td>
+                                <td>{kr.status}</td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    placeholder="Metric/Value"
+                                    style={{ width: 100 }}
+                                    value={progress[kr.id] || ''}
+                                    onChange={e => handleProgressChange(kr.id, e.target.value)}
+                                    disabled={saving[kr.id]}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    placeholder="Evidence or comments"
+                                    style={{ width: 180 }}
+                                    value={evidence[kr.id] || ''}
+                                    onChange={e => handleEvidenceChange(kr.id, e.target.value)}
+                                    disabled={saving[kr.id]}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    placeholder="Blockers"
+                                    style={{ width: 120 }}
+                                    value={blockers[kr.id] || ''}
+                                    onChange={e => handleBlockersChange(kr.id, e.target.value)}
+                                    disabled={saving[kr.id]}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    placeholder="Resources needed"
+                                    style={{ width: 120 }}
+                                    value={resources[kr.id] || ''}
+                                    onChange={e => handleResourcesChange(kr.id, e.target.value)}
+                                    disabled={saving[kr.id]}
+                                  />
+                                </td>
+                                <td style={{ fontSize: 12 }}>
+                                  {saved ? (
+                                    <div>
+                                      <div><b>Value:</b> {saved.metric_value ?? ''}</div>
+                                      <div><b>Evidence:</b> {saved.evidence ?? ''}</div>
+                                      <div><b>Blockers:</b> {saved.blockers ?? ''}</div>
+                                      <div><b>Resources:</b> {saved.resources_needed ?? ''}</div>
+                                    </div>
+                                  ) : <span style={{ color: '#888' }}>No progress</span>}
+                                </td>
+                                <td>
+                                  <Button size="sm" color="primary" onClick={() => handleSave(kr.id, month, year)} disabled={saving[kr.id]}>Save</Button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </Table>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </Table>
+      </Card>
+    </div>
   );
 }

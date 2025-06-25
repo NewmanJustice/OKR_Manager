@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import Button from '@mui/joy/Button';
 import Typography from '@mui/joy/Typography';
 import Input from '@mui/joy/Input';
@@ -8,13 +9,16 @@ import RadioGroup from '@mui/joy/RadioGroup';
 import FormControl from '@mui/joy/FormControl';
 import FormLabel from '@mui/joy/FormLabel';
 import Slider from '@mui/joy/Slider';
+import { Card, Chip, Accordion, AccordionGroup, AccordionDetails, AccordionSummary } from '@mui/joy';
 
 export default function ObjectiveKeyResultsClient({ keyResults }: any) {
+  const router = useRouter();
   const [progress, setProgress] = React.useState<Record<number, string>>({});
   const [status, setStatus] = React.useState<Record<number, string>>({});
   const [evidence, setEvidence] = React.useState<Record<number, string>>({});
   const [blockers, setBlockers] = React.useState<Record<number, string>>({});
   const [resources, setResources] = React.useState<Record<number, string>>({});
+  const [comments, setComments] = React.useState<Record<number, string>>({});
   const [saving, setSaving] = React.useState<Record<number, boolean>>({});
   const [savedProgress, setSavedProgress] = React.useState<Record<number, any>>({});
   const [error, setError] = React.useState<string | null>(null);
@@ -100,6 +104,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
     } else if (field === 'evidence') setEvidence(prev => ({ ...prev, [krId]: value }));
     else if (field === 'blockers') setBlockers(prev => ({ ...prev, [krId]: value }));
     else if (field === 'resources') setResources(prev => ({ ...prev, [krId]: value }));
+    else if (field === 'comments') setComments(prev => ({ ...prev, [krId]: value }));
   };
 
   const handleSave = async (krId: number, month: number, year: number) => {
@@ -132,7 +137,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
         status: statusValue,
         metric_value,
         evidence: evidence[krId] || '',
-        comments: '',
+        comments: comments[krId] || '',
         blockers: blockers[krId] || '',
         resources_needed: resources[krId] || '',
         month,
@@ -146,11 +151,17 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
       });
       if (res.ok) {
         const saved = await res.json();
-        setSavedProgress(prev => ({ ...prev, [krId]: saved }));
+        setSavedProgress(prev => {
+          const prevArr = prev[krId] || [];
+          return { ...prev, [krId]: [saved, ...prevArr] };
+        });
         setProgress(prev => ({ ...prev, [krId]: '' }));
         setEvidence(prev => ({ ...prev, [krId]: '' }));
         setBlockers(prev => ({ ...prev, [krId]: '' }));
         setResources(prev => ({ ...prev, [krId]: '' }));
+        setComments(prev => ({ ...prev, [krId]: '' }));
+        // Redirect to dashboard after save
+        router.push('/pdm');
       } else {
         const err = await res.json();
         setError(err.error || 'Failed to save progress');
@@ -161,6 +172,26 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
     setSaving(prev => ({ ...prev, [krId]: false }));
   };
 
+  React.useEffect(() => {
+    // Fetch all progress history for all key results for this objective
+    const allKeyResultIds = keyResults.map((kr: any) => kr.id);
+    if (allKeyResultIds.length > 0) {
+      fetch(`/api/pdm/progress?keyResultIds=${allKeyResultIds.join(",")}`)
+        .then(async res2 => {
+          if (res2.ok) {
+            const progressArr = await res2.json();
+            // Group by key_result_id
+            const historyMap: Record<number, any[]> = {};
+            progressArr.forEach((p: any) => {
+              if (!historyMap[p.key_result_id]) historyMap[p.key_result_id] = [];
+              historyMap[p.key_result_id].push(p);
+            });
+            setSavedProgress(historyMap);
+          }
+        });
+    }
+  }, [keyResults]);
+
   const now = new Date();
   const month = now.getMonth() + 1;
   const year = now.getFullYear();
@@ -170,10 +201,10 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
       {error && <Typography color="danger" sx={{ mb: 2 }}>{error}</Typography>}
       <ul className="space-y-6" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
         {keyResults.map((kr: any) => {
-          const saved = savedProgress[kr.id];
+          const history = savedProgress[kr.id] || [];
           return (
             <li key={kr.id} style={{ border: 'none', boxShadow: 'none', padding: '1rem', background: 'white' }}>
-              <div className="font-semibold mb-2">{kr.title}</div>
+              <div className="font-bold mb-4" style={{ fontSize: '1.25em', color: '#1a237e', letterSpacing: '0.5px', paddingBottom: '0.5em' }}>{kr.title}</div>
               <FormControl sx={{ mb: 2 }}>
                 <FormLabel>Status</FormLabel>
                 <RadioGroup
@@ -200,9 +231,9 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
                 />
               </FormControl>
               <FormControl sx={{ mb: 2 }}>
-                <FormLabel>Evidence or comments</FormLabel>
+                <FormLabel>Evidence</FormLabel>
                 <Input
-                  placeholder="Evidence or comments"
+                  placeholder="Evidence"
                   value={evidence[kr.id] || ''}
                   onChange={e => handleChange('evidence', kr.id, e.target.value)}
                   disabled={saving[kr.id]}
@@ -226,19 +257,44 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
                   disabled={saving[kr.id]}
                 />
               </FormControl>
-              <div className="mb-2">
+              <FormControl sx={{ mb: 2 }}>
+                <FormLabel>Comments</FormLabel>
+                <Input
+                  placeholder="Comments"
+                  value={comments[kr.id] || ''}
+                  onChange={e => handleChange('comments', kr.id, e.target.value)}
+                  disabled={saving[kr.id]}
+                />
+              </FormControl>
+              <div className="mb-2" style={{ marginBottom: '2.5rem' }}>
                 <Button size="sm" color="primary" onClick={() => handleSave(kr.id, month, year)} disabled={saving[kr.id]}>Save</Button>
               </div>
-              <div style={{ fontSize: 12 }}>
-                {saved ? (
-                  <div>
-                    <div><b>Value:</b> {saved.metric_value ?? ''}</div>
-                    <div><b>Evidence:</b> {saved.evidence ?? ''}</div>
-                    <div><b>Blockers:</b> {saved.blockers ?? ''}</div>
-                    <div><b>Resources:</b> {saved.resources_needed ?? ''}</div>
-                  </div>
-                ) : <span style={{ color: '#888' }}>No progress</span>}
-              </div>
+              {history.length > 0 && (
+                <div className="mt-4">
+                  <Typography level="body-sm" sx={{ fontWeight: 'bold', mb: 1 }}>Monthly Review History</Typography>
+                  <AccordionGroup sx={{ width: '100%' }}>
+                    {history.sort((a: any, b: any) => (b.year - a.year) || (b.month - a.month) || (b.id - a.id)).map((entry: any, idx: number) => (
+                      <Accordion key={entry.id || idx} sx={{ mb: 1 }}>
+                        <AccordionSummary>
+                          <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                            <Typography level="title-sm" sx={{ mr: 2 }}><b>{entry.month}/{entry.year}</b></Typography>
+                            {entry.status === 'Done' && <Chip color="success" size="sm" variant="soft" sx={{ ml: 1 }}>Done</Chip>}
+                            {entry.status === 'In Progress' && <Chip color="primary" size="sm" variant="soft" sx={{ ml: 1 }}>In Progress</Chip>}
+                            {entry.status === 'Not Started' && <Chip color="neutral" size="sm" variant="soft" sx={{ ml: 1 }}>Not Started</Chip>}
+                          </div>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Typography level="body-sm" sx={{ mb: 0.5 }}><b>Progress:</b> {entry.metric_value !== null && entry.metric_value !== undefined ? entry.metric_value : '-'}</Typography>
+                          <Typography level="body-sm" sx={{ mb: 0.5 }}><b>Evidence:</b> {entry.evidence || '-'}</Typography>
+                          <Typography level="body-sm" sx={{ mb: 0.5 }}><b>Comments:</b> {entry.comments || '-'}</Typography>
+                          <Typography level="body-sm" sx={{ mb: 0.5 }}><b>Blockers:</b> {entry.blockers || '-'}</Typography>
+                          <Typography level="body-sm"><b>Resources Needed:</b> {entry.resources_needed || '-'}</Typography>
+                        </AccordionDetails>
+                      </Accordion>
+                    ))}
+                  </AccordionGroup>
+                </div>
+              )}
             </li>
           );
         })}

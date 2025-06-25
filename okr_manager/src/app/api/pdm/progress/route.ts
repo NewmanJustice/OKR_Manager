@@ -12,28 +12,14 @@ export async function POST(req: NextRequest) {
   if (req.headers.get('x-debug-session') === 'true') {
     return NextResponse.json({ debugUserId: session.id });
   }
-  const { key_result_id, status, metric_value, evidence, comments, month, year } = await req.json();
+  const { key_result_id, status, metric_value, evidence, comments, blockers, resources_needed, month, year } = await req.json();
   if (!key_result_id || !month || !year || !status) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
   try {
-    console.log('Received progress POST:', { sessionId: session.id, key_result_id, status, metric_value, evidence, comments, month, year });
-    const progress = await prisma.keyResultProgress.upsert({
-      where: {
-        key_result_id_user_id_month_year: {
-          key_result_id,
-          user_id: session.id,
-          month,
-          year,
-        },
-      },
-      update: {
-        status,
-        metric_value,
-        evidence,
-        comments,
-      },
-      create: {
+    console.log('Received progress POST:', { sessionId: session.id, key_result_id, status, metric_value, evidence, comments, blockers, resources_needed, month, year });
+    const progress = await prisma.keyResultProgress.create({
+      data: {
         key_result_id,
         user_id: session.id,
         month,
@@ -42,6 +28,8 @@ export async function POST(req: NextRequest) {
         metric_value,
         evidence,
         comments,
+        blockers,
+        resources_needed,
       },
     });
     return NextResponse.json(progress);
@@ -58,19 +46,24 @@ export async function GET(req: NextRequest) {
   }
   const { searchParams } = new URL(req.url);
   const keyResultIds = (searchParams.get('keyResultIds') || '').split(',').map(Number).filter(Boolean);
-  const month = Number(searchParams.get('month'));
-  const year = Number(searchParams.get('year'));
-  if (!keyResultIds.length || !month || !year) {
+  // If month and year are provided, filter by them, else return all months/years
+  const month = searchParams.get('month');
+  const year = searchParams.get('year');
+  if (!keyResultIds.length) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
   try {
+    const where: any = {
+      key_result_id: { in: keyResultIds },
+      user_id: session.id,
+    };
+    if (month && year) {
+      where.month = Number(month);
+      where.year = Number(year);
+    }
     const progressArr = await prisma.keyResultProgress.findMany({
-      where: {
-        key_result_id: { in: keyResultIds },
-        user_id: session.id,
-        month,
-        year,
-      },
+      where,
+      orderBy: [{ year: 'asc' }, { month: 'asc' }],
     });
     return NextResponse.json(progressArr);
   } catch (e: any) {

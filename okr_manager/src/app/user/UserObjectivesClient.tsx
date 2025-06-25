@@ -23,7 +23,7 @@ export default function UserObjectivesClient() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 pt-4">
       <Card variant="outlined" sx={{ width: 900, maxWidth: '98vw', p: 4, mb: 6, boxShadow: 'lg', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography level="h4" sx={{ mb: 2 }}>My Assigned OKRs</Typography>
+        <Typography level="h4" sx={{ mb: 2 }}>My OKRs</Typography>
         {objectives.length === 0 ? (
           <Typography>No OKRs assigned to you yet.</Typography>
         ) : (

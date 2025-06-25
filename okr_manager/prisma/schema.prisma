@@ -168,11 +168,11 @@ model KeyResultProgress {
   metric_value  Float?
   evidence      String?
   comments      String?
+  blockers      String?
+  resources_needed String?
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
   key_result    KeyResult @relation(fields: [key_result_id], references: [id])
   user          User      @relation(fields: [user_id], references: [id])
-
-  @@unique([key_result_id, user_id, month, year])
 }
