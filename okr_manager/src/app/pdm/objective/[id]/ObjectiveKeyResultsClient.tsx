@@ -10,6 +10,9 @@ import FormControl from '@mui/joy/FormControl';
 import FormLabel from '@mui/joy/FormLabel';
 import Slider from '@mui/joy/Slider';
 import { Card, Chip, Accordion, AccordionGroup, AccordionDetails, AccordionSummary } from '@mui/joy';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function ObjectiveKeyResultsClient({ keyResults }: any) {
   const router = useRouter();
@@ -20,73 +23,77 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
   const [resources, setResources] = React.useState<Record<number, string>>({});
   const [comments, setComments] = React.useState<Record<number, string>>({});
   const [saving, setSaving] = React.useState<Record<number, boolean>>({});
-  const [savedProgress, setSavedProgress] = React.useState<Record<number, any>>({});
+  const [savedProgress, setSavedProgress] = React.useState<Record<number, any[]>>({});
   const [error, setError] = React.useState<string | null>(null);
+  const [successCriteria, setSuccessCriteria] = React.useState<Record<number, string>>({});
+  const [editingCriteria, setEditingCriteria] = React.useState<Record<number, boolean>>({});
+  const [savingCriteria, setSavingCriteria] = React.useState<Record<number, boolean>>({});
+  const [userRole, setUserRole] = React.useState<string>('');
 
   React.useEffect(() => {
-    // Fetch saved progress for all key results for this objective
+    // Fetch user role for permissions
+    fetch('/api/user/me').then(async res => {
+      if (res.ok) {
+        const data = await res.json();
+        setUserRole(data.role || '');
+      }
+    });
+    // Fetch success criteria for all key results
+    keyResults.forEach((kr: any) => {
+      fetch(`/api/key-result/${kr.id}/success-criteria`).then(async res => {
+        if (res.ok) {
+          const data = await res.json();
+          setSuccessCriteria(prev => ({ ...prev, [kr.id]: data.success_criteria || '' }));
+        }
+      });
+    });
+  }, [keyResults]);
+
+  React.useEffect(() => {
+    // Fetch all progress history for all key results for this objective
     const allKeyResultIds = keyResults.map((kr: any) => kr.id);
     if (allKeyResultIds.length > 0) {
-      const now = new Date();
-      const month = now.getMonth() + 1;
-      const year = now.getFullYear();
-      fetch(`/api/pdm/progress?keyResultIds=${allKeyResultIds.join(",")}&month=${month}&year=${year}`)
+      fetch(`/api/pdm/progress?keyResultIds=${allKeyResultIds.join(",")}`)
         .then(async res2 => {
           if (res2.ok) {
             const progressArr = await res2.json();
-            const progressMap: Record<number, any> = {};
-            const statusMap: Record<number, string> = {};
-            const metricMap: Record<number, string> = {};
+            // Group by key_result_id
+            const historyMap: Record<number, any[]> = {};
             progressArr.forEach((p: any) => {
-              progressMap[p.key_result_id] = p;
-              statusMap[p.key_result_id] = p.status || "Not Started";
-              if (typeof p.metric_value === 'number') {
-                metricMap[p.key_result_id] = String(p.metric_value);
-              }
+              if (!historyMap[p.key_result_id]) historyMap[p.key_result_id] = [];
+              historyMap[p.key_result_id].push(p);
             });
-            setSavedProgress(progressMap);
-            // Always set status from backend (or Not Started)
-            const newStatus: Record<number, string> = {};
-            allKeyResultIds.forEach((id: number) => {
-              newStatus[id] = statusMap[id] || "Not Started";
-            });
-            setStatus(newStatus);
-            // Set progress (slider) from backend
-            setProgress(prev => {
-              const newProgress = { ...prev };
-              allKeyResultIds.forEach((id: number) => {
-                if (metricMap[id] !== undefined) {
-                  newProgress[id] = metricMap[id];
-                }
-              });
-              return newProgress;
-            });
-          } else {
-            // If no progress, set default status
-            const newStatus: Record<number, string> = {};
-            allKeyResultIds.forEach((id: number) => {
-              newStatus[id] = "Not Started";
-            });
-            setStatus(newStatus);
+            setSavedProgress(historyMap);
           }
         });
     }
   }, [keyResults]);
 
-  // Sync status state with savedProgress or key result status when it changes
+  // Sync status and progress state from the latest entry in the history array
   React.useEffect(() => {
     const allKeyResultIds = keyResults.map((kr: any) => kr.id);
     setStatus(prev => {
       const newStatus = { ...prev };
       allKeyResultIds.forEach((id: number) => {
-        const kr = keyResults.find((k: any) => k.id === id);
-        if (savedProgress[id] && (prev[id] === undefined || prev[id] === "Not Started" || prev[id] === "")) {
-          newStatus[id] = savedProgress[id].status || (kr?.status ?? "Not Started");
-        } else if (!savedProgress[id] && (prev[id] === undefined || prev[id] === "")) {
+        const history = savedProgress[id] || [];
+        if (history.length > 0) {
+          newStatus[id] = history[history.length - 1].status || "Not Started";
+        } else {
+          const kr = keyResults.find((k: any) => k.id === id);
           newStatus[id] = kr?.status ?? "Not Started";
         }
       });
       return newStatus;
+    });
+    setProgress(prev => {
+      const newProgress = { ...prev };
+      allKeyResultIds.forEach((id: number) => {
+        const history = savedProgress[id] || [];
+        if (history.length > 0 && typeof history[history.length - 1].metric_value === 'number') {
+          newProgress[id] = String(history[history.length - 1].metric_value);
+        }
+      });
+      return newProgress;
     });
   }, [savedProgress, keyResults]);
 
@@ -152,7 +159,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
       if (res.ok) {
         const saved = await res.json();
         setSavedProgress(prev => {
-          const prevArr = prev[krId] || [];
+          const prevArr = Array.isArray(prev[krId]) ? prev[krId] : [];
           return { ...prev, [krId]: [saved, ...prevArr] };
         });
         setProgress(prev => ({ ...prev, [krId]: '' }));
@@ -160,8 +167,23 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
         setBlockers(prev => ({ ...prev, [krId]: '' }));
         setResources(prev => ({ ...prev, [krId]: '' }));
         setComments(prev => ({ ...prev, [krId]: '' }));
-        // Redirect to dashboard after save
-        router.push('/pdm');
+        // After save, re-fetch all progress history for this objective (no redirect)
+        const allKeyResultIds = keyResults.map((kr: any) => kr.id);
+        if (allKeyResultIds.length > 0) {
+          fetch(`/api/pdm/progress?keyResultIds=${allKeyResultIds.join(",")}`)
+            .then(async res2 => {
+              if (res2.ok) {
+                const progressArr = await res2.json();
+                // Group by key_result_id
+                const historyMap: Record<number, any[]> = {};
+                progressArr.forEach((p: any) => {
+                  if (!historyMap[p.key_result_id]) historyMap[p.key_result_id] = [];
+                  historyMap[p.key_result_id].push(p);
+                });
+                setSavedProgress(historyMap);
+              }
+            });
+        }
       } else {
         const err = await res.json();
         setError(err.error || 'Failed to save progress');
@@ -172,25 +194,30 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
     setSaving(prev => ({ ...prev, [krId]: false }));
   };
 
-  React.useEffect(() => {
-    // Fetch all progress history for all key results for this objective
-    const allKeyResultIds = keyResults.map((kr: any) => kr.id);
-    if (allKeyResultIds.length > 0) {
-      fetch(`/api/pdm/progress?keyResultIds=${allKeyResultIds.join(",")}`)
-        .then(async res2 => {
-          if (res2.ok) {
-            const progressArr = await res2.json();
-            // Group by key_result_id
-            const historyMap: Record<number, any[]> = {};
-            progressArr.forEach((p: any) => {
-              if (!historyMap[p.key_result_id]) historyMap[p.key_result_id] = [];
-              historyMap[p.key_result_id].push(p);
-            });
-            setSavedProgress(historyMap);
-          }
-        });
-    }
-  }, [keyResults]);
+  const handleCriteriaSave = async (krId: number) => {
+    setSavingCriteria(prev => ({ ...prev, [krId]: true }));
+    try {
+      const res = await fetch(`/api/key-result/${krId}/success-criteria`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ success_criteria: successCriteria[krId] })
+      });
+      if (!res.ok) throw new Error('Failed to save');
+      setEditingCriteria(prev => ({ ...prev, [krId]: false }));
+    } catch (e) {}
+    setSavingCriteria(prev => ({ ...prev, [krId]: false }));
+  };
+
+  const handleCriteriaDelete = async (krId: number) => {
+    setSavingCriteria(prev => ({ ...prev, [krId]: true }));
+    try {
+      const res = await fetch(`/api/key-result/${krId}/success-criteria`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete');
+      setSuccessCriteria(prev => ({ ...prev, [krId]: '' }));
+      setEditingCriteria(prev => ({ ...prev, [krId]: false }));
+    } catch (e) {}
+    setSavingCriteria(prev => ({ ...prev, [krId]: false }));
+  };
 
   const now = new Date();
   const month = now.getMonth() + 1;
@@ -205,6 +232,37 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
           return (
             <li key={kr.id} style={{ border: 'none', boxShadow: 'none', padding: '1rem', background: 'white' }}>
               <div className="font-bold mb-4" style={{ fontSize: '1.25em', color: '#1a237e', letterSpacing: '0.5px', paddingBottom: '0.5em' }}>{kr.title}</div>
+              <div className="mb-2">
+                <Typography level="body-md" sx={{ fontWeight: 'bold', mb: 1 }}>Success Criteria</Typography>
+                {editingCriteria[kr.id] ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Input
+                      value={successCriteria[kr.id] || ''}
+                      onChange={e => setSuccessCriteria(prev => ({ ...prev, [kr.id]: e.target.value }))}
+                      disabled={savingCriteria[kr.id]}
+                      sx={{ flex: 1 }}
+                    />
+                    <Button size="sm" color="success" onClick={() => handleCriteriaSave(kr.id)} disabled={savingCriteria[kr.id]}><SaveIcon fontSize="small" /></Button>
+                    <Button size="sm" color="neutral" onClick={() => setEditingCriteria(prev => ({ ...prev, [kr.id]: false }))}>Cancel</Button>
+                    {successCriteria[kr.id] && (
+                      <Button size="sm" color="danger" onClick={() => handleCriteriaDelete(kr.id)} disabled={savingCriteria[kr.id]}><DeleteIcon fontSize="small" /></Button>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Typography level="body-sm" sx={{ mr: 1 }}>
+                      {successCriteria[kr.id] || <span className="text-gray-400">No success criteria set.</span>}
+                    </Typography>
+                    {userRole.toLowerCase() === 'pdm' && (
+                      successCriteria[kr.id] ? (
+                        <Button size="sm" variant="plain" color="primary" onClick={() => setEditingCriteria(prev => ({ ...prev, [kr.id]: true }))}><EditIcon fontSize="small" /></Button>
+                      ) : (
+                        <Button size="sm" variant="soft" color="primary" onClick={() => setEditingCriteria(prev => ({ ...prev, [kr.id]: true }))}>Add Success Criteria</Button>
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
               <FormControl sx={{ mb: 2 }}>
                 <FormLabel>Status</FormLabel>
                 <RadioGroup

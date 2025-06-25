@@ -23,16 +23,14 @@ export default async function ObjectivePage({ params }: { params: Promise<{ id: 
   }
   return (
     <main className="max-w-3xl mx-auto mt-10 p-6">
-      <div className="w-[90vw] max-w-[1200px] min-w-[320px] mx-auto">
-        <Card variant="outlined" sx={{ borderRadius: 'lg', boxShadow: 'md', p: 4 }}>
-          <CardContent>
-            <Link href="/pdm" className="text-blue-700 hover:underline mb-4 inline-block">&larr; Back to Dashboard</Link>
-            <h1 className="text-2xl font-bold mb-4 text-center">{objective.title}</h1>
-            <div className="mb-2 text-center text-gray-600">Target Date: Quarter {objective.quarter}, {objective.year}</div>
-            <ObjectiveKeyResultsClientWrapper keyResults={objective.key_results} />
-          </CardContent>
-        </Card>
-      </div>
+      <Card variant="outlined" sx={{ borderRadius: 'lg', boxShadow: 'md', p: 4 }}>
+        <CardContent>
+          <Link href="/pdm" className="text-blue-700 hover:underline mb-4 inline-block">&larr; Back to Dashboard</Link>
+          <h1 className="text-2xl font-bold mb-4 text-center">{objective.title}</h1>
+          <div className="mb-2 text-center text-gray-600">Target Date: Quarter {objective.quarter}, {objective.year}</div>
+          <ObjectiveKeyResultsClientWrapper keyResults={objective.key_results} />
+        </CardContent>
+      </Card>
     </main>
   );
 }

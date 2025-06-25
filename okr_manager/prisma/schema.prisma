@@ -8,25 +8,25 @@ datasource db {
 }
 
 model User {
-  id                  Int               @id @default(autoincrement())
-  email               String            @unique
-  password_hash       String
-  name                String
-  role                String
-  notify_preferences  Json
-  created_at          DateTime          @default(now())
-  updated_at          DateTime          @updatedAt
-  created_key_results KeyResult[]       @relation("UserCreatedKeyResults")
-  monthly_reviews     MonthlyReview[]
-  created_objectives  Objective[]       @relation("AdminCreatedObjectives")
-  objectives          Objective[]
-  progress_updates    ProgressUpdate[]
-  quarterly_reviews   QuarterlyReview[]
-  created_teams       Team[]            @relation("AdminCreatedTeams")
-  teams               Team[]            @relation("PDMTeams")
-  okrAssignments       OkrAssignment[]
-  adminTeamMemberships TeamMembership[] @relation("AdminTeamMemberships")
-  userTeamMemberships  TeamMembership[] @relation("UserTeamMemberships")
+  id                    Int                 @id @default(autoincrement())
+  email                 String              @unique
+  password_hash         String
+  name                  String
+  role                  String
+  notify_preferences    Json
+  created_at            DateTime            @default(now())
+  updated_at            DateTime            @updatedAt
+  created_key_results   KeyResult[]         @relation("UserCreatedKeyResults")
+  monthly_reviews       MonthlyReview[]
+  created_objectives    Objective[]         @relation("AdminCreatedObjectives")
+  objectives            Objective[]
+  progress_updates      ProgressUpdate[]
+  quarterly_reviews     QuarterlyReview[]
+  created_teams         Team[]              @relation("AdminCreatedTeams")
+  teams                 Team[]              @relation("PDMTeams")
+  okrAssignments        OkrAssignment[]
+  adminTeamMemberships  TeamMembership[]    @relation("AdminTeamMemberships")
+  userTeamMemberships   TeamMembership[]    @relation("UserTeamMemberships")
   key_result_progresses KeyResultProgress[]
 }
 
@@ -45,7 +45,7 @@ model Team {
 }
 
 model Objective {
-  id               Int         @id @default(autoincrement())
+  id               Int             @id @default(autoincrement())
   title            String
   description      String
   pdm_id           Int?
@@ -54,30 +54,31 @@ model Objective {
   objective_number Int
   created_by_id    Int
   assigned_at      DateTime?
-  created_at       DateTime    @default(now())
-  updated_at       DateTime    @updatedAt
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
   key_results      KeyResult[]
-  created_by       User        @relation("AdminCreatedObjectives", fields: [created_by_id], references: [id])
-  pdm              User?       @relation(fields: [pdm_id], references: [id])
-  okrAssignments    OkrAssignment[]
+  created_by       User            @relation("AdminCreatedObjectives", fields: [created_by_id], references: [id])
+  pdm              User?           @relation(fields: [pdm_id], references: [id])
+  okrAssignments   OkrAssignment[]
 }
 
 model KeyResult {
-  id               Int              @id @default(autoincrement())
-  objective_id     Int
-  title            String
-  description      String
-  target_value     Float?
-  current_value    Float?
-  unit             String?
-  due_date         DateTime?
-  status           String
-  created_by_id    Int
-  created_at       DateTime         @default(now())
-  updated_at       DateTime         @updatedAt
-  created_by       User             @relation("UserCreatedKeyResults", fields: [created_by_id], references: [id])
-  objective        Objective        @relation(fields: [objective_id], references: [id])
-  progress_updates ProgressUpdate[]
+  id                    Int                 @id @default(autoincrement())
+  objective_id          Int
+  title                 String
+  description           String
+  target_value          Float?
+  current_value         Float?
+  unit                  String?
+  due_date              DateTime?
+  status                String
+  created_by_id         Int
+  created_at            DateTime            @default(now())
+  updated_at            DateTime            @updatedAt
+  success_criteria      String?
+  created_by            User                @relation("UserCreatedKeyResults", fields: [created_by_id], references: [id])
+  objective             Objective           @relation(fields: [objective_id], references: [id])
+  progress_updates      ProgressUpdate[]
   key_result_progresses KeyResultProgress[]
 }
 
@@ -137,42 +138,42 @@ model ReviewMeeting {
 }
 
 model OkrAssignment {
-  id         Int      @id @default(autoincrement())
-  user       User     @relation(fields: [userId], references: [id])
+  id         Int       @id @default(autoincrement())
+  user       User      @relation(fields: [userId], references: [id])
   userId     Int
   okr        Objective @relation(fields: [okrId], references: [id])
   okrId      Int
-  assignedAt DateTime @default(now())
+  assignedAt DateTime  @default(now())
 
   @@unique([userId, okrId])
 }
 
 model TeamMembership {
-  id       Int  @id @default(autoincrement())
-  admin    User @relation("AdminTeamMemberships", fields: [adminId], references: [id])
-  adminId  Int
-  user     User @relation("UserTeamMemberships", fields: [userId], references: [id])
-  userId   Int
+  id        Int      @id @default(autoincrement())
+  admin     User     @relation("AdminTeamMemberships", fields: [adminId], references: [id])
+  adminId   Int
+  user      User     @relation("UserTeamMemberships", fields: [userId], references: [id])
+  userId    Int
   createdAt DateTime @default(now())
 
   @@unique([adminId, userId])
 }
 
 model KeyResultProgress {
-  id            Int      @id @default(autoincrement())
-  key_result_id Int
-  user_id       Int
-  month         Int      // 1-12
-  year          Int
-  status        String
-  metric_value  Float?
-  evidence      String?
-  comments      String?
-  blockers      String?
+  id               Int      @id @default(autoincrement())
+  key_result_id    Int
+  user_id          Int
+  month            Int // 1-12
+  year             Int
+  status           String
+  metric_value     Float?
+  evidence         String?
+  comments         String?
+  blockers         String?
   resources_needed String?
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 
-  key_result    KeyResult @relation(fields: [key_result_id], references: [id])
-  user          User      @relation(fields: [user_id], references: [id])
+  key_result KeyResult @relation(fields: [key_result_id], references: [id])
+  user       User      @relation(fields: [user_id], references: [id])
 }
