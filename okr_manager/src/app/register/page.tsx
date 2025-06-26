@@ -12,7 +12,6 @@ import Button from "@mui/joy/Button";
 import Avatar from "@mui/joy/Avatar";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Divider from "@mui/joy/Divider";
-import Link from "next/link";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ email: "", password: "", name: "", roleId: "" });
@@ -24,13 +23,13 @@ export default function RegisterPage() {
   useEffect(() => {
     fetch("/api/roles")
       .then((res) => res.json())
-      .then((data) => setRoles(data.filter((r: any) => r.name !== 'Admin')));
+      .then((data: { id: number; name: string; description?: string }[]) => setRoles(data.filter((r) => r.name !== 'Admin')));
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-  const handleRoleChange = (_: any, value: string | null) => {
+  const handleRoleChange = (_: unknown, value: string | null) => {
     setForm({ ...form, roleId: value || "" });
   };
 
@@ -84,11 +83,11 @@ export default function RegisterPage() {
           The OKR Management System
         </Typography>
         <Typography level="body-sm" sx={{ mb: 2, textAlign: "center" }}>
-          Track and manage OKR's
+          Track and manage OKRs
         </Typography>
         <Divider sx={{ width: "100%", mb: 2 }} />
         {error && (
-          <Typography color="danger" sx={{ mb: 2 }}>
+          <Typography level="body-sm" color="danger" sx={{ mt: 2 }}>
             {error}
           </Typography>
         )}

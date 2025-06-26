@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSessionUserFromRequest } from '../utils/session';
 
 // Accepts a predicate function for role-based access
-export function withRole(check: (user: any) => boolean) {
+export function withRole(check: (user: Record<string, unknown>) => boolean) {
   return async (req: NextRequest) => {
     const user = await getSessionUserFromRequest(req);
     if (!user || !check(user)) {

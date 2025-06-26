@@ -4,7 +4,6 @@ import Sheet from "@mui/joy/Sheet";
 import Typography from "@mui/joy/Typography";
 import Input from "@mui/joy/Input";
 import Button from "@mui/joy/Button";
-import Link from "next/link";
 import Box from "@mui/joy/Box";
 import Divider from "@mui/joy/Divider";
 import Avatar from "@mui/joy/Avatar";
@@ -42,7 +41,7 @@ export default function LandingPage() {
       let data;
       try {
         data = await res.json();
-      } catch (err) {
+      } catch {
         router.push("/");
         return;
       }
@@ -57,8 +56,8 @@ export default function LandingPage() {
       let data;
       try {
         data = await res.json();
-      } catch (err) {
-        setLoginError("Login failed (invalid response)");
+      } catch {
+        setLoginError("Login failed");
         return;
       }
       setLoginError(data.error || "Login failed");
@@ -75,7 +74,7 @@ export default function LandingPage() {
   const handleRegisterPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRegisterForm(f => ({ ...f, password: e.target.value }));
   };
-  const handleRegisterRoleChange = (_: any, value: string | null) => {
+  const handleRegisterRoleChange = (_: unknown, value: string | null) => {
     setRegisterForm(f => ({ ...f, roleId: value || "" }));
   };
   const handleRegisterSubmit = async (e: React.FormEvent) => {

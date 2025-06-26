@@ -1,21 +1,28 @@
 "use client";
 import * as React from "react";
-import List from '@mui/joy/List';
-import ListItem from '@mui/joy/ListItem';
-import ListItemButton from '@mui/joy/ListItemButton';
 import Button from '@mui/joy/Button';
 import Input from '@mui/joy/Input';
 import Typography from '@mui/joy/Typography';
 import Card from '@mui/joy/Card';
 import Table from '@mui/joy/Table';
 
+export interface Objective {
+  id: number;
+  title: string;
+  description: string;
+  quarter: number;
+  year: number;
+  keyResults: { text: string }[];
+  // Add other fields as needed
+}
+
 export default function ObjectivesClient() {
-  const [objectives, setObjectives] = React.useState<any[]>([]);
+  const [objectives, setObjectives] = React.useState<Objective[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [form, setForm] = React.useState({ title: '', description: '', quarter: '', year: '', keyResults: [{ text: '' }] });
+  const [form, setForm] = React.useState<{ title: string; description: string; quarter: string; year: string; keyResults: { text: string }[] }>({ title: '', description: '', quarter: '', year: '', keyResults: [{ text: '' }] });
   const [error, setError] = React.useState('');
   const [editingId, setEditingId] = React.useState<number | null>(null);
-  const [editForm, setEditForm] = React.useState<any>(null);
+  const [editForm, setEditForm] = React.useState<Objective | null>(null);
 
   React.useEffect(() => {
     fetch('/api/admin/objectives').then(async res => {
@@ -57,14 +64,15 @@ export default function ObjectivesClient() {
     setObjectives(objectives.filter(o => o.id !== id));
   };
 
-  const startEdit = (obj: any) => {
+  const startEdit = (obj: Objective) => {
     setEditingId(obj.id);
     setEditForm({
+      id: obj.id,
       title: obj.title,
       description: obj.description,
       quarter: obj.quarter,
       year: obj.year,
-      keyResults: (obj.key_results || []).filter((kr: any) => kr && (kr.text !== undefined || kr.title !== undefined)),
+      keyResults: obj.keyResults.map(kr => ({ text: kr.text })),
     });
   };
   const cancelEdit = () => {
@@ -72,17 +80,18 @@ export default function ObjectivesClient() {
     setEditForm(null);
   };
   const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditForm((f: any) => ({ ...f, [e.target.name]: e.target.value }));
+    setEditForm(f => f ? { ...f, [e.target.name]: e.target.value } : null);
   };
   const handleEditKRChange = (idx: number, value: string) => {
-    setEditForm((f: any) => ({ ...f, keyResults: f.keyResults.map((kr: any, i: number) => i === idx ? { ...kr, text: value } : kr) }));
+    setEditForm(f => f ? { ...f, keyResults: f.keyResults.map((kr, i) => i === idx ? { ...kr, text: value } : kr) } : null);
   };
-  const addEditKR = () => setEditForm((f: any) => ({ ...f, keyResults: [...f.keyResults, { text: '' }] }));
-  const removeEditKR = (idx: number) => setEditForm((f: any) => ({ ...f, keyResults: f.keyResults.filter((_: any, i: number) => i !== idx) }));
+  const addEditKR = () => setEditForm(f => f ? { ...f, keyResults: [...f.keyResults, { text: '' }] } : null);
+  const removeEditKR = (idx: number) => setEditForm(f => f ? { ...f, keyResults: f.keyResults.filter((_, i) => i !== idx) } : null);
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!editForm) return;
     const res = await fetch(`/api/admin/objectives/${editingId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -110,9 +119,9 @@ export default function ObjectivesClient() {
             <Input name="quarter" placeholder="Quarter (e.g. 2)" value={editForm.quarter} onChange={handleEditFormChange} required type="number" />
             <Input name="year" placeholder="Year (e.g. 2025)" value={editForm.year} onChange={handleEditFormChange} required type="number" />
             <Typography level="body-sm">Key Results:</Typography>
-            {editForm.keyResults.map((kr: any, idx: number) => (
+            {editForm.keyResults.map((kr, idx) => (
               <div key={idx} className="flex" style={{ gap: '0.5em', marginBottom: '0.5em' }}>
-                <Input value={kr.text || kr.title || ''} onChange={e => handleEditKRChange(idx, e.target.value)} placeholder={`Key Result ${idx + 1}`} required />
+                <Input value={kr.text} onChange={e => handleEditKRChange(idx, e.target.value)} placeholder={`Key Result ${idx + 1}`} required />
                 <Button type="button" color="danger" onClick={() => removeEditKR(idx)} disabled={editForm.keyResults.length === 1}>Remove</Button>
               </div>
             ))}
@@ -163,8 +172,8 @@ export default function ObjectivesClient() {
                 <td>{obj.year}</td>
                 <td>
                   <ul style={{ paddingLeft: 16 }}>
-                    {(obj.key_results || []).map((kr: any, i: number) => (
-                      <li key={kr.id || i}>{kr.text || kr.title}</li>
+                    {obj.keyResults.map((kr, i) => (
+                      <li key={i}>{kr.text}</li>
                     ))}
                   </ul>
                 </td>

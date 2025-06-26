@@ -15,14 +15,14 @@ jest.mock('../../../../../utils/session', () => ({
 jest.mock('next/server', () => ({
   NextRequest: class {},
   NextResponse: {
-    json: (data: any, init?: any) => ({
+    json: (data: unknown, init?: { status?: number }) => ({
       status: (init && init.status) || 200,
       json: async () => data,
     }),
   },
 }));
 
-const { POST, GET } = require('../route');
+import { POST, GET } from '../route';
 
 describe('Objectives API', () => {
   beforeEach(() => {
@@ -46,7 +46,7 @@ describe('Objectives API', () => {
       key_results: [
         { id: 1, title: 'KR1', description: '', status: 'Not Started', created_by_id: 1 }
       ],
-    } as any);
+    } as Record<string, unknown>);
     // Use the Web API Request object
     const req = new Request('http://localhost/api/admin/objectives', {
       method: 'POST',
@@ -59,7 +59,7 @@ describe('Objectives API', () => {
         keyResults: [{ title: 'KR1' }],
       }),
     });
-    // @ts-ignore
+    // @ts-expect-error: Web API Request is not NextRequest, but sufficient for test
     const response = await POST(req);
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -70,9 +70,9 @@ describe('Objectives API', () => {
   it('returns objectives (GET)', async () => {
     mockObjective.findMany.mockResolvedValue([
       { id: 1, title: 'Test', description: '', quarter: 2, year: 2025, key_results: [] }
-    ] as any);
+    ] as Array<{ id: number; title: string; description: string; quarter: number; year: number; key_results: { id: number; title: string }[] }>);
     // Use the Web API Request object for GET
-    // @ts-ignore
+    // @ts-expect-error: GET does not require arguments in this test context
     const response = await GET();
     expect(response.status).toBe(200);
     const data = await response.json();

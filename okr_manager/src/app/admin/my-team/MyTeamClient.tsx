@@ -1,16 +1,24 @@
 "use client";
 import * as React from "react";
 import Autocomplete from "@mui/joy/Autocomplete";
-import Input from "@mui/joy/Input";
 import Button from "@mui/joy/Button";
 import Card from "@mui/joy/Card";
 import Typography from "@mui/joy/Typography";
 import Table from "@mui/joy/Table";
 
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+  roleName?: string;
+  role?: { name: string };
+  // Add other fields as needed
+}
+
 export default function MyTeamClient() {
-  const [team, setTeam] = React.useState<any[]>([]);
-  const [users, setUsers] = React.useState<any[]>([]);
-  const [selectedUser, setSelectedUser] = React.useState<any>(null);
+  const [team, setTeam] = React.useState<User[]>([]);
+  const [users, setUsers] = React.useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [status, setStatus] = React.useState<string>("");
 

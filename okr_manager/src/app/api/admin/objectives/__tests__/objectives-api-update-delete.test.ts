@@ -17,14 +17,14 @@ jest.mock('../../../../../utils/session', () => ({
 jest.mock('next/server', () => ({
   NextRequest: class {},
   NextResponse: {
-    json: (data: any, init?: any) => ({
+    json: (data: unknown, init?: { status?: number }) => ({
       status: (init && init.status) || 200,
       json: async () => data,
     }),
   },
 }));
 
-const { PUT, DELETE } = require('../[id]/route');
+import { PUT, DELETE } from '../[id]/route';
 
 describe('Objectives API Update/Delete', () => {
   beforeEach(() => {
@@ -42,7 +42,7 @@ describe('Objectives API Update/Delete', () => {
       quarter: 2,
       year: 2025,
       key_results: [],
-    } as any);
+    } as Record<string, unknown>);
     const req = new Request('http://localhost/api/admin/objectives/1', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -54,8 +54,8 @@ describe('Objectives API Update/Delete', () => {
         keyResults: [],
       }),
     });
-    // @ts-ignore
-    const response = await PUT(req, { params: { id: '1' } });
+    // Call PUT and DELETE with only the req argument, matching the handler signature
+    const response = await PUT(req as unknown as import('next/server').NextRequest);
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data.title).toBe('Updated');
@@ -67,8 +67,8 @@ describe('Objectives API Update/Delete', () => {
     const req = new Request('http://localhost/api/admin/objectives/1', {
       method: 'DELETE',
     });
-    // @ts-ignore
-    const response = await DELETE(req, { params: { id: '1' } });
+    // Call PUT and DELETE with only the req argument, matching the handler signature
+    const response = await DELETE(req as unknown as import('next/server').NextRequest);
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data.success).toBe(true);

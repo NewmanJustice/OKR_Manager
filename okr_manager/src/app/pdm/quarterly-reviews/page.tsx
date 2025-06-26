@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Card from '@mui/joy/Card';
 import Typography from '@mui/joy/Typography';
 import Table from '@mui/joy/Table';
@@ -9,12 +9,45 @@ import Button from '@mui/joy/Button';
 import Link from 'next/link';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 
-export default function QuarterlyReviewPage() {
-  const router = useRouter();
+export interface KeyResult {
+  id: number;
+  text?: string;
+  title?: string;
+}
+export interface Objective {
+  id: number;
+  title: string;
+  description: string;
+  quarter: number;
+  year: number;
+  key_results: KeyResult[];
+}
+export interface QuarterlyReview {
+  id: string | number;
+  quarter: number;
+  year: number;
+  okr_grading?: Record<string, unknown>;
+  submitted_at?: string | null;
+  isMissing?: boolean;
+}
+export interface ProgressEntry {
+  id: number;
+  year: number;
+  month: number;
+  key_result_id: number;
+  status?: string;
+  metric_value?: number;
+  evidence?: string;
+  comments?: string;
+  blockers?: string;
+  resources_needed?: string;
+}
+
+function QuarterlyReviewPageInner() {
   const searchParams = useSearchParams();
   const quarter = Number(searchParams.get("quarter"));
   const year = Number(searchParams.get("year"));
-  const [objectives, setObjectives] = React.useState<any[]>([]);
+  const [objectives, setObjectives] = React.useState<Objective[]>([]);
   const [okrGrading, setOkrGrading] = React.useState<Record<number, number>>({});
   const [lessons, setLessons] = React.useState("");
   const [adjustments, setAdjustments] = React.useState("");
@@ -23,7 +56,7 @@ export default function QuarterlyReviewPage() {
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState(false);
-  const [pastReviews, setPastReviews] = React.useState<any[]>([]);
+  const [pastReviews, setPastReviews] = React.useState<QuarterlyReview[]>([]);
 
   const fetchPastReviews = React.useCallback(() => {
     fetch(`/api/pdm/quarterly-review?year=${year}`)
@@ -32,9 +65,9 @@ export default function QuarterlyReviewPage() {
           let reviews = await res.json();
           const now = new Date();
           const currentQuarter = Math.floor(now.getMonth() / 3) + 1;
-          const missing: any[] = [];
+          const missing: QuarterlyReview[] = [];
           for (let q = 1; q < currentQuarter; q++) {
-            if (!reviews.some((r: any) => r && r.quarter === q && r.year === year)) {
+            if (!reviews.some((r: QuarterlyReview) => r && r.quarter === q && r.year === year)) {
               missing.push({
                 id: `missing-${q}`,
                 quarter: q,
@@ -45,8 +78,8 @@ export default function QuarterlyReviewPage() {
               });
             }
           }
-          reviews = [...reviews, ...missing].sort((a: any, b: any) => a.quarter - b.quarter);
-          setPastReviews(reviews.filter((r: any) => r && r.year === year));
+          reviews = [...reviews, ...missing].sort((a: QuarterlyReview, b: QuarterlyReview) => a.quarter - b.quarter);
+          setPastReviews(reviews.filter((r: QuarterlyReview) => r && r.year === year));
         }
       });
   }, [year]);
@@ -94,14 +127,14 @@ export default function QuarterlyReviewPage() {
     if (!objectives.length) return;
     // For each objective, fetch latest KR progress for the quarter
     Promise.all(
-      objectives.map(async (obj: any) => {
-        const krIds = obj.key_results.map((kr: any) => kr.id);
+      objectives.map(async (obj: Objective) => {
+        const krIds = obj.key_results.map((kr: KeyResult) => kr.id);
         if (!krIds.length) return [obj.id, 0];
         const res = await fetch(`/api/pdm/progress?keyResultIds=${krIds.join(",")}&quarter=${quarter}&year=${year}`);
         if (!res.ok) return [obj.id, 0];
-        const progressArr = await res.json();
+        const progressArr: ProgressEntry[] = await res.json();
         // For each KR, get the latest metric_value for the quarter
-        const values = progressArr.map((p: any) => typeof p.metric_value === 'number' ? p.metric_value : 0);
+        const values = progressArr.map((p: ProgressEntry) => typeof p.metric_value === 'number' ? p.metric_value : 0);
         const avg = values.length ? values.reduce((a: number, b: number) => a + b, 0) / values.length : 0;
         // Clamp to 0.0-1.0
         return [obj.id, Math.max(0, Math.min(1, avg))];
@@ -141,8 +174,12 @@ export default function QuarterlyReviewPage() {
         setSuccess(true);
         fetchPastReviews(); // Refresh past reviews after save
       } else setError('Failed to save review');
-    } catch (e: any) {
-      setError(e.message || 'Unknown error');
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(e.message || 'Unknown error');
+      } else {
+        setError('Unknown error');
+      }
     }
     setSaving(false);
   };
@@ -202,9 +239,9 @@ export default function QuarterlyReviewPage() {
           {pastReviews.length === 0 && (
             <tr><td colSpan={4} style={{ color: '#888' }}>No reviews yet</td></tr>
           )}
-          {pastReviews.map((r: any) => {
+          {pastReviews.map((r: QuarterlyReview) => {
             const grades = Object.values(r.okr_grading || {});
-            const avg = grades.length ? grades.reduce((a: number, b: any) => a + (typeof b === 'number' ? b : 0), 0) / grades.length : 0;
+            const avg = grades.length ? grades.reduce((a: number, b: unknown) => a + (typeof b === 'number' ? b : 0), 0) / grades.length : 0;
             const isMissing = r.isMissing || !r.submitted_at;
             return (
               <tr key={r.id} style={isMissing ? { background: '#ffe6a1' } : {}}>
@@ -222,5 +259,13 @@ export default function QuarterlyReviewPage() {
         </tbody>
       </Table>
     </Card>
+  );
+}
+
+export default function QuarterlyReviewPage() {
+  return (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <QuarterlyReviewPageInner />
+    </React.Suspense>
   );
 }

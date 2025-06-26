@@ -6,7 +6,7 @@ import Typography from '@mui/joy/Typography';
 import Button from '@mui/joy/Button';
 
 export default function NavBarClient() {
-  const [user, setUser] = React.useState<any>(null);
+  const [user, setUser] = React.useState<Record<string, unknown> | null>(null);
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => {
     setMounted(true);
@@ -55,7 +55,7 @@ export default function NavBarClient() {
         <div>
           {user ? (
             <>
-              {user.email && (
+              {typeof user.email === 'string' && (
                 <Typography level="body-md" sx={{ mr: 2, color: '#666', display: 'inline-block' }}>{user.email}</Typography>
               )}
               <Link href="/logout">

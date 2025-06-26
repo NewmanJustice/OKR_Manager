@@ -14,7 +14,10 @@ export async function POST(req: NextRequest) {
       where: { adminId_userId: { adminId: session.id, userId } },
     });
     return NextResponse.json({ success: true });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 400 });
+  } catch (err) {
+    if (err instanceof Error) {
+      return NextResponse.json({ error: err.message }, { status: 400 });
+    }
+    return NextResponse.json({ error: 'Unknown error' }, { status: 400 });
   }
 }

@@ -6,17 +6,44 @@ import Button from '@mui/joy/Button';
 import Typography from '@mui/joy/Typography';
 import Link from 'next/link';
 
+export interface KeyResult {
+  id: number;
+  title: string;
+  status?: string;
+  // Add other fields as needed
+}
+export interface Objective {
+  id: number;
+  title: string;
+  description: string;
+  quarter: number;
+  year: number;
+  key_results: KeyResult[];
+  // Add other fields as needed
+}
+export interface ProgressEntry {
+  id: number;
+  year: number;
+  month: number;
+  key_result_id: number;
+  status?: string;
+  metric_value?: number;
+  evidence?: string;
+  comments?: string;
+  blockers?: string;
+  resources_needed?: string;
+}
+
 export default function PDMObjectivesTable() {
-  const [objectives, setObjectives] = React.useState<any[]>([]);
+  const [objectives, setObjectives] = React.useState<Objective[]>([]);
   const [progress, setProgress] = React.useState<Record<number, string>>({});
   const [evidence, setEvidence] = React.useState<Record<number, string>>({});
   const [blockers, setBlockers] = React.useState<Record<number, string>>({});
   const [resources, setResources] = React.useState<Record<number, string>>({});
-  const [expandedId, setExpandedId] = React.useState<number | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [saving, setSaving] = React.useState<Record<number, boolean>>({});
-  const [savedProgress, setSavedProgress] = React.useState<Record<number, any>>({});
+  const [savedProgress, setSavedProgress] = React.useState<Record<number, ProgressEntry>>({});
 
   // Calculate date values once per render to avoid hydration mismatch
   const now = React.useMemo(() => new Date(), []);
@@ -28,17 +55,17 @@ export default function PDMObjectivesTable() {
     setLoading(true);
     fetch('/api/user/objectives').then(async res => {
       if (res.ok) {
-        const data = await res.json();
+        const data: Objective[] = await res.json();
         setObjectives(data);
         // Fetch saved progress for all key results
-        const allKeyResultIds = data.flatMap((obj: any) => obj.key_results.map((kr: any) => kr.id));
+        const allKeyResultIds = data.flatMap((obj: Objective) => obj.key_results.map((kr: KeyResult) => kr.id));
         if (allKeyResultIds.length > 0) {
           fetch(`/api/pdm/progress?keyResultIds=${allKeyResultIds.join(",")}&month=${currentMonth}&year=${currentYear}`)
             .then(async res2 => {
               if (res2.ok) {
-                const progressArr = await res2.json();
-                const progressMap: Record<number, any> = {};
-                progressArr.forEach((p: any) => { progressMap[p.key_result_id] = p; });
+                const progressArr: ProgressEntry[] = await res2.json();
+                const progressMap: Record<number, ProgressEntry> = {};
+                progressArr.forEach((p: ProgressEntry) => { progressMap[p.key_result_id] = p; });
                 setSavedProgress(progressMap);
               }
             });
@@ -73,7 +100,7 @@ export default function PDMObjectivesTable() {
       return;
     }
     try {
-      const kr = objectives.flatMap(obj => obj.key_results).find((k: any) => k.id === krId);
+      const kr = objectives.flatMap(obj => obj.key_results).find((k: KeyResult) => k.id === krId);
       if (!kr) throw new Error('Key result not found');
       const status = kr.status || "In Progress";
       const metric_value = parseFloat(progress[krId]);
@@ -93,7 +120,7 @@ export default function PDMObjectivesTable() {
         }),
       });
       if (res.ok) {
-        const saved = await res.json();
+        const saved: ProgressEntry = await res.json();
         setSavedProgress(prev => ({ ...prev, [krId]: saved }));
         setProgress(prev => ({ ...prev, [krId]: '' }));
         setEvidence(prev => ({ ...prev, [krId]: '' }));
@@ -103,8 +130,12 @@ export default function PDMObjectivesTable() {
         const err = await res.json();
         setError(err.error || 'Failed to save progress');
       }
-    } catch (e: any) {
-      setError(e.message || 'Unknown error');
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(e.message || 'Unknown error');
+      } else {
+        setError('Unknown error');
+      }
     }
     setSaving(prev => ({ ...prev, [krId]: false }));
   };
@@ -147,8 +178,7 @@ export default function PDMObjectivesTable() {
                 </Link>
                 </td>
             </tr>
-            {expandedId === obj.id && (
-                <tr>
+            <tr>
                 <td colSpan={4}>
                     <Table size="sm" variant="soft" sx={{ mt: 2, mb: 2 }}>
                     <thead>
@@ -164,7 +194,7 @@ export default function PDMObjectivesTable() {
                         </tr>
                     </thead>
                     <tbody>
-                        {obj.key_results.map((kr: any) => {
+                        {obj.key_results.map((kr: KeyResult) => {
                         const saved = savedProgress[kr.id];
                         return (
                             <tr key={kr.id}>
@@ -230,7 +260,6 @@ export default function PDMObjectivesTable() {
                     </Table>
                 </td>
                 </tr>
-            )}
             </React.Fragment>
         ))}
         </tbody>

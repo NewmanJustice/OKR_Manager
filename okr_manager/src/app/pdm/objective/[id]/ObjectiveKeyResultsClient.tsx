@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useRouter } from "next/navigation";
+// Removed unused useRouter import
 import Button from '@mui/joy/Button';
 import Typography from '@mui/joy/Typography';
 import Input from '@mui/joy/Input';
@@ -9,13 +9,37 @@ import RadioGroup from '@mui/joy/RadioGroup';
 import FormControl from '@mui/joy/FormControl';
 import FormLabel from '@mui/joy/FormLabel';
 import Slider from '@mui/joy/Slider';
-import { Card, Chip, Accordion, AccordionGroup, AccordionDetails, AccordionSummary } from '@mui/joy';
+import { Chip, Accordion, AccordionGroup, AccordionDetails, AccordionSummary } from '@mui/joy';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-export default function ObjectiveKeyResultsClient({ keyResults }: any) {
-  const router = useRouter();
+export interface KeyResult {
+  id: number;
+  title: string;
+  status?: string;
+  // Add other fields as needed
+}
+
+// Define ProgressEntry interface for history entries
+export interface ProgressEntry {
+  id: number;
+  year: number;
+  month: number;
+  key_result_id: number;
+  status?: string;
+  metric_value?: number;
+  evidence?: string;
+  comments?: string;
+  blockers?: string;
+  resources_needed?: string;
+}
+
+interface ObjectiveKeyResultsClientProps {
+  keyResults: KeyResult[];
+}
+
+export default function ObjectiveKeyResultsClient({ keyResults }: ObjectiveKeyResultsClientProps) {
   const [progress, setProgress] = React.useState<Record<number, string>>({});
   const [status, setStatus] = React.useState<Record<number, string>>({});
   const [evidence, setEvidence] = React.useState<Record<number, string>>({});
@@ -23,7 +47,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
   const [resources, setResources] = React.useState<Record<number, string>>({});
   const [comments, setComments] = React.useState<Record<number, string>>({});
   const [saving, setSaving] = React.useState<Record<number, boolean>>({});
-  const [savedProgress, setSavedProgress] = React.useState<Record<number, any[]>>({});
+  const [savedProgress, setSavedProgress] = React.useState<Record<number, ProgressEntry[]>>({});
   const [error, setError] = React.useState<string | null>(null);
   const [successCriteria, setSuccessCriteria] = React.useState<Record<number, string>>({});
   const [editingCriteria, setEditingCriteria] = React.useState<Record<number, boolean>>({});
@@ -39,7 +63,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
       }
     });
     // Fetch success criteria for all key results
-    keyResults.forEach((kr: any) => {
+    keyResults.forEach((kr: KeyResult) => {
       fetch(`/api/key-result/${kr.id}/success-criteria`).then(async res => {
         if (res.ok) {
           const data = await res.json();
@@ -51,15 +75,15 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
 
   React.useEffect(() => {
     // Fetch all progress history for all key results for this objective
-    const allKeyResultIds = keyResults.map((kr: any) => kr.id);
+    const allKeyResultIds = keyResults.map((kr: KeyResult) => kr.id);
     if (allKeyResultIds.length > 0) {
       fetch(`/api/pdm/progress?keyResultIds=${allKeyResultIds.join(",")}`)
         .then(async res2 => {
           if (res2.ok) {
             const progressArr = await res2.json();
             // Group by key_result_id
-            const historyMap: Record<number, any[]> = {};
-            progressArr.forEach((p: any) => {
+            const historyMap: Record<number, ProgressEntry[]> = {};
+            progressArr.forEach((p: ProgressEntry) => {
               if (!historyMap[p.key_result_id]) historyMap[p.key_result_id] = [];
               historyMap[p.key_result_id].push(p);
             });
@@ -71,7 +95,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
 
   // Sync status and progress state from the latest entry in the history array
   React.useEffect(() => {
-    const allKeyResultIds = keyResults.map((kr: any) => kr.id);
+    const allKeyResultIds = keyResults.map((kr: KeyResult) => kr.id);
     setStatus(prev => {
       const newStatus = { ...prev };
       allKeyResultIds.forEach((id: number) => {
@@ -79,7 +103,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
         if (history.length > 0) {
           newStatus[id] = history[history.length - 1].status || "Not Started";
         } else {
-          const kr = keyResults.find((k: any) => k.id === id);
+          const kr = keyResults.find((k: KeyResult) => k.id === id);
           newStatus[id] = kr?.status ?? "Not Started";
         }
       });
@@ -136,7 +160,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
       return;
     }
     try {
-      const kr = keyResults.find((k: any) => k.id === krId);
+      const kr = keyResults.find((k: KeyResult) => k.id === krId);
       if (!kr) throw new Error('Key result not found');
       const metric_value = progress[krId] ? parseFloat(progress[krId]) : null;
       const payload = {
@@ -168,15 +192,15 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
         setResources(prev => ({ ...prev, [krId]: '' }));
         setComments(prev => ({ ...prev, [krId]: '' }));
         // After save, re-fetch all progress history for this objective (no redirect)
-        const allKeyResultIds = keyResults.map((kr: any) => kr.id);
+        const allKeyResultIds = keyResults.map((kr: KeyResult) => kr.id);
         if (allKeyResultIds.length > 0) {
           fetch(`/api/pdm/progress?keyResultIds=${allKeyResultIds.join(",")}`)
             .then(async res2 => {
               if (res2.ok) {
                 const progressArr = await res2.json();
                 // Group by key_result_id
-                const historyMap: Record<number, any[]> = {};
-                progressArr.forEach((p: any) => {
+                const historyMap: Record<number, ProgressEntry[]> = {};
+                progressArr.forEach((p: ProgressEntry) => {
                   if (!historyMap[p.key_result_id]) historyMap[p.key_result_id] = [];
                   historyMap[p.key_result_id].push(p);
                 });
@@ -188,8 +212,12 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
         const err = await res.json();
         setError(err.error || 'Failed to save progress');
       }
-    } catch (e: any) {
-      setError(e.message || 'Unknown error');
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(e.message || 'Unknown error');
+      } else {
+        setError('Unknown error');
+      }
     }
     setSaving(prev => ({ ...prev, [krId]: false }));
   };
@@ -204,7 +232,9 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
       });
       if (!res.ok) throw new Error('Failed to save');
       setEditingCriteria(prev => ({ ...prev, [krId]: false }));
-    } catch (e) {}
+    } catch {
+      // No-op
+    }
     setSavingCriteria(prev => ({ ...prev, [krId]: false }));
   };
 
@@ -215,7 +245,9 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
       if (!res.ok) throw new Error('Failed to delete');
       setSuccessCriteria(prev => ({ ...prev, [krId]: '' }));
       setEditingCriteria(prev => ({ ...prev, [krId]: false }));
-    } catch (e) {}
+    } catch {
+      // No-op
+    }
     setSavingCriteria(prev => ({ ...prev, [krId]: false }));
   };
 
@@ -227,7 +259,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
     <div className="mt-8">
       {error && <Typography color="danger" sx={{ mb: 2 }}>{error}</Typography>}
       <ul className="space-y-6" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-        {keyResults.map((kr: any) => {
+        {keyResults.map((kr: KeyResult) => {
           const history = savedProgress[kr.id] || [];
           return (
             <li key={kr.id} style={{ border: 'none', boxShadow: 'none', padding: '1rem', background: 'white' }}>
@@ -331,7 +363,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
                 <div className="mt-4">
                   <Typography level="body-sm" sx={{ fontWeight: 'bold', mb: 1 }}>Monthly Review History</Typography>
                   <AccordionGroup sx={{ width: '100%' }}>
-                    {history.sort((a: any, b: any) => (b.year - a.year) || (b.month - a.month) || (b.id - a.id)).map((entry: any, idx: number) => (
+                    {history.sort((a: ProgressEntry, b: ProgressEntry) => (b.year - a.year) || (b.month - a.month) || (b.id - a.id)).map((entry: ProgressEntry, idx: number) => (
                       <Accordion key={entry.id || idx} sx={{ mb: 1 }}>
                         <AccordionSummary>
                           <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>

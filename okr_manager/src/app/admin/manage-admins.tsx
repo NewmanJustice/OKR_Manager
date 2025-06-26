@@ -4,7 +4,6 @@ import Sheet from "@mui/joy/Sheet";
 import Typography from "@mui/joy/Typography";
 import Button from "@mui/joy/Button";
 import Table from "@mui/joy/Table";
-import Box from "@mui/joy/Box";
 import Input from "@mui/joy/Input";
 import IconButton from "@mui/joy/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
@@ -13,8 +12,14 @@ import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { useEffect } from "react";
 
-export default function ManageAdmins({ initialAdmins }: { initialAdmins: any[] }) {
-  const [admins, setAdmins] = React.useState(initialAdmins);
+export interface Admin {
+  id: number;
+  email: string;
+  name: string;
+}
+
+export default function ManageAdmins({ initialAdmins }: { initialAdmins: Admin[] }) {
+  const [admins, setAdmins] = React.useState<Admin[]>(initialAdmins);
   const [email, setEmail] = React.useState("");
   const [name, setName] = React.useState("");
   const [error, setError] = React.useState("");
@@ -55,7 +60,7 @@ export default function ManageAdmins({ initialAdmins }: { initialAdmins: any[] }
     }
   };
 
-  const handleEdit = (admin: any) => {
+  const handleEdit = (admin: Admin) => {
     setEditId(admin.id);
     setEditEmail(admin.email);
     setEditName(admin.name);

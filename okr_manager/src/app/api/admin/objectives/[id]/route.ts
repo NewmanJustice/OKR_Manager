@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/utils/prisma';
 
-export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function PUT(req: NextRequest) {
   try {
-    const { params } = context;
-    const awaitedParams = await params;
-    const id = Number(awaitedParams.id);
+    const url = new URL(req.url);
+    const id = Number(url.pathname.split('/').pop());
     const { title, description, quarter, year, pdm_id, keyResults } = await req.json();
     if (!title || !quarter || !year) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
     // Update the objective
-    const updatedObjective = await prisma.objective.update({
+    await prisma.objective.update({
       where: { id },
       data: {
         title,
@@ -25,7 +24,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
     await prisma.keyResult.deleteMany({
       where: {
         objective_id: id,
-        id: { notIn: (keyResults || []).filter((kr: any) => kr.id).map((kr: any) => kr.id) },
+        id: { notIn: (keyResults || []).filter((kr: { id?: number }) => kr.id).map((kr: { id: number }) => kr.id) },
       },
     });
     // Upsert key results
@@ -65,11 +64,10 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
   }
 }
 
-export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest) {
   try {
-    const { params } = context;
-    const awaitedParams = await params;
-    const id = Number(awaitedParams.id);
+    const url = new URL(req.url);
+    const id = Number(url.pathname.split('/').pop());
     // Delete related key results first
     await prisma.keyResult.deleteMany({ where: { objective_id: id } });
     // Delete assignments (if any)

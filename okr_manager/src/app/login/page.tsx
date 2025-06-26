@@ -72,14 +72,12 @@ export default function LoginPage() {
           The OKR Management System
         </Typography>
         <Typography level="body-sm" sx={{ mb: 2, textAlign: "center" }}>
-          Track and manage OKR's
+          Track and manage OKRs
         </Typography>
         <Divider sx={{ width: "100%", mb: 2 }} />
-        {error && (
-          <Typography color="danger" sx={{ mb: 2 }}>
-            {error}
-          </Typography>
-        )}
+        <Typography level="body-sm" color="danger" sx={{ mt: 2 }}>
+          {error}
+        </Typography>
         <form onSubmit={handleSubmit} className="w-full mb-4" style={{ paddingTop: "1em" }}>
           <Input
             id="email"

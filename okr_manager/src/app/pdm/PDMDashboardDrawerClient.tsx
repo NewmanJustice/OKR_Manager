@@ -8,7 +8,6 @@ import Markdown from 'react-markdown';
 export default function PDMDashboardDrawerClient() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [role, setRole] = useState<string | null>(null);
   const [description, setDescription] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -27,7 +26,6 @@ export default function PDMDashboardDrawerClient() {
       .then(async res => {
         const data = await res.json();
         const userRole = data?.user?.roleName;
-        setRole(userRole);
         if (userRole) {
           fetch(`/api/role-description?role=${encodeURIComponent(userRole)}`)
             .then(async res2 => {
@@ -47,7 +45,6 @@ export default function PDMDashboardDrawerClient() {
         }
       })
       .catch(() => {
-        setRole(null);
         setDescription("");
         setLoading(false);
         setError("Failed to load user session");

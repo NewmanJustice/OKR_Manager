@@ -4,8 +4,22 @@ import Card from '@mui/joy/Card';
 import Table from '@mui/joy/Table';
 import Typography from '@mui/joy/Typography';
 
+export interface KeyResult {
+  id: number;
+  text?: string;
+  title?: string;
+}
+export interface Objective {
+  id: number;
+  title: string;
+  description: string;
+  quarter: number;
+  year: number;
+  key_results: KeyResult[];
+}
+
 export default function UserObjectivesClient() {
-  const [objectives, setObjectives] = React.useState<any[]>([]);
+  const [objectives, setObjectives] = React.useState<Objective[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState('');
 
@@ -46,7 +60,7 @@ export default function UserObjectivesClient() {
                   <td>{obj.year}</td>
                   <td>
                     <ul style={{ paddingLeft: 16 }}>
-                      {(obj.key_results || []).map((kr: any, i: number) => (
+                      {(obj.key_results || []).map((kr: KeyResult, i: number) => (
                         <li key={kr.id || i}>{kr.text || kr.title}</li>
                       ))}
                     </ul>

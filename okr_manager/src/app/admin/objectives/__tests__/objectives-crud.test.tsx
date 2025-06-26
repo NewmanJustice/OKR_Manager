@@ -12,7 +12,7 @@ const testObjective = {
 };
 
 // Helper to set fetch mock for GET
-function mockGetObjectives(objectives: any[]) {
+function mockGetObjectives(objectives: unknown[]) {
   (global.fetch as jest.Mock).mockImplementation((url, options) => {
     if (url === '/api/admin/objectives' && (!options || options.method === 'GET')) {
       return Promise.resolve({ ok: true, json: () => Promise.resolve(objectives) });
