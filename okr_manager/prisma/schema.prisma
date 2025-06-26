@@ -7,12 +7,22 @@ datasource db {
   url      = "file:./dev.db"
 }
 
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  users       User[]
+}
+
 model User {
   id                    Int                 @id @default(autoincrement())
   email                 String              @unique
   password_hash         String
   name                  String
-  role                  String
+  roleId                Int
+  role                  Role                @relation(fields: [roleId], references: [id])
+  isAdmin               Boolean             @default(false)
+  isLineManager         Boolean             @default(false)
   notify_preferences    Json
   created_at            DateTime            @default(now())
   updated_at            DateTime            @updatedAt
@@ -176,4 +186,10 @@ model KeyResultProgress {
 
   key_result KeyResult @relation(fields: [key_result_id], references: [id])
   user       User      @relation(fields: [user_id], references: [id])
+}
+
+model RoleDescription {
+  id          Int    @id @default(autoincrement())
+  roleName    String @unique
+  description String // Markdown content
 }

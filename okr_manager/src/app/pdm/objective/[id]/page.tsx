@@ -9,7 +9,7 @@ import CardContent from '@mui/joy/CardContent';
 export default async function ObjectivePage({ params }: { params: Promise<{ id: string }> }) {
   // Server-side session check
   const user = await getSessionUserFromCookies();
-  if (!user || user.role !== 'PDM') {
+  if (!user || !user.isLineManager) {
     redirect('/login');
   }
   const awaitedParams = await params;
@@ -23,7 +23,7 @@ export default async function ObjectivePage({ params }: { params: Promise<{ id: 
   }
   return (
     <main className="max-w-3xl mx-auto mt-10 p-6">
-      <Card variant="outlined" sx={{ borderRadius: 'lg', boxShadow: 'md', p: 4 }}>
+      <Card variant="outlined" sx={{ borderRadius: 'lg', boxShadow: 'md', p: 4, maxWidth: '90vw', mx: 'auto' }}>
         <CardContent>
           <Link href="/pdm" className="text-blue-700 hover:underline mb-4 inline-block">&larr; Back to Dashboard</Link>
           <h1 className="text-2xl font-bold mb-4 text-center">{objective.title}</h1>

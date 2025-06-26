@@ -5,7 +5,7 @@ import { getSessionUserFromRequest } from '@/utils/session';
 // PATCH: Update success_criteria for a key result
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getSessionUserFromRequest(req);
-  if (!session || session.role.toLowerCase() !== 'pdm') {
+  if (!session || !session.isLineManager) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const keyResultId = Number(params.id);
@@ -27,7 +27,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 // DELETE: Remove success_criteria for a key result
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getSessionUserFromRequest(req);
-  if (!session || session.role.toLowerCase() !== 'pdm') {
+  if (!session || !session.isLineManager) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const keyResultId = Number(params.id);

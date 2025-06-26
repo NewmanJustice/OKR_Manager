@@ -92,7 +92,7 @@ export default function MyTeamClient() {
                 <tr key={user.id}>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
-                  <td>{user.role}</td>
+                  <td>{user.roleName || user.role?.name || ''}</td>
                   <td>
                     <Button color="danger" size="sm" onClick={() => handleRemove(user.id)}>Remove</Button>
                   </td>

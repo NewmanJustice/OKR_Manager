@@ -67,12 +67,22 @@ export default function QuarterlyReviewPage() {
       .then(async res => {
         if (res.ok) {
           const review = await res.json();
-          if (review) {
+          if (review && Object.keys(review).length > 0) {
             setOkrGrading(review.okr_grading || {});
             setLessons(review.lessons_learned || "");
             setAdjustments(review.strategic_adjustments || "");
             setNextPlan(review.next_quarter_planning || "");
+          } else {
+            setOkrGrading({});
+            setLessons("");
+            setAdjustments("");
+            setNextPlan("");
           }
+        } else {
+          setOkrGrading({});
+          setLessons("");
+          setAdjustments("");
+          setNextPlan("");
         }
       });
     // Fetch all reviews for the year

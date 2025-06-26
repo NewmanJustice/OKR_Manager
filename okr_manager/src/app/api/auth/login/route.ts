@@ -11,8 +11,7 @@ export async function POST(req: NextRequest) {
     if (!email || !password) {
       return NextResponse.json({ error: 'Missing email or password' }, { status: 400 });
     }
-    const user = await prisma.user.findUnique({ where: { email } });
-    console.log('Login attempt for', email, 'found user:', user);
+    const user = await prisma.user.findUnique({ where: { email }, include: { role: true } });
     if (!user) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
@@ -20,10 +19,17 @@ export async function POST(req: NextRequest) {
     if (!valid) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
-    const res = NextResponse.json({ id: user.id, email: user.email, name: user.name, role: user.role });
+    const res = NextResponse.json({ id: user.id, email: user.email, name: user.name, roleId: user.roleId, isAdmin: user.isAdmin, isLineManager: user.isLineManager });
     // Clear any existing session cookie before setting a new one
     res.cookies.set({ name: 'okr_session', value: '', maxAge: 0, path: '/' });
-    await setSessionCookie(res, user);
+    await setSessionCookie(res, {
+      id: user.id,
+      email: user.email,
+      roleId: user.roleId,
+      roleName: user.role?.name || '',
+      isAdmin: user.isAdmin,
+      isLineManager: user.isLineManager,
+    });
     return res;
   } catch (err: any) {
     console.error('Login error:', err);

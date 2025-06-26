@@ -6,7 +6,7 @@ import MyTeamClient from './MyTeamClient';
 
 export default async function MyTeamPage() {
   const user = await getSessionUserFromCookies();
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || !user.isAdmin) {
     redirect('/login');
   }
   return (

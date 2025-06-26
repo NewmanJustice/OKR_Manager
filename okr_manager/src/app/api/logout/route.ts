@@ -1,10 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { clearSessionCookie } from '@/utils/session';
 
-export async function GET() {
-  // Remove the session cookie by setting it to empty and expired
-  return NextResponse.json({ success: true }, {
-    headers: {
-      'Set-Cookie': 'session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT',
-    },
-  });
+export async function GET(req: NextRequest) {
+  const res = NextResponse.json({ ok: true });
+  clearSessionCookie(res);
+  return res;
 }

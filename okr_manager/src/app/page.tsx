@@ -19,7 +19,7 @@ export default function LandingPage() {
   const [loginForm, setLoginForm] = React.useState({ email: "", password: "" });
   const [loginError, setLoginError] = React.useState("");
   // Register state
-  const [registerForm, setRegisterForm] = React.useState({ email: "", password: "", name: "", role: "PDM" });
+  const [registerForm, setRegisterForm] = React.useState({ email: "", password: "", name: "", roleId: "" });
   const [registerError, setRegisterError] = React.useState("");
   const router = useRouter();
 
@@ -38,19 +38,17 @@ export default function LandingPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(loginForm),
     });
-    console.log('Login response status:', res.status);
     if (res.ok) {
       let data;
       try {
         data = await res.json();
       } catch (err) {
-        console.error('Error parsing login success response:', err);
         router.push("/");
         return;
       }
-      if (data && data.role === 'PDM') {
+      if (data && data.isLineManager) {
         router.push("/pdm");
-      } else if (data && data.role === 'ADMIN') {
+      } else if (data && data.isAdmin) {
         router.push("/admin");
       } else {
         router.push("/");
@@ -60,11 +58,9 @@ export default function LandingPage() {
       try {
         data = await res.json();
       } catch (err) {
-        console.error('Error parsing login error response:', err);
         setLoginError("Login failed (invalid response)");
         return;
       }
-      console.error('Login error:', data);
       setLoginError(data.error || "Login failed");
     }
   };
@@ -80,7 +76,7 @@ export default function LandingPage() {
     setRegisterForm(f => ({ ...f, password: e.target.value }));
   };
   const handleRegisterRoleChange = (_: any, value: string | null) => {
-    setRegisterForm(f => ({ ...f, role: value || "PDM" }));
+    setRegisterForm(f => ({ ...f, roleId: value || "" }));
   };
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -196,13 +192,14 @@ export default function LandingPage() {
             />
             <Select
               placeholder="Role"
-              name="role"
-              value={registerForm.role}
+              name="roleId"
+              value={registerForm.roleId}
               onChange={handleRegisterRoleChange}
               sx={{ mb: 2 }}
               required
             >
-              <Option value="PDM">Principal Development Manager</Option>
+              <Option value="2">Principal Development Manager</Option>
+              <Option value="3">User</Option>
             </Select>
             <Button fullWidth variant="solid" color="primary" sx={{ mb: 2 }} type="submit">
               Register

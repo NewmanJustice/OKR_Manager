@@ -18,6 +18,12 @@ export default function PDMObjectivesTable() {
   const [saving, setSaving] = React.useState<Record<number, boolean>>({});
   const [savedProgress, setSavedProgress] = React.useState<Record<number, any>>({});
 
+  // Calculate date values once per render to avoid hydration mismatch
+  const now = React.useMemo(() => new Date(), []);
+  const currentQuarter = Math.floor(now.getMonth() / 3) + 1;
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+
   React.useEffect(() => {
     setLoading(true);
     fetch('/api/user/objectives').then(async res => {
@@ -27,10 +33,7 @@ export default function PDMObjectivesTable() {
         // Fetch saved progress for all key results
         const allKeyResultIds = data.flatMap((obj: any) => obj.key_results.map((kr: any) => kr.id));
         if (allKeyResultIds.length > 0) {
-          const now = new Date();
-          const month = now.getMonth() + 1;
-          const year = now.getFullYear();
-          fetch(`/api/pdm/progress?keyResultIds=${allKeyResultIds.join(",")}&month=${month}&year=${year}`)
+          fetch(`/api/pdm/progress?keyResultIds=${allKeyResultIds.join(",")}&month=${currentMonth}&year=${currentYear}`)
             .then(async res2 => {
               if (res2.ok) {
                 const progressArr = await res2.json();
@@ -45,7 +48,7 @@ export default function PDMObjectivesTable() {
       }
       setLoading(false);
     });
-  }, []);
+  }, [currentMonth, currentYear]);
 
   const handleProgressChange = (krId: number, value: string) => {
     setProgress(prev => ({ ...prev, [krId]: value }));
@@ -110,22 +113,15 @@ export default function PDMObjectivesTable() {
   return (
     <Card variant="outlined" sx={{ width: '100%', maxWidth: 1200, minWidth: 320, p: 4, mb: 6, boxShadow: 'lg', display: 'flex', flexDirection: 'column', alignItems: 'center', mx: 'auto' }}>
       <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
-        {(() => {
-          const now = new Date();
-          const currentQuarter = Math.floor(now.getMonth() / 3) + 1;
-          const currentYear = now.getFullYear();
-          return (
-            <Link
-              href={`/pdm/quarterly-reviews?quarter=${currentQuarter}&year=${currentYear}`}
-              className="text-blue-700 hover:underline mb-4 inline-block"
-              style={{ display: 'inline-flex', alignItems: 'center' }}
-            >
-              <span style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ fontSize: 18, marginRight: 4, fontWeight: 600 }}>&rarr;</span> Quarterly Reviews
-              </span>
-            </Link>
-          );
-        })()}
+        <Link
+          href={`/pdm/quarterly-reviews?quarter=${currentQuarter}&year=${currentYear}`}
+          className="text-blue-700 hover:underline mb-4 inline-block"
+          style={{ display: 'inline-flex', alignItems: 'center' }}
+        >
+          <span style={{ display: 'flex', alignItems: 'center' }}>
+            <span style={{ fontSize: 18, marginRight: 4, fontWeight: 600 }}>&rarr;</span> Quarterly Reviews
+          </span>
+        </Link>
       </div>
       <Typography level="h4" sx={{ mb: 2, textAlign: 'center' }}>My OKRs</Typography>
       {error && <Typography color="danger" sx={{ mb: 2 }}>{error}</Typography>}
@@ -169,9 +165,6 @@ export default function PDMObjectivesTable() {
                     </thead>
                     <tbody>
                         {obj.key_results.map((kr: any) => {
-                        const now = new Date();
-                        const month = now.getMonth() + 1;
-                        const year = now.getFullYear();
                         const saved = savedProgress[kr.id];
                         return (
                             <tr key={kr.id}>
@@ -228,7 +221,7 @@ export default function PDMObjectivesTable() {
                                 ) : <span style={{ color: '#888' }}>No progress</span>}
                             </td>
                             <td>
-                                <Button size="sm" color="primary" onClick={() => handleSave(kr.id, month, year)} disabled={saving[kr.id]}>Save</Button>
+                                <Button size="sm" onClick={() => handleSave(kr.id, currentMonth, currentYear)} disabled={saving[kr.id]}>Save</Button>
                             </td>
                             </tr>
                         );

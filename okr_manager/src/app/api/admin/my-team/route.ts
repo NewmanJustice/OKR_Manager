@@ -5,7 +5,7 @@ import prisma from '@/utils/prisma';
 // GET: Get current admin's team
 export async function GET(req: NextRequest) {
   const session = await getSessionUserFromRequest(req);
-  if (!session || session.role.toLowerCase() !== 'admin') {
+  if (!session || !session.isAdmin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const team = await prisma.teamMembership.findMany({

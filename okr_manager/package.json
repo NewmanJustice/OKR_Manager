@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
+    "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.1.2",
     "@mui/joy": "^5.0.0-beta.52",
@@ -22,7 +23,8 @@
     "multer": "^2.0.1",
     "next": "15.3.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -4,8 +4,9 @@ import { getSessionUserFromRequest } from '@/utils/session';
 export async function GET(req: NextRequest) {
   const session = await getSessionUserFromRequest(req);
   if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Return 200 with no user object for easier client logic
+    return NextResponse.json({});
   }
   // Return only minimal info needed for UI
-  return NextResponse.json({ id: session.id, role: session.role });
+  return NextResponse.json({ id: session.id, email: session.email, roleName: session.roleName });
 }

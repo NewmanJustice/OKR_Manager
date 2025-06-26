@@ -35,7 +35,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
     fetch('/api/user/me').then(async res => {
       if (res.ok) {
         const data = await res.json();
-        setUserRole(data.role || '');
+        setUserRole(data.roleName || '');
       }
     });
     // Fetch success criteria for all key results
@@ -253,7 +253,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: any) {
                     <Typography level="body-sm" sx={{ mr: 1 }}>
                       {successCriteria[kr.id] || <span className="text-gray-400">No success criteria set.</span>}
                     </Typography>
-                    {userRole.toLowerCase() === 'pdm' && (
+                    {userRole === 'Principal Development Manager' && (
                       successCriteria[kr.id] ? (
                         <Button size="sm" variant="plain" color="primary" onClick={() => setEditingCriteria(prev => ({ ...prev, [kr.id]: true }))}><EditIcon fontSize="small" /></Button>
                       ) : (

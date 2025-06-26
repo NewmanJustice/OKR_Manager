@@ -8,7 +8,7 @@ import PDMDashboardDrawerClient from './PDMDashboardDrawerClient';
 export default async function PDMDashboard() {
   // Server-side session check
   const user = await getSessionUserFromCookies();
-  if (!user || user.role !== 'PDM') {
+  if (!user || !user.isLineManager) {
     redirect('/login');
   }
   return (

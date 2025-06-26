@@ -6,7 +6,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 export default async function ObjectivesPage() {
   const user = await getSessionUserFromCookies();
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || !user.isAdmin) {
     redirect('/login');
   }
   return (

@@ -8,12 +8,12 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 export default async function AdminDashboard() {
   // Server-side session check
   const user = await getSessionUserFromCookies();
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || !user.isAdmin) {
     redirect('/login');
   }
   // Fetch all admins
   const prisma = new PrismaClient();
-  const admins = await prisma.user.findMany({ where: { role: 'ADMIN' }, select: { id: true, email: true, name: true } });
+  const admins = await prisma.user.findMany({ where: { isAdmin: true }, select: { id: true, email: true, name: true } });
   return (
     <main className="max-w-3xl mx-auto mt-10 p-6">
       <div className="flex items-center mb-6">

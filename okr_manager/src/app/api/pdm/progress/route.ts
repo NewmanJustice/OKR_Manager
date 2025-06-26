@@ -5,7 +5,7 @@ import { getSessionUserFromRequest } from '@/utils/session';
 // POST: Save or update progress for a key result (monthly)
 export async function POST(req: NextRequest) {
   const session = await getSessionUserFromRequest(req);
-  if (!session || session.role.toLowerCase() !== 'pdm') {
+  if (!session || !session.isLineManager) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   // Debug: return session user id
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 // GET: Fetch progress for key results for the current user and month/year
 export async function GET(req: NextRequest) {
   const session = await getSessionUserFromRequest(req);
-  if (!session || session.role.toLowerCase() !== 'pdm') {
+  if (!session || !session.isLineManager) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const { searchParams } = new URL(req.url);
