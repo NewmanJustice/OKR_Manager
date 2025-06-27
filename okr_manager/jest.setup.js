@@ -1,5 +1,7 @@
 require('@testing-library/jest-dom');
 
+import '@testing-library/jest-dom';
+
 // Polyfill TextEncoder/TextDecoder for undici
 const { TextEncoder, TextDecoder } = require('util');
 global.TextEncoder = TextEncoder;

@@ -6,8 +6,9 @@ import Typography from "@mui/joy/Typography";
 import Input from "@mui/joy/Input";
 import Button from "@mui/joy/Button";
 import Avatar from "@mui/joy/Avatar";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
 import Divider from "@mui/joy/Divider";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -66,7 +67,7 @@ export default function LoginPage() {
           <div></div>
         </div>
         <Avatar variant="soft" color="neutral" size="md" sx={{ m: 1, bgcolor: "#000" }}>
-          <LockOutlinedIcon fontSize="medium" />
+          <InsertChartOutlinedIcon fontSize="medium" />
         </Avatar>
         <Typography level="h2" sx={{ mb: 1, textAlign: "center" }}>
           The OKR Management System
@@ -104,6 +105,11 @@ export default function LoginPage() {
           <Button type="submit" fullWidth variant="solid" size="md" sx={{ mb: 2, backgroundColor: '#000', color: '#fff', '&:hover': { backgroundColor: '#e8890c', color: '#fff' } }}>
             Sign In
           </Button>
+          <div style={{ textAlign: 'center', marginTop: 8 }}>
+            <Link href="/reset-password/request" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+              Forgot password?
+            </Link>
+          </div>
         </form>
       </Sheet>
     </main>

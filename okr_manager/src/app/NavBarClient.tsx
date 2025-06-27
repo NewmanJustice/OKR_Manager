@@ -4,6 +4,8 @@ import Link from "next/link";
 import Card from '@mui/joy/Card';
 import Typography from '@mui/joy/Typography';
 import Button from '@mui/joy/Button';
+import Avatar from "@mui/joy/Avatar";
+import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
 
 export default function NavBarClient() {
   const [user, setUser] = React.useState<Record<string, unknown> | null>(null);
@@ -48,10 +50,15 @@ export default function NavBarClient() {
   return (
     <Card variant="outlined" sx={{ borderRadius: 0, boxShadow: 'sm', mb: 0, width: '100%', minHeight: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', px: 0 }}>
       <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 32, paddingRight: 32 }}>
-        <button
-          onClick={() => window.location.href = '/'}
-          style={{ fontWeight: 700, fontSize: 28, color: '#222', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer' }}
-        >OKR Manager</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Avatar variant="soft" color="neutral" size="md" sx={{ bgcolor: "#000", width: 40, height: 40, mr: 1 }}>
+            <InsertChartOutlinedIcon fontSize="medium" style={{ color: '#666' }} />
+          </Avatar>
+          <button
+            onClick={() => window.location.href = '/'}
+            style={{ fontWeight: 700, fontSize: 28, color: '#222', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer' }}
+          >OKR Manager</button>
+        </div>
         <div>
           {user ? (
             <>

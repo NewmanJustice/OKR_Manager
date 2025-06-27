@@ -48,7 +48,7 @@ describe('Objectives API', () => {
       ],
     } as Record<string, unknown>);
     // Use the Web API Request object
-    const req = new Request('http://localhost/api/admin/objectives', {
+    const req = new Request('https://example.com/foo', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

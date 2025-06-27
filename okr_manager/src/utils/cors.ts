@@ -1,5 +1,5 @@
 // src/utils/cors.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*', // Change to your frontend URL in production

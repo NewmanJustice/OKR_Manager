@@ -175,6 +175,17 @@ CREATE TABLE "RoleDescription" (
     "description" TEXT NOT NULL
 );
 
+-- CreateTable
+CREATE TABLE "PasswordResetToken" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "userId" INTEGER NOT NULL,
+    "token" TEXT NOT NULL,
+    "expiresAt" DATETIME NOT NULL,
+    "used" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "PasswordResetToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Role_name_key" ON "Role"("name");
 
@@ -189,3 +200,6 @@ CREATE UNIQUE INDEX "TeamMembership_adminId_userId_key" ON "TeamMembership"("adm
 
 -- CreateIndex
 CREATE UNIQUE INDEX "RoleDescription_roleName_key" ON "RoleDescription"("roleName");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PasswordResetToken_token_key" ON "PasswordResetToken"("token");

@@ -109,6 +109,9 @@ export default function RegisterPage() {
             <FormControl sx={{ mb: 2 }} required>
               <FormLabel>Password</FormLabel>
               <Input name="password" type="password" value={form.password} onChange={handleChange} autoComplete="new-password" />
+              <Typography level="body-xs" sx={{ mt: 0.5, color: '#888' }}>
+                Password must be at least 8 characters long.
+              </Typography>
             </FormControl>
             <FormControl sx={{ mb: 3 }} required>
               <FormLabel>Role</FormLabel>
@@ -118,7 +121,7 @@ export default function RegisterPage() {
                 ))}
               </Select>
             </FormControl>
-            <Button type="submit" fullWidth variant="solid" size="md" sx={{ mb: 2, backgroundColor: '#000', color: '#fff', '&:hover': { backgroundColor: '#e8890c', color: '#fff' } }}>
+            <Button type="submit" fullWidth variant="solid" size="md" sx={{ mb: 2, backgroundColor: '#000', color: '#fff', '&:hover': { backgroundColor: '#e8890c', color: '#fff' } }} disabled={form.password.length > 0 && form.password.length < 8}>
               Register
             </Button>
           </form>

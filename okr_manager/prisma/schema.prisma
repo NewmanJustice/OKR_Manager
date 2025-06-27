@@ -38,6 +38,7 @@ model User {
   adminTeamMemberships  TeamMembership[]    @relation("AdminTeamMemberships")
   userTeamMemberships   TeamMembership[]    @relation("UserTeamMemberships")
   key_result_progresses KeyResultProgress[]
+  passwordResetTokens   PasswordResetToken[]
 }
 
 model Team {
@@ -192,4 +193,14 @@ model RoleDescription {
   id          Int    @id @default(autoincrement())
   roleName    String @unique
   description String // Markdown content
+}
+
+model PasswordResetToken {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id])
+  token      String   @unique
+  expiresAt  DateTime
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now())
 }

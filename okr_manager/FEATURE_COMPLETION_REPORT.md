@@ -43,14 +43,15 @@
 ## 🟡 In Progress / Next Steps
 
 - (From Next_Features.md) Implement new features:
-  - Move line manager features out of admin
-  - Add line manager links to user home
-  - User profile editing and token generation
-  - Gov Notify integration
-  - Invite links
-  - Outlook meeting creation
-  - Progress dashboard improvements
-  - Dashboard sharing
+  1. Move line manager features out of admin
+  2. Add line manager links to user home
+  3. User profile editing and token generation
+  4. Gov Notify integration
+  5. Invite links
+  6. Outlook meeting creation
+  7. Progress dashboard improvements
+  8. Dashboard sharing
+  9. Reset password
 - Continue to monitor for any new SSR/hydration or CORS issues as new features are added
 - Add more automated tests for new flows and edge cases
 

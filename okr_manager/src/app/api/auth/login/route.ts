@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const headers = limiter.checkNext(req, 20);
     const schema = z.object({
       email: z.string().email(),
-      password: z.string().min(8).max(100),
+      password: z.string().min(8).max(100), // restored min length to 8
     });
     const { email, password } = schema.parse(await req.json());
     const user = await prisma.user.findUnique({ where: { email }, include: { role: true } });

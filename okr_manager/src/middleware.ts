@@ -26,6 +26,8 @@ export async function middleware(req: NextRequest) {
     '/favicon.ico',
     '/_next',
     '/api/public',
+    '/reset-password',
+    '/reset-password/request',
   ];
   const isPublic = publicPaths.some((p) => req.nextUrl.pathname.startsWith(p));
   if (!user && !isPublic) {
