@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
       where: { adminId: session.id },
       include: { user: true },
     });
-    return NextResponse.json(team.map((tm: { user: any }) => tm.user), { headers });
+    return NextResponse.json(team.map((tm: { user: typeof team[0]["user"] }) => tm.user), { headers });
   } catch (err) {
     if (err instanceof Error && err.message === 'Rate limit exceeded') {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
