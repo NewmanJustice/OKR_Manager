@@ -38,7 +38,6 @@ export async function POST(req: NextRequest) {
       }))
     });
     const { title, description, quarter, year, pdm_id, keyResults } = schema.parse(await req.json());
-    console.log('POST /api/admin/objectives', { title, description, quarter, year, pdm_id, keyResults });
     if (!title || !quarter || !year) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }

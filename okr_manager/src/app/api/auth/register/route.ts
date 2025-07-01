@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { setSessionCookie } from '@/utils/session';
 import { limiter } from '../../_middleware/rateLimit';
 import { z } from 'zod';
 import { handleZodError } from '../../_middleware/handleZodError';
+import { sendVerifyEmail } from '@/utils/email';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -15,9 +16,24 @@ export async function POST(req: NextRequest) {
       email: z.string().email(),
       password: z.string().min(8).max(100),
       name: z.string().min(1).max(100),
-      roleId: z.union([z.string().regex(/^\d+$/), z.number()]),
+      roleId: z.union([z.string().regex(/^[0-9]+$/), z.number()]),
+      captcha: z.string(),
     });
-    const { email, password, name, roleId } = schema.parse(await req.json());
+    const { email, password, name, roleId, captcha } = schema.parse(await req.json());
+    // Verify hCaptcha token
+    const hcaptchaSecret = process.env.HCAPTCHA_SECRET_KEY;
+    const verifyRes = await fetch(
+      "https://hcaptcha.com/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `secret=${hcaptchaSecret}&response=${captcha}`,
+      }
+    );
+    const verifyData = await verifyRes.json();
+    if (!verifyData.success) {
+      return NextResponse.json({ error: "CAPTCHA failed." }, { status: 400, headers });
+    }
     // Prevent registering as admin by role name
     const role = await prisma.role.findUnique({ where: { id: Number(roleId) } });
     if (!role) {
@@ -34,6 +50,7 @@ export async function POST(req: NextRequest) {
     // Set isLineManager or isAdmin based on role
     const isLineManager = role.name === 'Principal Development Manager';
     const isAdmin = role.name === 'Admin';
+    const verifyToken = crypto.randomBytes(32).toString('hex');
     const user = await prisma.user.create({
       data: {
         email,
@@ -43,21 +60,17 @@ export async function POST(req: NextRequest) {
         isLineManager,
         isAdmin,
         notify_preferences: {},
+        isVerified: false,
+        verifyToken,
       },
     });
-    const res = NextResponse.json(
-      { id: user.id, email: user.email, name: user.name, roleId: user.roleId, isAdmin: user.isAdmin, isLineManager: user.isLineManager },
+    // Send verification email
+    await sendVerifyEmail(user.email, verifyToken, user.name);
+    // Do not set session cookie yet; require verification
+    return NextResponse.json(
+      { message: 'Registration successful. Please check your email to verify your account.' },
       { headers }
     );
-    await setSessionCookie(res, {
-      id: user.id,
-      email: user.email,
-      roleId: user.roleId,
-      roleName: role.name,
-      isAdmin: user.isAdmin,
-      isLineManager: user.isLineManager,
-    });
-    return res;
   } catch (err) {
     if (err instanceof Error && err.message === 'Rate limit exceeded') {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });

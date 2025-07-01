@@ -53,7 +53,7 @@ export default function PDMDashboardDrawerClient() {
 
   return (
     <>
-      <Button variant="outlined" color="neutral" onClick={() => setOpen(true)} sx={{ mb: 2 }}>
+      <Button variant="outlined" color="neutral" onClick={() => setOpen(true)} sx={{ mb: 2, borderRadius: 0 }}>
         Show Role Description
       </Button>
       <Drawer open={open} onClose={() => setOpen(false)} anchor="right" size="lg" sx={{

@@ -251,7 +251,7 @@ export default function PDMObjectivesTable() {
                                 ) : <span style={{ color: '#888' }}>No progress</span>}
                             </td>
                             <td>
-                                <Button size="sm" onClick={() => handleSave(kr.id, currentMonth, currentYear)} disabled={saving[kr.id]}>Save</Button>
+                                <Button size="sm" onClick={() => handleSave(kr.id, currentMonth, currentYear)} disabled={saving[kr.id]} sx={{ borderRadius: 0 }}>Save</Button>
                             </td>
                             </tr>
                         );

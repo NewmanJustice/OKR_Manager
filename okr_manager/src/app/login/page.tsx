@@ -5,14 +5,19 @@ import Sheet from "@mui/joy/Sheet";
 import Typography from "@mui/joy/Typography";
 import Input from "@mui/joy/Input";
 import Button from "@mui/joy/Button";
-import Avatar from "@mui/joy/Avatar";
-import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
 import Divider from "@mui/joy/Divider";
 import Link from "next/link";
+import HCaptcha from "react-hcaptcha";
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+
+// Warning about <img>: Consider replacing <img> with <Image /> from next/image for optimization.
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,24 +27,40 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (showCaptcha && !captcha) {
+      setError("Please complete the CAPTCHA.");
+      return;
+    }
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(showCaptcha ? { ...form, captcha } : form),
       credentials: "include",
     });
     if (res.ok) {
       const data = await res.json();
+      setShowCaptcha(false);
+      setCaptcha(null);
+      setFailedAttempts(0);
       if (data.isAdmin) {
         router.push("/admin");
       } else if (data.isLineManager) {
         router.push("/pdm");
       } else {
-        router.push("/user"); // or "/" if you don't have a /user dashboard
+        router.push("/user");
       }
     } else {
+      setFailedAttempts((prev) => prev + 1);
+      if (failedAttempts + 1 >= 3) {
+        setShowCaptcha(true);
+      }
+      setCaptcha(null);
       const data = await res.json();
-      setError(data.error || "Login failed");
+      if (res.status === 401 || res.status === 400) {
+        setError("Incorrect details");
+      } else {
+        setError(data.error || "Login failed");
+      }
     }
   };
 
@@ -55,30 +76,29 @@ export default function LoginPage() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          borderRadius: "md",
-          boxShadow: "lg",
-          backgroundColor: "background.body",
+          borderRadius: 3,
+          boxShadow: "0 4px 24px 0 rgba(0,0,0,0.08)",
+          backgroundColor: "#fff",
         }}
       >
-        <div style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", paddingLeft: 32, paddingRight: 32, marginBottom: 8 }}>
-          <Typography level="h4" sx={{ fontWeight: 700, fontSize: '1.875rem', color: '#222', textAlign: 'center', mb: 0, width: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
+          <img src="/globe.svg" alt="OKR Manager Logo" width={48} height={48} style={{ marginBottom: 12 }} />
+          <Typography level="h4" sx={{ fontWeight: 700, color: '#222', mb: 0.5, letterSpacing: 1 }}>
             OKR Manager
           </Typography>
-          <div></div>
+          <Typography level="title-lg" sx={{ fontWeight: 600, color: '#222', mb: 2, letterSpacing: 0.5 }}>
+            Login
+          </Typography>
         </div>
-        <Avatar variant="soft" color="neutral" size="md" sx={{ m: 1, bgcolor: "#000" }}>
-          <InsertChartOutlinedIcon fontSize="medium" />
-        </Avatar>
-        <Typography level="h2" sx={{ mb: 1, textAlign: "center" }}>
-          The OKR Management System
-        </Typography>
-        <Typography level="body-sm" sx={{ mb: 2, textAlign: "center" }}>
-          Track and manage OKRs
-        </Typography>
         <Divider sx={{ width: "100%", mb: 2 }} />
-        <Typography level="body-sm" color="danger" sx={{ mt: 2 }}>
-          {error}
-        </Typography>
+        {error && (
+          <Sheet variant="soft" color="danger" sx={{ mb: 2, p: 1.5, display: 'flex', alignItems: 'center', borderRadius: 2, backgroundColor: '#fff0f0' }}>
+            <ErrorOutlineIcon color="error" sx={{ mr: 1 }} />
+            <Typography level="body-sm" color="danger" sx={{ fontWeight: 500 }} aria-live="polite">
+              {error}
+            </Typography>
+          </Sheet>
+        )}
         <form onSubmit={handleSubmit} className="w-full mb-4" style={{ paddingTop: "1em" }}>
           <Input
             id="email"
@@ -88,7 +108,7 @@ export default function LoginPage() {
             value={form.email}
             onChange={handleChange}
             required
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, borderRadius: 2, fontSize: '1.05em', background: '#f7fafd' }}
             autoComplete="email"
           />
           <Input
@@ -99,14 +119,23 @@ export default function LoginPage() {
             value={form.password}
             onChange={handleChange}
             required
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, borderRadius: 2, fontSize: '1.05em', background: '#f7fafd' }}
             autoComplete="current-password"
           />
-          <Button type="submit" fullWidth variant="solid" size="md" sx={{ mb: 2, backgroundColor: '#000', color: '#fff', '&:hover': { backgroundColor: '#e8890c', color: '#fff' } }}>
+          <Button type="submit" fullWidth variant="solid" size="md" sx={{ mb: 2, backgroundColor: '#000', color: '#fff', fontWeight: 700, borderRadius: 0, fontSize: '1.08em', boxShadow: '0 2px 8px 0 rgba(0,0,0,0.08)', '&:hover': { backgroundColor: '#e8890c', color: '#fff' } }}>
             Sign In
           </Button>
-          <div style={{ textAlign: 'center', marginTop: 8 }}>
-            <Link href="/reset-password/request" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+          {/* Only show captcha after 3 failed attempts */}
+          {showCaptcha && (
+            <div className="hcaptcha-box" style={{ width: '100%' }}>
+              <HCaptcha
+                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+                onVerify={setCaptcha}
+              />
+            </div>
+          )}
+          <div style={{ textAlign: 'center', marginTop: 12 }}>
+            <Link href="/reset-password/request" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.97em', fontWeight: 500 }}>
               Forgot password?
             </Link>
           </div>

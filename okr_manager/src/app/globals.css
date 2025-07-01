@@ -46,3 +46,10 @@ a {
     color-scheme: dark;
   }
 }
+
+/* Make hCaptcha iframe fill its container width */
+.hcaptcha-box iframe {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}

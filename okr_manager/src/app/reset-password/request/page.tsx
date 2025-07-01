@@ -5,21 +5,28 @@ import Typography from "@mui/joy/Typography";
 import Input from "@mui/joy/Input";
 import Button from "@mui/joy/Button";
 import Divider from "@mui/joy/Divider";
+import HCaptcha from "react-hcaptcha";
 
 export default function RequestResetPassword() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [captcha, setCaptcha] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setStatus(null);
+    if (!captcha) {
+      setStatus("Please complete the CAPTCHA.");
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch("/api/auth/request-reset", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, captcha }),
       });
       if (res.ok) {
         setStatus("If an account exists, a reset link has been sent to your email.");
@@ -67,12 +74,18 @@ export default function RequestResetPassword() {
             autoComplete="email"
             autoFocus
           />
+          <div style={{ marginBottom: 16, width: '100%' }}>
+            <HCaptcha
+              sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+              onVerify={setCaptcha}
+            />
+          </div>
           <Button
             type="submit"
             fullWidth
             variant="solid"
             size="md"
-            sx={{ mb: 2, backgroundColor: '#000', color: '#fff', '&:hover': { backgroundColor: '#e8890c', color: '#fff' } }}
+            sx={{ mb: 2, backgroundColor: '#000', color: '#fff', '&:hover': { backgroundColor: '#e8890c', color: '#fff' }, borderRadius: 0 }}
             disabled={loading}
           >
             {loading ? "Sending..." : "Send reset link"}

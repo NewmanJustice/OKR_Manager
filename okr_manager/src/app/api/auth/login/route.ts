@@ -13,9 +13,26 @@ export async function POST(req: NextRequest) {
     const headers = limiter.checkNext(req, 20);
     const schema = z.object({
       email: z.string().email(),
-      password: z.string().min(8).max(100), // restored min length to 8
+      password: z.string().min(8).max(100),
+      captcha: z.string().optional(),
     });
-    const { email, password } = schema.parse(await req.json());
+    const { email, password, captcha } = schema.parse(await req.json());
+    // If captcha is present (shown after 3 failed attempts), verify it
+    if (captcha) {
+      const hcaptchaSecret = process.env.HCAPTCHA_SECRET_KEY;
+      const verifyRes = await fetch(
+        "https://hcaptcha.com/siteverify",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `secret=${hcaptchaSecret}&response=${captcha}`,
+        }
+      );
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) {
+        return NextResponse.json({ error: "CAPTCHA failed." }, { status: 400, headers });
+      }
+    }
     const user = await prisma.user.findUnique({ where: { email }, include: { role: true } });
     if (!user) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401, headers });
@@ -23,6 +40,9 @@ export async function POST(req: NextRequest) {
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401, headers });
+    }
+    if (!user.isVerified) {
+      return NextResponse.json({ error: 'Email not verified. Please check your inbox for a verification link.' }, { status: 403, headers });
     }
     const res = NextResponse.json(
       { id: user.id, email: user.email, name: user.name, roleId: user.roleId, isAdmin: user.isAdmin, isLineManager: user.isLineManager },

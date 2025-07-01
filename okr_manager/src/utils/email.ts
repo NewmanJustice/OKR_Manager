@@ -4,13 +4,18 @@
 // EmailProvider interface
 export interface EmailProvider {
   sendResetEmail(email: string, token: string, name?: string): Promise<void>;
+  sendVerifyEmail?(email: string, token: string, name?: string): Promise<void>;
 }
 
 // Default (dev) provider logs to console
 export class ConsoleEmailProvider implements EmailProvider {
   async sendResetEmail(email: string, token: string, name?: string) {
     const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
-    console.log(`Password reset link for ${name ? name + ' <' + email + '>' : email}: ${resetUrl}`);
+    // Removed console.log for password reset link
+  }
+  async sendVerifyEmail(email: string, token: string, name?: string) {
+    const verifyUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/verify?token=${token}`;
+    // Removed console.log for verify account link
   }
 }
 
@@ -43,6 +48,31 @@ export class GovNotifyEmailProvider implements EmailProvider {
       throw new Error(`Gov Notify error: ${response.status} ${errorText}`);
     }
   }
+  async sendVerifyEmail(email: string, token: string, name?: string) {
+    const verifyUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/verify?token=${token}`;
+    const apiKey = process.env.GOV_NOTIFY_API_KEY;
+    const templateId = process.env.GOV_NOTIFY_VERIFY_ACCOUNT_TEMPLATE_ID;
+    if (!apiKey || !templateId) {
+      throw new Error('Gov Notify API key or verify account template ID not set');
+    }
+    const payload = {
+      email_address: email,
+      template_id: templateId,
+      personalisation: { verify_url: verifyUrl, name: name || email },
+    };
+    const response = await fetch('https://api.notifications.service.gov.uk/v2/notifications/email', {
+      method: 'POST',
+      headers: {
+        'Authorization': `ApiKey-v1 ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gov Notify error: ${response.status} ${errorText}`);
+    }
+  }
 }
 
 // Configurable provider selection
@@ -57,4 +87,12 @@ if (providerName === 'govnotify') {
 
 export async function sendResetEmail(email: string, token: string, name?: string) {
   await provider.sendResetEmail(email, token, name);
+}
+
+export async function sendVerifyEmail(email: string, token: string, name?: string) {
+  if (provider.sendVerifyEmail) {
+    await provider.sendVerifyEmail(email, token, name);
+  } else {
+    throw new Error('Email provider does not support sendVerifyEmail');
+  }
 }

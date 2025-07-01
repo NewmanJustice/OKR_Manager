@@ -10,7 +10,7 @@ export default function QuarterlyReviewButton() {
   const quarter = Math.floor(now.getMonth() / 3) + 1;
   return (
     <Link href={`/pdm/quarterly-reviews?quarter=${quarter}&year=${year}`} passHref legacyBehavior={false}>
-      <Button color="success" variant="solid" sx={{ mb: 2, ml: 2 }}>
+      <Button color="success" variant="solid" sx={{ mb: 2, ml: 2, borderRadius: 0 }}>
         Quarterly Reviews
       </Button>
     </Link>

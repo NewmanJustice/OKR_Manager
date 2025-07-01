@@ -174,7 +174,6 @@ export default function ObjectiveKeyResultsClient({ keyResults }: ObjectiveKeyRe
         month,
         year,
       };
-      console.log('Saving progress payload:', payload);
       const res = await fetch('/api/pdm/progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -325,7 +324,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: ObjectiveKeyRe
                 <Input
                   placeholder="Evidence"
                   value={evidence[kr.id] || ''}
-                  onChange={e => handleChange('evidence', kr.id, e.target.value)}
+                  onChange={e => handleChange('evidence', krId, e.target.value)}
                   disabled={saving[kr.id]}
                 />
               </FormControl>
@@ -334,7 +333,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: ObjectiveKeyRe
                 <Input
                   placeholder="Blockers"
                   value={blockers[kr.id] || ''}
-                  onChange={e => handleChange('blockers', kr.id, e.target.value)}
+                  onChange={e => handleChange('blockers', krId, e.target.value)}
                   disabled={saving[kr.id]}
                 />
               </FormControl>
@@ -343,7 +342,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: ObjectiveKeyRe
                 <Input
                   placeholder="Resources needed"
                   value={resources[kr.id] || ''}
-                  onChange={e => handleChange('resources', kr.id, e.target.value)}
+                  onChange={e => handleChange('resources', krId, e.target.value)}
                   disabled={saving[kr.id]}
                 />
               </FormControl>
@@ -352,7 +351,7 @@ export default function ObjectiveKeyResultsClient({ keyResults }: ObjectiveKeyRe
                 <Input
                   placeholder="Comments"
                   value={comments[kr.id] || ''}
-                  onChange={e => handleChange('comments', kr.id, e.target.value)}
+                  onChange={e => handleChange('comments', krId, e.target.value)}
                   disabled={saving[kr.id]}
                 />
               </FormControl>

@@ -1,1 +1,0 @@
-Upload functionality has been removed. If you need to restore it, recover the deleted files from version control or backup.

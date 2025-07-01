@@ -8,37 +8,41 @@ datasource db {
 }
 
 model Role {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
   description String?
   users       User[]
 }
 
 model User {
-  id                    Int                 @id @default(autoincrement())
-  email                 String              @unique
+  id                    Int                  @id @default(autoincrement())
+  email                 String               @unique
   password_hash         String
   name                  String
   roleId                Int
-  role                  Role                @relation(fields: [roleId], references: [id])
-  isAdmin               Boolean             @default(false)
-  isLineManager         Boolean             @default(false)
+  role                  Role                 @relation(fields: [roleId], references: [id])
+  isAdmin               Boolean              @default(false)
+  isLineManager         Boolean              @default(false)
   notify_preferences    Json
-  created_at            DateTime            @default(now())
-  updated_at            DateTime            @updatedAt
-  created_key_results   KeyResult[]         @relation("UserCreatedKeyResults")
+  created_at            DateTime             @default(now())
+  updated_at            DateTime             @updatedAt
+  created_key_results   KeyResult[]          @relation("UserCreatedKeyResults")
   monthly_reviews       MonthlyReview[]
-  created_objectives    Objective[]         @relation("AdminCreatedObjectives")
+  created_objectives    Objective[]          @relation("AdminCreatedObjectives")
   objectives            Objective[]
   progress_updates      ProgressUpdate[]
   quarterly_reviews     QuarterlyReview[]
-  created_teams         Team[]              @relation("AdminCreatedTeams")
-  teams                 Team[]              @relation("PDMTeams")
+  created_teams         Team[]               @relation("AdminCreatedTeams")
+  teams                 Team[]               @relation("PDMTeams")
   okrAssignments        OkrAssignment[]
-  adminTeamMemberships  TeamMembership[]    @relation("AdminTeamMemberships")
-  userTeamMemberships   TeamMembership[]    @relation("UserTeamMemberships")
+  adminTeamMemberships  TeamMembership[]     @relation("AdminTeamMemberships")
+  userTeamMemberships   TeamMembership[]     @relation("UserTeamMemberships")
   key_result_progresses KeyResultProgress[]
   passwordResetTokens   PasswordResetToken[]
+  resetAttempts         Int                  @default(0)
+  resetLockoutUntil     DateTime? // null if not locked out
+  isVerified            Boolean              @default(false)
+  verifyToken           String?
 }
 
 model Team {
@@ -196,11 +200,11 @@ model RoleDescription {
 }
 
 model PasswordResetToken {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  user       User     @relation(fields: [userId], references: [id])
-  token      String   @unique
-  expiresAt  DateTime
-  used       Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

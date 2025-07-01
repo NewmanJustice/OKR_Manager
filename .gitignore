@@ -40,3 +40,6 @@ dist/
 
 # Build
 build/
+
+# Support docs
+supportingDocs/

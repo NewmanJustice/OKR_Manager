@@ -78,6 +78,7 @@ export default function NavBarClient() {
                       backgroundColor: '#e8890c',
                       color: '#fff',
                     },
+                    borderRadius: 0,
                   }}
                 >
                   Logout
@@ -86,8 +87,8 @@ export default function NavBarClient() {
             </>
           ) : (
             <>
-              <Button onClick={() => window.location.href = '/login'} color="primary" variant="soft" size="sm" sx={{ mr: 1, color: '#fff', '&:hover': { color: '#fff', backgroundColor: '#e8890c' } }}>Login</Button>
-              <Button onClick={() => window.location.href = '/register'} color="neutral" variant="soft" size="sm" sx={{ color: '#fff', '&:hover': { color: '#fff', backgroundColor: '#e8890c' } }}>Register</Button>
+              <Button onClick={() => window.location.href = '/login'} color="primary" variant="soft" size="sm" sx={{ mr: 1, color: '#fff', '&:hover': { color: '#fff', backgroundColor: '#e8890c' }, borderRadius: 0 }}>Login</Button>
+              <Button onClick={() => window.location.href = '/register'} color="neutral" variant="soft" size="sm" sx={{ color: '#fff', '&:hover': { color: '#fff', backgroundColor: '#e8890c' }, borderRadius: 0 }}>Register</Button>
             </>
           )}
         </div>

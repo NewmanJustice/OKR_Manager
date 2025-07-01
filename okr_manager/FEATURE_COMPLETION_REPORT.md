@@ -46,14 +46,22 @@
   1. Move line manager features out of admin
   2. Add line manager links to user home
   3. User profile editing and token generation
-  4. Gov Notify integration
+ ~~ 4. Gov Notify integration ~~
   5. Invite links
   6. Outlook meeting creation
   7. Progress dashboard improvements
   8. Dashboard sharing
-  9. Reset password
+~~  9. Reset password ~~
 - Continue to monitor for any new SSR/hydration or CORS issues as new features are added
 - Add more automated tests for new flows and edge cases
+- (Optional/Recommended enhancements, not yet completed):
+  - Add more user-friendly error/success states or branding to all user flows (beyond auth)
+  - Add accessibility improvements and more ARIA live regions throughout the app
+  - Add micro-interactions (e.g., spinners, subtle animations, shake on error) to all forms
+  - Add admin tools for monitoring/resetting lockouts and user activity
+  - Add more helpful links (e.g., contact support, back to login) on all error/success states
+  - Further polish for mobile responsiveness and dark mode
+  - Add more automated tests for edge cases and UI flows
 
 ## 🟢 Outstanding Issues from the Code Review
 
