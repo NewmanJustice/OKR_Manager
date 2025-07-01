@@ -7,8 +7,8 @@ import Input from "@mui/joy/Input";
 import Button from "@mui/joy/Button";
 import Divider from "@mui/joy/Divider";
 import Link from "next/link";
-import HCaptcha from "react-hcaptcha";
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import HCaptchaWidget from "@/components/HCaptchaWidget";
 
 // Warning about <img>: Consider replacing <img> with <Image /> from next/image for optimization.
 
@@ -82,6 +82,7 @@ export default function LoginPage() {
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/globe.svg" alt="OKR Manager Logo" width={48} height={48} style={{ marginBottom: 12 }} />
           <Typography level="h4" sx={{ fontWeight: 700, color: '#222', mb: 0.5, letterSpacing: 1 }}>
             OKR Manager
@@ -128,8 +129,8 @@ export default function LoginPage() {
           {/* Only show captcha after 3 failed attempts */}
           {showCaptcha && (
             <div className="hcaptcha-box" style={{ width: '100%' }}>
-              <HCaptcha
-                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+              <HCaptchaWidget
+                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || ''}
                 onVerify={setCaptcha}
               />
             </div>

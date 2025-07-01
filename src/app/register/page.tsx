@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sheet from "@mui/joy/Sheet";
 import Typography from "@mui/joy/Typography";
@@ -10,14 +10,11 @@ import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
 import Button from "@mui/joy/Button";
 import Divider from "@mui/joy/Divider";
-import dynamic from "next/dynamic";
+import HCaptchaWidget from "@/components/HCaptchaWidget";
 import zxcvbn from "zxcvbn";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import Image from 'next/image';
-
-const HCaptcha = dynamic(() => import("react-hcaptcha"), { ssr: false });
-const HCaptchaAny = HCaptcha as any;
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ email: "", password: "", name: "", roleId: "" });
@@ -28,7 +25,6 @@ export default function RegisterPage() {
   const [passwordScore, setPasswordScore] = useState(0);
   const [passwordFeedback, setPasswordFeedback] = useState("");
   const router = useRouter();
-  const captchaRef = useRef<any>(null);
 
   useEffect(() => {
     fetch("/api/roles")
@@ -159,10 +155,8 @@ export default function RegisterPage() {
               </Select>
             </FormControl>
             <div className="hcaptcha-box" style={{ width: '100%' }}>
-              {/* Always render hCaptcha above the Register button, never unmount */}
-              <HCaptchaAny
-                ref={captchaRef}
-                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+              <HCaptchaWidget
+                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || ''}
                 onVerify={setCaptcha}
               />
             </div>

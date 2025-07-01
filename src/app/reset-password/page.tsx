@@ -9,11 +9,3 @@ export default function ResetPasswordPage() {
     </Suspense>
   );
 }
-
-// Assuming there's a Button component used somewhere in ResetPasswordPageInner
-<Button
-  // ...existing props...
-  sx={{ ...sx, borderRadius: 0, ...(sx || {}) }}
->
-  // ...existing code...
-</Button>

@@ -5,7 +5,7 @@ import Typography from "@mui/joy/Typography";
 import Input from "@mui/joy/Input";
 import Button from "@mui/joy/Button";
 import Divider from "@mui/joy/Divider";
-import HCaptcha from "react-hcaptcha";
+import HCaptchaWidget from "@/components/HCaptchaWidget";
 
 export default function RequestResetPassword() {
   const [email, setEmail] = useState("");
@@ -75,7 +75,7 @@ export default function RequestResetPassword() {
             autoFocus
           />
           <div style={{ marginBottom: 16, width: '100%' }}>
-            <HCaptcha
+            <HCaptchaWidget
               sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
               onVerify={setCaptcha}
             />

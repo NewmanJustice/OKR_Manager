@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
       },
     });
     // Send verification email
-    await sendVerifyEmail(user.email, verifyToken, user.name);
+    await sendVerifyEmail(user.email, verifyToken);
     // Do not set session cookie yet; require verification
     return NextResponse.json(
       { message: 'Registration successful. Please check your email to verify your account.' },

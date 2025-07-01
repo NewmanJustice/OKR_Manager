@@ -10,7 +10,7 @@ import zxcvbn from "zxcvbn";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import Image from 'next/image';
-import HCaptcha from "react-hcaptcha";
+import HCaptchaWidget from "@/components/HCaptchaWidget";
 
 export default function ResetPasswordPageInner() {
   const [password, setPassword] = useState("");
@@ -21,7 +21,6 @@ export default function ResetPasswordPageInner() {
   const [passwordScore, setPasswordScore] = useState(0);
   const [passwordFeedback, setPasswordFeedback] = useState("");
   const [captcha, setCaptcha] = useState<string | null>(null);
-  const [captchaReady, setCaptchaReady] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -149,11 +148,10 @@ export default function ResetPasswordPageInner() {
             {loading ? "Resetting..." : "Reset Password"}
           </Button>
         </form>
-        <div style={{ marginTop: 16, display: captchaReady ? 'block' : 'none' }}>
-          <HCaptcha
-            sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+        <div style={{ marginTop: 16, display: 'block' }}>
+          <HCaptchaWidget
+            sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || ''}
             onVerify={setCaptcha}
-            style={{ width: '100%' }}
           />
         </div>
       </Sheet>

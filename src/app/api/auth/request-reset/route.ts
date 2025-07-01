@@ -76,8 +76,7 @@ export async function POST(req: NextRequest) {
       where: { id: user.id },
       data: { resetAttempts: 0, resetLockoutUntil: null },
     });
-    // Send email with user's name for personalization
-    await sendResetEmail(user.email, token, user.name);
+    await sendResetEmail(user.email, token);
     return NextResponse.json({ message: 'If an account exists, a reset link has been sent.' }, { headers });
   } catch (err) {
     return handleZodError(err);
