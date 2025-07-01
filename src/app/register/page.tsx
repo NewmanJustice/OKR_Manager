@@ -14,7 +14,6 @@ import HCaptchaWidget from "@/components/HCaptchaWidget";
 import zxcvbn from "zxcvbn";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import Image from 'next/image';
 import Avatar from "@mui/joy/Avatar";
 import Box from "@mui/joy/Box";
 import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined';
