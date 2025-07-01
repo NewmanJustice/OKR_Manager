@@ -1,10 +1,26 @@
-# Dockerfile for OKR Manager (Next.js) use for local development
-# This Dockerfile is for local development purposes, not for production deployment.
-# It uses Node.js 20 on Alpine Linux for a lightweight image.   
-FROM node:20-alpine
+# Use official Node.js image as build environment
+FROM node:20-alpine AS builder
 WORKDIR /app
+
+# Install dependencies
 COPY package*.json ./
 RUN npm install
+
+# Copy source code
 COPY . .
+
+# Build Next.js app
+RUN npm run build
+
+# Production image
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+# Only copy necessary files for production
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+
 EXPOSE 3000
 CMD ["npm", "start"]
