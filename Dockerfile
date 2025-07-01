@@ -21,7 +21,7 @@ WORKDIR /app
 
 # Install only production dependencies
 COPY package*.json ./
-RUN npm ci --omit=dev --ignore-scripts
+RUN npm ci --omit=dev
 
 # Copy built app and necessary files from builder
 COPY --from=builder /app/.next ./.next
