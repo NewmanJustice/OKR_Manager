@@ -9,6 +9,9 @@ import Divider from "@mui/joy/Divider";
 import Link from "next/link";
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import HCaptchaWidget from "@/components/HCaptchaWidget";
+import Box from '@mui/joy/Box';
+import Avatar from '@mui/joy/Avatar';
+import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined';
 
 // Warning about <img>: Consider replacing <img> with <Image /> from next/image for optimization.
 
@@ -81,16 +84,27 @@ export default function LoginPage() {
           backgroundColor: "#fff",
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/globe.svg" alt="OKR Manager Logo" width={48} height={48} style={{ marginBottom: 12 }} />
-          <Typography level="h4" sx={{ fontWeight: 700, color: '#222', mb: 0.5, letterSpacing: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            mb: 3,
+          }}
+        >
+          <Avatar sx={{ m: 1, bgcolor: "#000" }}>
+            <InsertChartOutlinedIcon sx={{ color: '#fff' }} />
+          </Avatar>
+          <Typography component="h3" level="h3" sx={{ fontWeight: 700, color: '#222', mb: 0.5, letterSpacing: 1 }}>
             OKR Manager
+          </Typography>
+          <Typography level="body-sm" sx={{ mb: 2, color: 'text.secondary', textAlign: 'center' }}>
+            Track and manage OKRs
           </Typography>
           <Typography level="title-lg" sx={{ fontWeight: 600, color: '#222', mb: 2, letterSpacing: 0.5 }}>
             Login
           </Typography>
-        </div>
+        </Box>
         <Divider sx={{ width: "100%", mb: 2 }} />
         {error && (
           <Sheet variant="soft" color="danger" sx={{ mb: 2, p: 1.5, display: 'flex', alignItems: 'center', borderRadius: 2, backgroundColor: '#fff0f0' }}>

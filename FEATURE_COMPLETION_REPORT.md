@@ -62,6 +62,7 @@
   - Add more helpful links (e.g., contact support, back to login) on all error/success states
   - Further polish for mobile responsiveness and dark mode
   - Add more automated tests for edge cases and UI flows
+  - Set up secure port forwarding to use Prisma Studio safely
 
 ## 🟢 Outstanding Issues from the Code Review
 

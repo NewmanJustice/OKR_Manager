@@ -15,6 +15,9 @@ import zxcvbn from "zxcvbn";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import Image from 'next/image';
+import Avatar from "@mui/joy/Avatar";
+import Box from "@mui/joy/Box";
+import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined';
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ email: "", password: "", name: "", roleId: "" });
@@ -85,15 +88,27 @@ export default function RegisterPage() {
           backgroundColor: "background.body",
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 16 }}>
-          <Image src="/globe.svg" alt="OKR Manager Logo" width={48} height={48} style={{ marginBottom: 8 }} />
-          <Typography level="h4" sx={{ fontWeight: 700, fontSize: '1.875rem', color: '#222', textAlign: 'center', mb: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            mb: 3,
+          }}
+        >
+          <Avatar sx={{ m: 1, bgcolor: "#000" }}>
+            <InsertChartOutlinedIcon sx={{ color: '#fff' }} />
+          </Avatar>
+          <Typography component="h3" level="h3" sx={{ fontWeight: 700, color: '#222', mb: 0.5, letterSpacing: 1 }}>
             OKR Manager
           </Typography>
-        </div>
-        <Typography level="title-lg" sx={{ fontWeight: 600, color: '#222', textAlign: 'center', mb: 2 }}>
-          Register
-        </Typography>
+          <Typography level="body-sm" sx={{ mb: 2, color: 'text.secondary', textAlign: 'center' }}>
+            Track and manage OKRs
+          </Typography>
+          <Typography level="title-lg" sx={{ fontWeight: 600, color: '#222', mb: 2, letterSpacing: 0.5 }}>
+            Register
+          </Typography>
+        </Box>
         <Divider sx={{ width: "100%", mb: 2 }} />
         {error && (
           <Sheet variant="soft" color="danger" sx={{ mb: 2, p: 1, display: 'flex', alignItems: 'center', borderRadius: 'sm', backgroundColor: '#fff0f0' }}>

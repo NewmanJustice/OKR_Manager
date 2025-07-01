@@ -19,20 +19,9 @@ declare global {
 
 const HCaptchaWidget = ({ sitekey, onVerify }: HCaptchaWidgetProps) => {
   const widgetId = useRef<number | null>(null);
+  const scriptLoaded = useRef(false);
 
   useEffect(() => {
-    // Load hCaptcha script if not already present
-    if (!window.hcaptcha) {
-      const script = document.createElement("script");
-      script.src = "https://js.hcaptcha.com/1/api.js?render=explicit";
-      script.async = true;
-      script.defer = true;
-      script.onload = renderWidget;
-      document.body.appendChild(script);
-    } else {
-      renderWidget();
-    }
-
     function renderWidget() {
       if (window.hcaptcha && widgetId.current === null) {
         widgetId.current = window.hcaptcha.render("hcaptcha-container", {
@@ -42,8 +31,21 @@ const HCaptchaWidget = ({ sitekey, onVerify }: HCaptchaWidgetProps) => {
       }
     }
 
+    if (!window.hcaptcha && !scriptLoaded.current) {
+      const script = document.createElement("script");
+      script.src = "https://js.hcaptcha.com/1/api.js?render=explicit";
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        scriptLoaded.current = true;
+        renderWidget();
+      };
+      document.body.appendChild(script);
+    } else if (window.hcaptcha) {
+      renderWidget();
+    }
+
     return () => {
-      // Optionally remove widget on unmount
       if (window.hcaptcha && widgetId.current !== null) {
         window.hcaptcha.remove(widgetId.current);
         widgetId.current = null;
