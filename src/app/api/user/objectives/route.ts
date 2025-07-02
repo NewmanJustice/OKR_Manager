@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
         }
       }
     });
-    const objectives = assignments.map(a => a.okr);
+    const objectives = assignments.map((a: typeof assignments[0]) => a.okr);
     return NextResponse.json(objectives, { headers });
   } catch (err) {
     if (err instanceof Error && err.message === 'Rate limit exceeded') {
