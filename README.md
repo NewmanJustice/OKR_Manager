@@ -104,6 +104,13 @@ docker push <your-registry>/okr-manager:latest
 - Check Azure Web App logs for errors.
 - Ensure all secrets are set in Azure, not in code.
 - If you see `.next` missing errors, check Docker build logs for build failures.
+- **If you see a Prisma schema error (e.g., `Could not find Prisma Schema that is required for this command`):**
+  - Make sure your Dockerfile copies the `prisma/` directory into the production image:
+    ```dockerfile
+    COPY --from=builder /app/prisma ./prisma/
+    ```
+  - The `prisma/schema.prisma` file must be present in the running container for migrations to work.
+  - Rebuild and redeploy your Docker image after making this change.
 
 ---
 
