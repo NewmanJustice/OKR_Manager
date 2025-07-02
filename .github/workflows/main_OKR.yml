@@ -46,6 +46,5 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'OKR'
-        slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_e2cf51908226441f96a3a6a3a814d37d }}
         images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_9ce183ada55e4fdb9d80cdae25e964a6 }}/okr-manager:${{ github.sha }}'
