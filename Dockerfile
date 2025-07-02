@@ -9,6 +9,10 @@ RUN npm install
 # Copy source code
 COPY . .
 
+# Switch Prisma provider to PostgreSQL and generate client
+RUN npm run prisma:postgres
+RUN npx prisma generate
+
 # Build Next.js app
 RUN npm run build
 
