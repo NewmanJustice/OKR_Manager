@@ -30,6 +30,8 @@ export async function middleware(req: NextRequest) {
     '/reset-password/request',
     '/verify', // allow public access to verification page
     '/api/auth/verify', // allow public access to verification API
+    '/api/auth/request-reset', // allow public access to password reset request API
+    '/api/auth/reset-password', // allow public access to password reset API
   ];
   const isPublic = publicPaths.some((p) => req.nextUrl.pathname.startsWith(p));
   if (!user && !isPublic) {
