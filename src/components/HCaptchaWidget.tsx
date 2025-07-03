@@ -18,6 +18,8 @@ declare global {
 }
 
 const HCaptchaWidget = ({ sitekey, onVerify }: HCaptchaWidgetProps) => {
+  console.log("hCaptcha sitekey at runtime:", sitekey);
+
   const widgetId = useRef<number | null>(null);
   const scriptLoaded = useRef(false);
 
