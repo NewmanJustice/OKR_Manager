@@ -35,7 +35,7 @@ export class GovNotifyEmailProvider implements EmailProvider {
     const response = await fetch('https://api.notifications.service.gov.uk/v2/notifications/email', {
       method: 'POST',
       headers: {
-        'Authorization': `ApiKey-v1 ${apiKey}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
@@ -59,7 +59,7 @@ export class GovNotifyEmailProvider implements EmailProvider {
     const response = await fetch('https://api.notifications.service.gov.uk/v2/notifications/email', {
       method: 'POST',
       headers: {
-        'Authorization': `ApiKey-v1 ${apiKey}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
