@@ -9,6 +9,9 @@ RUN npm install
 # Copy source code
 COPY . .
 
+# Copy .env file for build-time environment variables
+COPY .env .env
+
 # Set dummy DATABASE_URL for build (Azure will override at runtime)
 ENV DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=public"
 
