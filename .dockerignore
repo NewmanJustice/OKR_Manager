@@ -1,0 +1,1 @@
+# .env  # <-- Commented out to allow build-time env vars for Next.js
