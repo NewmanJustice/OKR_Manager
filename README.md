@@ -47,8 +47,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 ### 2. Environment Variables
 Create a `.env` file in the project root with:
 ```
-# For SQLite (local dev)
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/okr"
 # For email, hCaptcha, JWT, etc. (replace with your own values)
 EMAIL_USER="<your-email-user>"
 EMAIL_PASS="<your-email-password>"
@@ -57,19 +56,41 @@ JWT_SECRET="<your-jwt-secret>"
 ```
 > **Never commit secrets to git.**
 
-### 3. Install dependencies
+### 3. Start a Local PostgreSQL Database with Docker
+If you don't have PostgreSQL installed locally, you can use Docker:
+
+1. Stop and remove any existing container (if needed):
+   ```sh
+   docker stop okr-postgres || true
+   docker rm okr-postgres || true
+   ```
+2. Start a new PostgreSQL container:
+   ```sh
+   docker run --name okr-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=okr -p 5432:5432 -d postgres:15
+   ```
+3. Your `.env` should match the connection string above.
+
+### 4. Install dependencies
 ```
 npm install
 ```
 
-### 4. Start the app (SQLite, local dev)
+### 5. Run migrations
+```
+npm run prisma:migrate
+```
+
+### 6. Start the app (local Postgres dev)
 ```
 npm run dev
 ```
 
-### 5. (Optional) Use local Postgres for dev
-- Update `DATABASE_URL` in `.env` to your local Postgres connection string.
-- Run `npm run prisma:postgres && npx prisma generate && npx prisma migrate dev`.
+### 7. (Optional) Stop and remove the container when done
+```
+docker stop okr-postgres
+
+docker rm okr-postgres
+```
 
 ---
 
@@ -101,6 +122,8 @@ docker push <your-registry>/okr-manager:latest
 - Only new migrations are applied; existing data is preserved.
 
 ### 6. Troubleshooting
+- If you see a Prisma provider mismatch error (e.g., `The datasource provider postgresql specified in your schema does not match the one specified in the migration_lock.toml, sqlite`):
+  - You must reset your migrations for PostgreSQL. See `POSTGRES_DEV.md` for instructions.
 - Check Azure Web App logs for errors.
 - Ensure all secrets are set in Azure, not in code.
 - If you see `.next` missing errors, check Docker build logs for build failures.

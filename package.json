@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prisma:sqlite": "node set-prisma-provider.js sqlite",
-    "prisma:postgres": "node set-prisma-provider.js postgresql",
-    "dev": "npm run prisma:sqlite && next dev --turbopack",
-    "build": "npm run prisma:postgres && next build",
+    "dev": "next dev --turbopack",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest"
+    "test": "jest",
+    "prisma:migrate": "npx prisma migrate dev --name init",
+    "prisma:deploy": "npx prisma migrate deploy"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
