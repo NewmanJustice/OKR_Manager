@@ -58,12 +58,7 @@ export default function LoginPage() {
         setShowCaptcha(true);
       }
       setCaptcha(null);
-      const data = await res.json();
-      if (res.status === 401 || res.status === 400) {
-        setError("Incorrect details");
-      } else {
-        setError(data.error || "Login failed");
-      }
+      setError("There was a problem. Please try again later.");
     }
   };
 

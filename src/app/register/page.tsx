@@ -65,8 +65,7 @@ export default function RegisterPage() {
       setSuccess(true);
       // Removed automatic redirect. User must click the button to navigate away.
     } else {
-      const data = await res.json();
-      setError(data.error || "Registration failed");
+      setError("There was a problem. Please try again later.");
     }
   };
 

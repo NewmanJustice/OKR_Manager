@@ -3,7 +3,7 @@ import { z } from 'zod';
 import crypto from 'crypto';
 import { limiter } from '../../_middleware/rateLimit';
 import { handleZodError } from '../../_middleware/handleZodError';
-import { sendResetEmail } from '@/utils/email'; // You will need to implement this
+import { sendResetEmail } from '@/utils/email'; 
 import prisma from '@/utils/prisma';
 import { addMinutes } from 'date-fns';
 
