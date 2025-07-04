@@ -18,6 +18,9 @@ RUN cat .env
 # Set dummy DATABASE_URL for build (Azure will override at runtime)
 ENV DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=public"
 
+# Set the time zone environment variable
+ENV TZ="Europe/London"
+
 # Run Prisma migrations (if needed)
 RUN npx prisma generate
 
