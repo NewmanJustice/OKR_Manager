@@ -17,16 +17,22 @@ export class ConsoleEmailProvider implements EmailProvider {
   }
 }
 
-// Example: GovNotifyEmailProvider (real implementation)
+import { createNotifyJwt } from './jwt_generater';
 import fetch from 'node-fetch';
 
+
 export class GovNotifyEmailProvider implements EmailProvider {
+  
   async sendResetEmail(email: string, token: string) {
     const apiKey = process.env.GOV_NOTIFY_API_KEY;
     const templateId = process.env.GOV_NOTIFY_RESET_PASSWORD_TEMPLATE_ID;
     if (!apiKey || !templateId) {
       throw new Error('Gov Notify API key or template ID not set');
     }
+
+    // Generate the required JWT for authentication
+    const notifyToken = createNotifyJwt(apiKey);
+
     const payload = {
       email_address: email,
       template_id: templateId,
@@ -35,7 +41,7 @@ export class GovNotifyEmailProvider implements EmailProvider {
     const response = await fetch('https://api.notifications.service.gov.uk/v2/notifications/email', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${notifyToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
@@ -51,6 +57,10 @@ export class GovNotifyEmailProvider implements EmailProvider {
     if (!apiKey || !templateId) {
       throw new Error('Gov Notify API key or verify account template ID not set');
     }
+
+    // Generate the required JWT for authentication
+    const notifyToken = createNotifyJwt(apiKey);
+
     const payload = {
       email_address: email,
       template_id: templateId,
@@ -59,7 +69,7 @@ export class GovNotifyEmailProvider implements EmailProvider {
     const response = await fetch('https://api.notifications.service.gov.uk/v2/notifications/email', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${notifyToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
