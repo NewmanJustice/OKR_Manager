@@ -5,7 +5,6 @@ import { setSessionCookie } from '@/utils/session';
 import { limiter } from '../../_middleware/rateLimit';
 import { z } from 'zod';
 import { handleZodError } from '../../_middleware/handleZodError';
-import { sendVerifyEmail } from '@/utils/email';
 
 const prisma = new PrismaClient();
 

@@ -17,7 +17,6 @@ export class ConsoleEmailProvider implements EmailProvider {
   }
 }
 
-import { createNotifyJwt } from './jwt_generater';
 import fetch from 'node-fetch';
 
 
