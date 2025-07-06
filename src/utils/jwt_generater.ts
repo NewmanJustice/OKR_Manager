@@ -10,15 +10,15 @@ import jwt from 'jsonwebtoken';
 export function createNotifyJwt(fullApiKey: string): string {
   // 1. Parse the API Key
   // The key is in the format: {key_name}-{service_id}-{api_secret}
-  const parts = fullApiKey.split('-');
-  if (parts.length < 3) {
-    throw new Error('Invalid GOV_NOTIFY_API_KEY format. Expected {name}-{service_id}-{secret}.');
-  }
 
-  // The service ID is the second-to-last part, and the secret is the last part.
-  // This handles key names that might contain hyphens.
-  const serviceId = parts[parts.length - 2];
-  const apiSecret = parts[parts.length - 1];
+const parts = fullApiKey.split('-');
+if (parts.length < 3) {
+  console.error('Invalid GOV_NOTIFY_API_KEY format. Expected format: key_name-service_id-api_secret');
+  process.exit(1);
+}
+
+const serviceId = parts.slice(1, 6).join('-');    // 1 to 5 (inclusive)
+const apiSecret = parts.slice(6).join('-');       // 6 to end
 
   // 2. Create the JWT Payload
   const payload = {
