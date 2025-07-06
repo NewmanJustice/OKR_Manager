@@ -5,6 +5,7 @@ import { setSessionCookie } from '@/utils/session';
 import { limiter } from '../../_middleware/rateLimit';
 import { z } from 'zod';
 import { handleZodError } from '../../_middleware/handleZodError';
+import { sendVerifyEmail } from '@/utils/email';
 
 const prisma = new PrismaClient();
 
@@ -42,7 +43,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401, headers });
     }
     if (!user.isVerified) {
-      return NextResponse.json({ error: 'Email not verified. Please check your inbox for a verification link.' }, { status: 403, headers });
+      return NextResponse.json({ 
+        error: 'Your email address is not verified. Please verify your account to continue.',
+        canResendVerification: true
+      }, { status: 403, headers });
     }
     const res = NextResponse.json(
       { id: user.id, email: user.email, name: user.name, roleId: user.roleId, isAdmin: user.isAdmin, isLineManager: user.isLineManager },

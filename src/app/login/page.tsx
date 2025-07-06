@@ -21,6 +21,8 @@ export default function LoginPage() {
   const [captcha, setCaptcha] = useState<string | null>(null);
   const [showCaptcha, setShowCaptcha] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState(0);
+  const [canResend, setCanResend] = useState(false);
+  const [resendStatus, setResendStatus] = useState<string | null>(null);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,6 +32,8 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setCanResend(false);
+    setResendStatus(null);
     if (showCaptcha && !captcha) {
       setError("Please complete the CAPTCHA.");
       return;
@@ -58,7 +62,25 @@ export default function LoginPage() {
         setShowCaptcha(true);
       }
       setCaptcha(null);
-      setError("There was a problem. Please try again later.");
+      const data = await res.json();
+      setError(data.error || "There was a problem. Please try again later.");
+      setCanResend(!!data.canResendVerification);
+    }
+  };
+
+  const handleResend = async () => {
+    setResendStatus(null);
+    setError("");
+    const res = await fetch("/api/auth/resend-verification", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: form.email }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setResendStatus(data.message || "Verification email resent. Please check your inbox.");
+    } else {
+      setResendStatus(data.error || "Failed to resend verification email.");
     }
   };
 
@@ -108,6 +130,18 @@ export default function LoginPage() {
               {error}
             </Typography>
           </Sheet>
+        )}
+        {canResend && (
+          <Box sx={{ mb: 2, width: '100%', textAlign: 'center' }}>
+            <Button onClick={handleResend} variant="outlined" color="primary" size="sm" sx={{ mt: 1, mb: 1 }}>
+              Resend verification email
+            </Button>
+            {resendStatus && (
+              <Typography level="body-sm" sx={{ mt: 1, color: resendStatus.startsWith('Verification') ? 'success.main' : 'danger.main' }}>
+                {resendStatus}
+              </Typography>
+            )}
+          </Box>
         )}
         <form onSubmit={handleSubmit} className="w-full mb-4" style={{ paddingTop: "1em" }}>
           <Input
