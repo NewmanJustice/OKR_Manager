@@ -69,6 +69,7 @@ export default function LoginPage() {
   };
 
   const handleResend = async () => {
+    console.log("Resend button clicked");
     setResendStatus(null);
     setError("");
     const res = await fetch("/api/auth/resend-verification", {
@@ -76,7 +77,13 @@ export default function LoginPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: form.email }),
     });
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      setResendStatus("Unexpected server error. Please try again later.");
+      return;
+    }
     if (res.ok) {
       setResendStatus(data.message || "Verification email resent. Please check your inbox.");
     } else {
@@ -131,6 +138,18 @@ export default function LoginPage() {
             </Typography>
           </Sheet>
         )}
+        {canResend && (
+          <Box sx={{ mb: 2, width: '100%', textAlign: 'center' }}>
+            <Button onClick={handleResend} type="button" variant="outlined" color="primary" size="sm" sx={{ mt: 1, mb: 1 }}>
+              Resend verification email
+            </Button>
+            {resendStatus && (
+              <Typography level="body-sm" sx={{ mt: 1, color: resendStatus.startsWith('Verification') ? 'success.main' : 'danger.main' }}>
+                {resendStatus}
+              </Typography>
+            )}
+          </Box>
+        )}
         <form onSubmit={handleSubmit} className="w-full mb-4" style={{ paddingTop: "1em" }}>
           <Input
             id="email"
@@ -172,18 +191,6 @@ export default function LoginPage() {
             </Link>
           </div>
         </form>
-        {canResend && (
-          <Box sx={{ mb: 2, width: '100%', textAlign: 'center' }}>
-            <Button onClick={handleResend} type="button" variant="outlined" color="primary" size="sm" sx={{ mt: 1, mb: 1 }}>
-              Resend verification email
-            </Button>
-            {resendStatus && (
-              <Typography level="body-sm" sx={{ mt: 1, color: resendStatus.startsWith('Verification') ? 'success.main' : 'danger.main' }}>
-                {resendStatus}
-              </Typography>
-            )}
-          </Box>
-        )}
       </Sheet>
     </main>
   );
