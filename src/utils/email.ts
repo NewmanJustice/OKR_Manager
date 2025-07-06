@@ -18,18 +18,17 @@ export class ConsoleEmailProvider implements EmailProvider {
 }
 
 import fetch from 'node-fetch';
-
+import { createNotifyJwt } from './jwt_generater';
 
 export class GovNotifyEmailProvider implements EmailProvider {
   
   async sendResetEmail(email: string, token: string, name?: string) {
-    const apiKey = process.env.GOV_NOTIFY_API_KEY;
     const templateId = process.env.GOV_NOTIFY_RESET_PASSWORD_TEMPLATE_ID;
-    if (!apiKey || !templateId) {
+    const notifyJwt = createNotifyJwt(process.env.GOV_NOTIFY_API_KEY || '');
+    if (!notifyJwt || !templateId) {
       throw new Error('Gov Notify API key or template ID not set');
     }
 
-    // Use API key directly as Bearer token (per Notify docs)
     const payload = {
       email_address: email,
       template_id: templateId,
@@ -41,7 +40,7 @@ export class GovNotifyEmailProvider implements EmailProvider {
     const response = await fetch('https://api.notifications.service.gov.uk/v2/notifications/email', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${notifyJwt}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
@@ -52,13 +51,12 @@ export class GovNotifyEmailProvider implements EmailProvider {
     }
   }
   async sendVerifyEmail(email: string, token: string, name?: string) {
-    const apiKey = process.env.GOV_NOTIFY_API_KEY;
+    const notifyJwt = createNotifyJwt(process.env.GOV_NOTIFY_API_KEY || '');
     const templateId = process.env.GOV_NOTIFY_VERIFY_ACCOUNT_TEMPLATE_ID;
-    if (!apiKey || !templateId) {
+    if (!notifyJwt || !templateId) {
       throw new Error('Gov Notify API key or verify account template ID not set');
     }
 
-    // Use API key directly as Bearer token (per Notify docs)
     const payload = {
       email_address: email,
       template_id: templateId,
@@ -70,7 +68,7 @@ export class GovNotifyEmailProvider implements EmailProvider {
     const response = await fetch('https://api.notifications.service.gov.uk/v2/notifications/email', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${notifyJwt}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),

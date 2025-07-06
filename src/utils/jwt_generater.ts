@@ -1,4 +1,3 @@
-// file: lib/notify.ts (or a similar location)
 
 import jwt from 'jsonwebtoken';
 
