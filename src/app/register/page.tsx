@@ -18,6 +18,8 @@ import Avatar from "@mui/joy/Avatar";
 import Box from "@mui/joy/Box";
 import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined';
 
+const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || '';
+
 export default function RegisterPage() {
   const [form, setForm] = useState({ email: "", password: "", name: "", roleId: "" });
   const [roles, setRoles] = useState<{ id: number; name: string; description?: string }[]>([]);
@@ -167,9 +169,9 @@ export default function RegisterPage() {
                 ))}
               </Select>
             </FormControl>
-            <div className="hcaptcha-box" style={{ width: '100%' }}>
+            <div className="hcaptcha-box" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <HCaptchaWidget
-                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || ''}
+                sitekey={HCAPTCHA_SITE_KEY}
                 onVerify={setCaptcha}
               />
             </div>

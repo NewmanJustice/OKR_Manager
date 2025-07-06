@@ -24,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head>
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} bg-gray-50 min-h-screen font-sans`}>
         <ClientAppShell>

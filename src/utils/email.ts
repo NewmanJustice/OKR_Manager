@@ -51,6 +51,7 @@ export class GovNotifyEmailProvider implements EmailProvider {
     }
   }
   async sendVerifyEmail(email: string, token: string, name?: string) {
+    console.log('GovNotifyEmailProvider.sendVerifyEmail called');
     const notifyJwt = createNotifyJwt(process.env.GOV_NOTIFY_API_KEY || '');
     const templateId = process.env.GOV_NOTIFY_VERIFY_ACCOUNT_TEMPLATE_ID;
     if (!notifyJwt || !templateId) {
@@ -63,7 +64,7 @@ export class GovNotifyEmailProvider implements EmailProvider {
       name: name || 'User'
     };
     // Uncomment for debugging:
-    // console.log('Notify personalisation:', personalisation);
+    console.log('Notify personalisation:', personalisation);
     const payload = {
       email_address: email,
       template_id: templateId,
@@ -86,12 +87,15 @@ export class GovNotifyEmailProvider implements EmailProvider {
 
 // Configurable provider selection
 const providerName = process.env.EMAIL_PROVIDER || 'console';
+console.log('EMAIL_PROVIDER:', providerName);
 
 let provider: EmailProvider;
 if (providerName === 'govnotify') {
   provider = new GovNotifyEmailProvider();
+  console.log('Using GovNotifyEmailProvider');
 } else {
   provider = new ConsoleEmailProvider();
+  console.log('Using ConsoleEmailProvider');
 }
 
 export async function sendResetEmail(email: string, token: string, name?: string) {
@@ -99,6 +103,7 @@ export async function sendResetEmail(email: string, token: string, name?: string
 }
 
 export async function sendVerifyEmail(email: string, token: string, name?: string) {
+  console.log('sendVerifyEmail called with:', { email, token, name });
   if (provider.sendVerifyEmail) {
     await provider.sendVerifyEmail(email, token, name);
   } else {

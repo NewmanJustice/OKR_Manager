@@ -23,7 +23,7 @@ export async function middleware(req: NextRequest) {
     '/api/auth/login',
     '/api/auth/register',
     '/api/roles',
-    '/favicon.ico',
+    '/favicon.svg',
     '/_next',
     '/api/public',
     '/reset-password',
@@ -60,5 +60,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next|favicon.ico|api/public).*)'],
+  matcher: ['/((?!_next|favicon.svg|api/public).*)'],
 };
