@@ -131,18 +131,6 @@ export default function LoginPage() {
             </Typography>
           </Sheet>
         )}
-        {canResend && (
-          <Box sx={{ mb: 2, width: '100%', textAlign: 'center' }}>
-            <Button onClick={handleResend} type="button" variant="outlined" color="primary" size="sm" sx={{ mt: 1, mb: 1 }}>
-              Resend verification email
-            </Button>
-            {resendStatus && (
-              <Typography level="body-sm" sx={{ mt: 1, color: resendStatus.startsWith('Verification') ? 'success.main' : 'danger.main' }}>
-                {resendStatus}
-              </Typography>
-            )}
-          </Box>
-        )}
         <form onSubmit={handleSubmit} className="w-full mb-4" style={{ paddingTop: "1em" }}>
           <Input
             id="email"
@@ -184,6 +172,18 @@ export default function LoginPage() {
             </Link>
           </div>
         </form>
+        {canResend && (
+          <Box sx={{ mb: 2, width: '100%', textAlign: 'center' }}>
+            <Button onClick={handleResend} type="button" variant="outlined" color="primary" size="sm" sx={{ mt: 1, mb: 1 }}>
+              Resend verification email
+            </Button>
+            {resendStatus && (
+              <Typography level="body-sm" sx={{ mt: 1, color: resendStatus.startsWith('Verification') ? 'success.main' : 'danger.main' }}>
+                {resendStatus}
+              </Typography>
+            )}
+          </Box>
+        )}
       </Sheet>
     </main>
   );
