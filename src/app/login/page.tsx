@@ -133,7 +133,7 @@ export default function LoginPage() {
         )}
         {canResend && (
           <Box sx={{ mb: 2, width: '100%', textAlign: 'center' }}>
-            <Button onClick={handleResend} variant="outlined" color="primary" size="sm" sx={{ mt: 1, mb: 1 }}>
+            <Button onClick={handleResend} type="button" variant="outlined" color="primary" size="sm" sx={{ mt: 1, mb: 1 }}>
               Resend verification email
             </Button>
             {resendStatus && (
