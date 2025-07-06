@@ -56,14 +56,18 @@ export class GovNotifyEmailProvider implements EmailProvider {
     if (!notifyJwt || !templateId) {
       throw new Error('Gov Notify API key or verify account template ID not set');
     }
-
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const verifyUrl = `${baseUrl}/verify?token=${token || ''}`;
+    const personalisation = {
+      verify_url: verifyUrl,
+      name: name || 'User'
+    };
+    // Uncomment for debugging:
+    // console.log('Notify personalisation:', personalisation);
     const payload = {
       email_address: email,
       template_id: templateId,
-      personalisation: {
-        verify_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/verify?token=${token}`,
-        name: name || ''
-      },
+      personalisation,
     };
     const response = await fetch('https://api.notifications.service.gov.uk/v2/notifications/email', {
       method: 'POST',
