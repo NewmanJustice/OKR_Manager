@@ -10,15 +10,19 @@ import ProfessionSelect from './ProfessionSelect';
 // Move currentYear outside the component to avoid SSR/CSR mismatch
 const CURRENT_YEAR = new Date().getFullYear();
 
+export interface KeyResult {
+  id?: number;
+  title: string;
+}
+
 export interface Objective {
   id: number;
   title: string;
   description: string;
   quarter: number;
   year: number;
-  keyResults: { id?: number; title: string }[];
-  professionId?: string | number; // Added for form compatibility
-  // Add other fields as needed
+  keyResults: KeyResult[];
+  professionId?: string | number;
 }
 
 export default function ObjectivesClient() {
@@ -35,11 +39,11 @@ export default function ObjectivesClient() {
   React.useEffect(() => {
     fetch('/api/admin/objectives').then(async res => {
       if (res.ok) {
-        const data = await res.json();
+        const data: Array<{ id: number; title: string; description: string; quarter: number; year: number; key_results: KeyResult[]; professionId?: string | number }> = await res.json();
         // Normalize key_results to keyResults for frontend
-        const normalized = (data || []).map((obj: any) => ({
+        const normalized: Objective[] = (data || []).map((obj) => ({
           ...obj,
-          keyResults: (obj.key_results || []).map((kr: any) => ({
+          keyResults: (obj.key_results || []).map((kr) => ({
             id: kr.id,
             title: kr.title
           }))
@@ -50,7 +54,7 @@ export default function ObjectivesClient() {
     });
     fetch('/api/profession').then(async res => {
       if (res.ok) {
-        const data = await res.json();
+        const data: { professions: { id: number; roleName: string }[] } = await res.json();
         setProfessions(data.professions || []);
       }
     });
@@ -101,9 +105,9 @@ export default function ObjectivesClient() {
     if (res.ok) {
       const newObj = await res.json();
       // Normalize key_results to keyResults for the new objective
-      const normalizedNewObj = {
+      const normalizedNewObj: Objective = {
         ...newObj,
-        keyResults: (newObj.key_results || []).map((kr: any) => ({
+        keyResults: (newObj.key_results || []).map((kr: KeyResult) => ({
           ...kr,
           title: kr.title
         }))
@@ -165,9 +169,9 @@ export default function ObjectivesClient() {
     if (res.ok) {
       const updated = await res.json();
       // Normalize key_results to keyResults for the updated objective
-      const normalizedUpdated = {
+      const normalizedUpdated: Objective = {
         ...updated,
-        keyResults: (updated.key_results || []).map((kr: any) => ({
+        keyResults: (updated.key_results || []).map((kr: KeyResult) => ({
           ...kr,
           title: kr.title
         }))

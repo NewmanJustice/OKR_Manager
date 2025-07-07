@@ -112,7 +112,19 @@ export async function PUT(req: NextRequest) {
     const existingIds = new Set(existing.map(kr => kr.id));
     const incomingIds = new Set(key_results.filter(kr => kr.id).map(kr => kr.id));
     // Prepare nested update
-    const updateData: any = {
+    type UpdateData = {
+      title: string;
+      description: string;
+      quarter: number;
+      year: number;
+      professionId: number;
+      key_results: {
+        deleteMany: { id: number }[];
+        updateMany: { where: { id: number }; data: { title: string } }[];
+        create: { title: string; description: string; status: string; created_by: { connect: { id: number } } }[];
+      };
+    };
+    const updateData: UpdateData = {
       title,
       description: description ?? '',
       quarter,
@@ -120,10 +132,12 @@ export async function PUT(req: NextRequest) {
       professionId: Number(professionId),
       key_results: {
         deleteMany: Array.from(existingIds).filter(eid => !incomingIds.has(eid)).map(id => ({ id })),
-        updateMany: key_results.filter(kr => kr.id).map(kr => ({
-          where: { id: kr.id },
-          data: { title: kr.title }
-        })),
+        updateMany: key_results
+          .filter((kr): kr is { id: number; title: string } => typeof kr.id === 'number')
+          .map(kr => ({
+            where: { id: kr.id as number },
+            data: { title: kr.title }
+          })),
         create: key_results.filter(kr => !kr.id).map(kr => ({
           title: kr.title,
           description: '',

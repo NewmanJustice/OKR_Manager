@@ -1,37 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/utils/prisma';
 
+interface KeyResultInput {
+  id?: number;
+  title: string;
+  description?: string;
+  status?: string;
+  created_by_id?: number;
+}
+
 export async function PUT(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const id = Number(url.pathname.split('/').pop());
-    let { title, description, quarter, year, pdm_id, professionId, keyResults } = await req.json();
+    const { title, description, quarter, year, pdm_id, professionId, keyResults }: {
+      title: string;
+      description: string;
+      quarter: number;
+      year: number;
+      pdm_id?: number;
+      professionId?: number | string;
+      keyResults: KeyResultInput[];
+    } = await req.json();
     if (!title || !quarter || !year) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
     // Coerce professionId to number if present and not null
+    let finalProfessionId: number | undefined = undefined;
     if (professionId !== undefined && professionId !== null && professionId !== '') {
-      professionId = Number(professionId);
-      if (isNaN(professionId)) professionId = undefined;
-    } else {
-      professionId = undefined;
+      const num = Number(professionId);
+      if (!isNaN(num)) finalProfessionId = num;
     }
     // Prepare key result operations
-    const existingKRs = (keyResults || []).filter((kr: { id?: number }) => kr.id);
-    const newKRs = (keyResults || []).filter((kr: { id?: number }) => !kr.id);
-    const existingKRIds = existingKRs.map((kr: { id: number }) => kr.id);
+    const existingKRs: KeyResultInput[] = (keyResults || []).filter((kr) => kr.id !== undefined);
+    const newKRs: KeyResultInput[] = (keyResults || []).filter((kr) => kr.id === undefined);
+    const existingKRIds: number[] = existingKRs.map((kr) => kr.id as number);
     // Build key_results update object
-    const keyResultsUpdate: any = {
-      updateMany: existingKRs.map((kr: any) => ({
+    const keyResultsUpdate: Record<string, unknown> = {
+      updateMany: existingKRs.map((kr) => ({
         where: { id: kr.id },
         data: {
-          title: kr.title || kr.text || '',
+          title: kr.title,
           description: kr.description || '',
           status: kr.status || 'Not Started',
         },
       })),
-      create: newKRs.map((kr: any) => ({
-        title: kr.title || kr.text || '',
+      create: newKRs.map((kr) => ({
+        title: kr.title,
         description: kr.description || '',
         status: kr.status || 'Not Started',
         created_by_id: kr.created_by_id, // must be provided
@@ -54,7 +69,7 @@ export async function PUT(req: NextRequest) {
           quarter,
           year,
           pdm_id,
-          professionId,
+          professionId: finalProfessionId,
           key_results: keyResultsUpdate,
         },
         include: { key_results: true },
