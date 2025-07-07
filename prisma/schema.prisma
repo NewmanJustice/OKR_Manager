@@ -21,6 +21,8 @@ model User {
   name                  String
   roleId                Int
   role                  Role                 @relation(fields: [roleId], references: [id])
+  professionId          Int?
+  profession            Profession?          @relation(fields: [professionId], references: [id])
   isAdmin               Boolean              @default(false)
   isLineManager         Boolean              @default(false)
   notify_preferences    Json
@@ -193,10 +195,11 @@ model KeyResultProgress {
   user       User      @relation(fields: [user_id], references: [id])
 }
 
-model RoleDescription {
+model Profession {
   id          Int    @id @default(autoincrement())
   roleName    String @unique
   description String // Markdown content
+  users       User[]
 }
 
 model PasswordResetToken {

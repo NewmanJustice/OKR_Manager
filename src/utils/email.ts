@@ -7,13 +7,11 @@ export interface EmailProvider {
   sendVerifyEmail?(email: string, token: string, name?: string): Promise<void>;
 }
 
-// Default (dev) provider logs to console
+// Default (dev) provider logs to console when running in development prints to console 
 export class ConsoleEmailProvider implements EmailProvider {
   async sendResetEmail() {
-    // Removed console.log for password reset link
   }
   async sendVerifyEmail() {
-    // Removed console.log for verify account link
   }
 }
 
@@ -51,7 +49,6 @@ export class GovNotifyEmailProvider implements EmailProvider {
     }
   }
   async sendVerifyEmail(email: string, token: string, name?: string) {
-    console.log('GovNotifyEmailProvider.sendVerifyEmail called');
     const notifyJwt = createNotifyJwt(process.env.GOV_NOTIFY_API_KEY || '');
     const templateId = process.env.GOV_NOTIFY_VERIFY_ACCOUNT_TEMPLATE_ID;
     if (!notifyJwt || !templateId) {

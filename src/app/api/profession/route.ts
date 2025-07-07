@@ -12,27 +12,24 @@ export async function GET(req: NextRequest) {
   try {
     const headers = limiter.checkNext(req, 20); // 20 requests per minute per IP
     const session = await getSessionUserFromRequest(req);
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
     const { searchParams } = new URL(req.url);
     const roleName = searchParams.get('role');
     if (roleName) {
+      // Only authenticated users can fetch a profession description
+      if (!session) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
       // Validate roleName
       z.string().min(1).max(50).parse(roleName);
-      // Allow any authenticated user to fetch a profession description
       const desc = await prisma.profession.findUnique({ where: { roleName } });
       if (!desc) {
         return NextResponse.json({ description: '' }, { headers });
       }
       return NextResponse.json({ description: desc.description }, { headers });
     } else {
-      // Only admin can fetch all profession descriptions
-      if (!session.isAdmin) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-      const allDescs = await prisma.profession.findMany();
-      return NextResponse.json({ professions: allDescs }, { headers });
+      // Anyone (even unauthenticated) can fetch the list of professions (id, roleName)
+      const professions = await prisma.profession.findMany({ select: { id: true, roleName: true, description: true } });
+      return NextResponse.json({ professions }, { headers });
     }
   } catch (error) {
     if (error instanceof Error && error.message === 'Rate limit exceeded') {

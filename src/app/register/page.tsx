@@ -21,8 +21,9 @@ import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined';
 const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || '';
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ email: "", password: "", name: "", roleId: "" });
+  const [form, setForm] = useState({ email: "", password: "", name: "", roleId: "", professionId: "" });
   const [roles, setRoles] = useState<{ id: number; name: string; description?: string }[]>([]);
+  const [professions, setProfessions] = useState<{ id: number; roleName: string; description: string }[]>([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [captcha, setCaptcha] = useState<string | null>(null);
@@ -34,6 +35,9 @@ export default function RegisterPage() {
     fetch("/api/roles")
       .then((res) => res.json())
       .then((data: { id: number; name: string; description?: string }[]) => setRoles(data.filter((r) => r.name !== 'Admin')));
+    fetch("/api/profession")
+      .then((res) => res.json())
+      .then((data: { professions: { id: number; roleName: string; description: string }[] }) => setProfessions(data.professions || []));
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,6 +45,9 @@ export default function RegisterPage() {
   };
   const handleRoleChange = (_: unknown, value: string | null) => {
     setForm({ ...form, roleId: value || "" });
+  };
+  const handleProfessionChange = (_: unknown, value: string | null) => {
+    setForm({ ...form, professionId: value || "" });
   };
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleChange(e);
@@ -67,7 +74,16 @@ export default function RegisterPage() {
       setSuccess(true);
       // Removed automatic redirect. User must click the button to navigate away.
     } else {
-      setError("There was a problem. Please try again later.");
+      let msg = "There was a problem. Please try again later.";
+      try {
+        const data = await res.json();
+        if (data?.error) {
+          msg = data.error;
+        } else if (data?.details && Array.isArray(data.details)) {
+          msg = data.details.map((d: any) => d.message).join("; ");
+        }
+      } catch {}
+      setError(msg);
     }
   };
 
@@ -166,6 +182,14 @@ export default function RegisterPage() {
               <Select value={form.roleId} onChange={handleRoleChange} name="roleId" required>
                 {roles.map((role) => (
                   <Option key={role.id} value={role.id.toString()}>{role.name}</Option>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl sx={{ mb: 3 }} required>
+              <FormLabel>Job</FormLabel>
+              <Select value={form.professionId || ""} onChange={handleProfessionChange} name="professionId" required>
+                {professions.map((prof) => (
+                  <Option key={prof.id} value={prof.id.toString()}>{prof.roleName}</Option>
                 ))}
               </Select>
             </FormControl>

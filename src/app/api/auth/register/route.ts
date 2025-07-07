@@ -18,8 +18,9 @@ export async function POST(req: NextRequest) {
       name: z.string().min(1).max(100),
       roleId: z.union([z.string().regex(/^[0-9]+$/), z.number()]),
       captcha: z.string(),
+      professionId: z.union([z.string().regex(/^[0-9]+$/), z.number()]).optional().nullable(),
     });
-    const { email, password, name, roleId, captcha } = schema.parse(await req.json());
+    const { email, password, name, roleId, captcha, professionId } = schema.parse(await req.json());
     // Verify hCaptcha token
     const hcaptchaSecret = process.env.HCAPTCHA_SECRET_KEY;
     const verifyRes = await fetch(
@@ -46,9 +47,18 @@ export async function POST(req: NextRequest) {
     if (existing) {
       return NextResponse.json({ error: 'User already exists' }, { status: 409, headers });
     }
+    // Validate professionId if provided
+    let professionIdNum: number | undefined = undefined;
+    if (professionId !== undefined && professionId !== null && professionId !== "") {
+      professionIdNum = Number(professionId);
+      const profession = await prisma.profession.findUnique({ where: { id: professionIdNum } });
+      if (!profession) {
+        return NextResponse.json({ error: 'Invalid profession' }, { status: 400, headers });
+      }
+    }
     const password_hash = await bcrypt.hash(password, 10);
     // Set isLineManager or isAdmin based on role
-    const isLineManager = role.name === 'Principal Development Manager';
+    const isLineManager = role.name === 'LineManager';
     const isAdmin = role.name === 'Admin';
     const verifyToken = crypto.randomBytes(32).toString('hex');
     const user = await prisma.user.create({
@@ -62,6 +72,7 @@ export async function POST(req: NextRequest) {
         notify_preferences: {},
         isVerified: false,
         verifyToken,
+        ...(professionIdNum ? { professionId: professionIdNum } : {}),
       },
     });
     // Send verification email

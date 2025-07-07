@@ -52,6 +52,7 @@
   7. Progress dashboard improvements
   8. Dashboard sharing
 ~~  9. Reset password ~~
+  10. Rename PDM to User
 - Continue to monitor for any new SSR/hydration or CORS issues as new features are added
 - Add more automated tests for new flows and edge cases
 - (Optional/Recommended enhancements, not yet completed):

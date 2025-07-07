@@ -23,6 +23,7 @@ export async function middleware(req: NextRequest) {
     '/api/auth/login',
     '/api/auth/register',
     '/api/roles',
+    '/api/profession',
     '/favicon.svg',
     '/_next',
     '/api/public',
