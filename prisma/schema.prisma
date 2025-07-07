@@ -77,6 +77,8 @@ model Objective {
   created_by       User            @relation("AdminCreatedObjectives", fields: [created_by_id], references: [id])
   pdm              User?           @relation(fields: [pdm_id], references: [id])
   okrAssignments   OkrAssignment[]
+  professionId     Int?
+  profession       Profession?     @relation(fields: [professionId], references: [id])
 }
 
 model KeyResult {
@@ -200,6 +202,7 @@ model Profession {
   roleName    String @unique
   description String // Markdown content
   users       User[]
+  objectives  Objective[]
 }
 
 model PasswordResetToken {

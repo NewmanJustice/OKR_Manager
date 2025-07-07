@@ -43,10 +43,10 @@ export default function RegisterPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-  const handleRoleChange = (_: unknown, value: string | null) => {
+  const handleRoleChange = (_: React.SyntheticEvent | null, value: string | null) => {
     setForm({ ...form, roleId: value || "" });
   };
-  const handleProfessionChange = (_: unknown, value: string | null) => {
+  const handleProfessionChange = (_: React.SyntheticEvent | null, value: string | null) => {
     setForm({ ...form, professionId: value || "" });
   };
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,7 +80,7 @@ export default function RegisterPage() {
         if (data?.error) {
           msg = data.error;
         } else if (data?.details && Array.isArray(data.details)) {
-          msg = data.details.map((d: any) => d.message).join("; ");
+          msg = data.details.map((d: { message: string }) => d.message).join("; ");
         }
       } catch {}
       setError(msg);

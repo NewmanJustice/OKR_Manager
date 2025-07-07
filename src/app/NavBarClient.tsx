@@ -17,14 +17,16 @@ import { useTheme } from '@mui/joy/styles';
 
 export default function NavBarClient() {
   const [user, setUser] = React.useState<Record<string, unknown> | null>(null);
-  const [mounted, setMounted] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
   const theme = useTheme();
+  // Always call useMediaQuery unconditionally
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
   React.useEffect(() => {
     const fetchUser = () => {
       fetch("/api/user/me", { cache: 'no-store' })
@@ -57,7 +59,7 @@ export default function NavBarClient() {
     };
   }, []);
 
-  if (!mounted) return <div style={{ minHeight: 80 }} />;
+  if (!mounted) return null;
 
   const navLinks = user ? (
     <>

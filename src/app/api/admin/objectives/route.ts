@@ -31,13 +31,13 @@ export async function POST(req: NextRequest) {
       description: z.string().max(2000).optional(),
       quarter: z.number().int().min(1).max(4),
       year: z.number().int().min(2000).max(2100),
-      pdm_id: z.union([z.string().regex(/^\d+$/), z.number()]),
+      professionId: z.union([z.string().regex(/^[0-9]+$/), z.number()]),
       keyResults: z.array(z.object({
         text: z.string().min(1).max(1000).optional(),
         title: z.string().min(1).max(1000).optional()
       }))
     });
-    const { title, description, quarter, year, pdm_id, keyResults } = schema.parse(await req.json());
+    const { title, description, quarter, year, professionId, keyResults } = schema.parse(await req.json());
     if (!title || !quarter || !year) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
         description: description ?? '',
         quarter,
         year,
-        pdm_id: Number(pdm_id),
+        professionId: Number(professionId),
         objective_number: nextObjectiveNumber,
         created_by_id: session.id,
         key_results: {
@@ -72,16 +72,73 @@ export async function POST(req: NextRequest) {
             description: '',
             status: 'Not Started',
             created_by: { connect: { id: session.id } },
-            text: kr.text ?? kr.title ?? '',
           })),
         },
       },
+      include: { key_results: true }, // Correctly placed include
     });
     return NextResponse.json(objective, { headers });
   } catch (err) {
     if (err instanceof Error && err.message === 'Rate limit exceeded') {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
+    return handleZodError(err);
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const headers = limiter.checkNext(req, 20);
+    const { z } = await import('zod');
+    const schema = z.object({
+      id: z.number(),
+      title: z.string().min(1).max(200),
+      description: z.string().max(2000).optional(),
+      quarter: z.number().int().min(1).max(4),
+      year: z.number().int().min(2000).max(2100),
+      professionId: z.union([z.string().regex(/^[0-9]+$/), z.number()]),
+      key_results: z.array(z.object({
+        id: z.number().optional(),
+        title: z.string().min(1).max(1000)
+      }))
+    });
+    const { id, title, description, quarter, year, professionId, key_results } = schema.parse(await req.json());
+    const session = await getSessionUserFromCookies();
+    if (!session?.id) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401, headers });
+    }
+    // Find existing key result IDs
+    const existing = await prisma.keyResult.findMany({ where: { objective_id: id }, select: { id: true } });
+    const existingIds = new Set(existing.map(kr => kr.id));
+    const incomingIds = new Set(key_results.filter(kr => kr.id).map(kr => kr.id));
+    // Prepare nested update
+    const updateData: any = {
+      title,
+      description: description ?? '',
+      quarter,
+      year,
+      professionId: Number(professionId),
+      key_results: {
+        deleteMany: Array.from(existingIds).filter(eid => !incomingIds.has(eid)).map(id => ({ id })),
+        updateMany: key_results.filter(kr => kr.id).map(kr => ({
+          where: { id: kr.id },
+          data: { title: kr.title }
+        })),
+        create: key_results.filter(kr => !kr.id).map(kr => ({
+          title: kr.title,
+          description: '',
+          status: 'Not Started',
+          created_by: { connect: { id: session.id } },
+        })),
+      },
+    };
+    const updated = await prisma.objective.update({
+      where: { id },
+      data: updateData,
+      include: { key_results: true },
+    });
+    return NextResponse.json(updated, { headers });
+  } catch (err) {
     return handleZodError(err);
   }
 }
