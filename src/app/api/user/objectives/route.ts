@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSessionUserFromRequest } from '@/utils/session';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import prisma from '@/utils/prisma';
 import { limiter } from '../../_middleware/rateLimit';
 import { handleZodError } from '../../_middleware/handleZodError';
 import { withCORSHeaders, handleOptions } from '@/utils/cors';
 
 export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions as Record<string, unknown>) as 
+    { user?: { id: number } } | null;
+  const headers = withCORSHeaders(limiter.checkNext(req, 20));
+  if (!session || !session.user) {
+    return new Response('Unauthorized', { status: 401, headers });
+  }
   try {
-    const headers = withCORSHeaders(limiter.checkNext(req, 20));
-    const user = await getSessionUserFromRequest(req);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers });
-    }
-    const userId = user.id;
+    const userId = typeof session.user.id === 'string' ? parseInt(session.user.id, 10) : session.user.id;
     // Fetch OKRs assigned to this user
     const assignments = await prisma.okrAssignment.findMany({
       where: { userId },

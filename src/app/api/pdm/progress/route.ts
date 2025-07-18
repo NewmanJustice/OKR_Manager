@@ -1,22 +1,24 @@
 import { limiter } from '../../_middleware/rateLimit';
 import { z } from 'zod';
 import { handleZodError } from '../../_middleware/handleZodError';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/utils/prisma';
-import { getSessionUserFromRequest } from '@/utils/session';
 import { withCORSHeaders, handleOptions } from '@/utils/cors';
 
 // POST: Save or update progress for a key result (monthly)
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions as Record<string, unknown>) as 
+    { user?: { id: number; email: string; isLineManager?: boolean } } | null;
+  if (!session || !session.user || !session.user.isLineManager) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const headers = withCORSHeaders(limiter.checkNext(req, 20));
-    const session = await getSessionUserFromRequest(req);
-    if (!session || !session.isLineManager) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers });
-    }
     // Debug: return session user id
     if (req.headers.get('x-debug-session') === 'true') {
-      return NextResponse.json({ debugUserId: session.id }, { headers });
+      return NextResponse.json({ debugUserId: session.user.id }, { headers });
     }
     const schema = z.object({
       key_result_id: z.union([z.string().regex(/^\d+$/), z.number()]),
@@ -33,7 +35,7 @@ export async function POST(req: NextRequest) {
     const progress = await prisma.keyResultProgress.create({
       data: {
         key_result_id: Number(key_result_id),
-        user_id: session.id,
+        user_id: session.user.id,
         month,
         year,
         status,
@@ -55,9 +57,10 @@ export async function POST(req: NextRequest) {
 
 // GET: Fetch progress for key results for the current user and month/year
 export async function GET(req: NextRequest) {
-  const session = await getSessionUserFromRequest(req);
-  if (!session || !session.isLineManager) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: withCORSHeaders() });
+  const session = await getServerSession(authOptions as Record<string, unknown>) as 
+    { user?: { id: number; email: string; isLineManager?: boolean } } | null;
+  if (!session || !session.user || !session.user.isLineManager) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const { searchParams } = new URL(req.url);
   const keyResultIds = (searchParams.get('keyResultIds') || '').split(',').map(Number).filter(Boolean);
@@ -70,7 +73,7 @@ export async function GET(req: NextRequest) {
   try {
     const where: Record<string, unknown> = {
       key_result_id: { in: keyResultIds },
-      user_id: session.id,
+      user_id: session.user.id,
     };
     if (month && year) {
       where.month = Number(month);

@@ -1,11 +1,14 @@
 import Link from 'next/link';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { getSessionUserFromCookies } from '@/utils/session';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import MyTeamClient from './MyTeamClient';
 
 export default async function MyTeamPage() {
-  const user = await getSessionUserFromCookies();
+  const session = (await getServerSession(authOptions as Record<string, unknown>)) as { user?: { isAdmin?: boolean } } | null;
+  const user = session?.user;
+
   if (!user || !user.isAdmin) {
     redirect('/login');
   }

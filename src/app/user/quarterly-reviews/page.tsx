@@ -59,7 +59,7 @@ function QuarterlyReviewPageInner() {
   const [pastReviews, setPastReviews] = React.useState<QuarterlyReview[]>([]);
 
   const fetchPastReviews = React.useCallback(() => {
-    fetch(`/api/pdm/quarterly-review?year=${year}`)
+    fetch(`/api/user/quarterly-review?year=${year}`)
       .then(async res => {
         if (res.ok) {
           let reviews = await res.json();
@@ -96,7 +96,7 @@ function QuarterlyReviewPageInner() {
       })
       .finally(() => setLoading(false));
     // Fetch existing review if any
-    fetch(`/api/pdm/quarterly-review?quarter=${quarter}&year=${year}`)
+    fetch(`/api/user/quarterly-review?quarter=${quarter}&year=${year}`)
       .then(async res => {
         if (res.ok) {
           const review = await res.json();
@@ -130,7 +130,7 @@ function QuarterlyReviewPageInner() {
       objectives.map(async (obj: Objective) => {
         const krIds = obj.key_results.map((kr: KeyResult) => kr.id);
         if (!krIds.length) return [obj.id, 0];
-        const res = await fetch(`/api/pdm/progress?keyResultIds=${krIds.join(",")}&quarter=${quarter}&year=${year}`);
+        const res = await fetch(`/api/user/progress?keyResultIds=${krIds.join(",")}&quarter=${quarter}&year=${year}`);
         if (!res.ok) return [obj.id, 0];
         const progressArr: ProgressEntry[] = await res.json();
         // For each KR, get the latest metric_value for the quarter
@@ -158,7 +158,7 @@ function QuarterlyReviewPageInner() {
     setError(null);
     setSuccess(false);
     try {
-      const res = await fetch('/api/pdm/quarterly-review', {
+      const res = await fetch('/api/user/quarterly-review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -188,7 +188,7 @@ function QuarterlyReviewPageInner() {
   return (
     <Card variant="outlined" sx={{ width: '100%', maxWidth: 900, minWidth: 320, p: 4, mb: 6, boxShadow: 'lg', mx: 'auto' }}>
       <div style={{ marginBottom: 16 }}>
-        <Link href="/pdm" className="text-blue-700 hover:underline mb-4 inline-block" style={{ display: 'inline-flex', alignItems: 'center' }}>
+        <Link href="/user" className="text-blue-700 hover:underline mb-4 inline-block" style={{ display: 'inline-flex', alignItems: 'center' }}>
           <KeyboardArrowLeft sx={{ mr: 0.5 }} /> Back to Dashboard
         </Link>
       </div>
@@ -249,7 +249,7 @@ function QuarterlyReviewPageInner() {
                 <td>{r.submitted_at ? new Date(r.submitted_at).toLocaleString() : ''}</td>
                 <td>{avg.toFixed(2)}</td>
                 <td>
-                  <Link href={`/pdm/quarterly-reviews?quarter=${r.quarter}&year=${r.year}`} style={{ color: '#1976d2', textDecoration: 'underline' }}>
+                  <Link href={`/user/quarterly-reviews?quarter=${r.quarter}&year=${r.year}`} style={{ color: '#1976d2', textDecoration: 'underline' }}>
                     View/Edit
                   </Link>
                 </td>

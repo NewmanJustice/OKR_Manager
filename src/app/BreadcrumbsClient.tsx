@@ -26,7 +26,12 @@ export default function BreadcrumbsClient() {
       .catch(() => setUser(null));
   }, []);
 
-  if (!mounted || !user) return <div style={{ minHeight: 40 }} />;
+  // Always render placeholder on both server and client until mounted and user are available
+  if (!mounted || !user) {
+    return (
+      <div style={{ minHeight: 40 }} />
+    );
+  }
 
   const segments = pathname.split('/').filter(Boolean);
   // Remove 'admin' or 'pdm' from breadcrumbs if it's the only segment (i.e., home for that role)

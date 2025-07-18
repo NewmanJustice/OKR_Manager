@@ -33,7 +33,6 @@ model User {
   created_objectives    Objective[]          @relation("AdminCreatedObjectives")
   objectives            Objective[]
   progress_updates      ProgressUpdate[]
-  quarterly_reviews     QuarterlyReview[]
   created_teams         Team[]               @relation("AdminCreatedTeams")
   teams                 Team[]               @relation("PDMTeams")
   okrAssignments        OkrAssignment[]
@@ -45,6 +44,8 @@ model User {
   resetLockoutUntil     DateTime? // null if not locked out
   isVerified            Boolean              @default(false)
   verifyToken           String?
+  pdmQuarterlyReviews   QuarterlyReview[]    @relation("PDMUser")
+  userQuarterlyReviews  QuarterlyReview[]    @relation("ReviewUser")
 }
 
 model Team {
@@ -94,11 +95,12 @@ model KeyResult {
   created_by_id         Int
   created_at            DateTime            @default(now())
   updated_at            DateTime            @updatedAt
-  success_criteria      String?
+  success_criteria      String?             // Remove after migration
   created_by            User                @relation("UserCreatedKeyResults", fields: [created_by_id], references: [id])
   objective             Objective           @relation(fields: [objective_id], references: [id])
   progress_updates      ProgressUpdate[]
   key_result_progresses KeyResultProgress[]
+  success_criteria_list SuccessCriteria[]   // New relation
 }
 
 model ProgressUpdate {
@@ -132,18 +134,22 @@ model MonthlyReview {
 
 model QuarterlyReview {
   id                    Int      @id @default(autoincrement())
-  pdm_id                Int
-  review_date           DateTime
+  pdm_id                Int?
+  user_id               Int?
+  review_date           DateTime?
   quarter               Int
   year                  Int
   okr_grading           Json
   lessons_learned       String
   strategic_adjustments String
   next_quarter_planning String
-  stakeholder_feedback  String
-  submitted_at          DateTime
+  stakeholder_feedback  String?
+  submitted_at          DateTime?
   created_at            DateTime @default(now())
-  pdm                   User     @relation(fields: [pdm_id], references: [id])
+  pdm                   User?    @relation("PDMUser", fields: [pdm_id], references: [id])
+  user                  User?    @relation("ReviewUser", fields: [user_id], references: [id])
+
+  @@unique([user_id, quarter, year])
 }
 
 model ReviewMeeting {
@@ -213,4 +219,13 @@ model PasswordResetToken {
   expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model SuccessCriteria {
+  id           Int      @id @default(autoincrement())
+  key_result   KeyResult @relation(fields: [key_result_id], references: [id])
+  key_result_id Int
+  text         String
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
 }

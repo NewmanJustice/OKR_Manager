@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSessionUserFromRequest } from '@/utils/session';
+import { authOptions } from '@/lib/auth';
+import { getServerSession } from 'next-auth/next';
 import prisma from '@/utils/prisma';
 import { limiter } from '../../_middleware/rateLimit';
 import { handleZodError } from '../../_middleware/handleZodError';
@@ -8,12 +9,15 @@ import { handleZodError } from '../../_middleware/handleZodError';
 export async function GET(req: NextRequest) {
   try {
     const headers = limiter.checkNext(req, 20);
-    const session = await getSessionUserFromRequest(req);
-    if (!session || !session.isAdmin) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers });
+    const session = (await getServerSession(authOptions as Record<string, unknown>)) as {
+      user?: { id: number; isAdmin?: boolean };
+    } | null;
+    const user = session?.user;
+    if (!session || !user?.isAdmin) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const team = await prisma.teamMembership.findMany({
-      where: { adminId: session.id },
+      where: { adminId: user.id },
       include: { user: true },
     });
     return NextResponse.json(team.map((tm: { user: typeof team[0]["user"] }) => tm.user), { headers });

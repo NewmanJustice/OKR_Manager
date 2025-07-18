@@ -1,13 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import crypto from 'crypto';
-import { limiter } from '../../_middleware/rateLimit';
-import { handleZodError } from '../../_middleware/handleZodError';
-import { sendResetEmail } from '@/utils/email'; 
-import prisma from '@/utils/prisma';
-import { addMinutes } from 'date-fns';
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import crypto from "crypto";
+import { limiter } from "../../_middleware/rateLimit";
+import { handleZodError } from "../../_middleware/handleZodError";
+import { sendResetEmail } from "@/utils/email";
+import prisma from "@/utils/prisma";
+import { addMinutes } from "date-fns";
 
 export async function POST(req: NextRequest) {
+  // Password reset request logic (no authentication required for request)
   try {
     const headers = limiter.checkNext(req, 10);
     const schema = z.object({ email: z.string().email(), captcha: z.string() });

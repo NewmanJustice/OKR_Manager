@@ -1,6 +1,5 @@
 "use client";
 import * as React from "react";
-import Link from "next/link";
 import Card from '@mui/joy/Card';
 import Typography from '@mui/joy/Typography';
 import Button from '@mui/joy/Button';
@@ -29,13 +28,27 @@ export default function NavBarClient() {
 
   React.useEffect(() => {
     const fetchUser = () => {
-      fetch("/api/user/me", { cache: 'no-store' })
+      fetch("/api/user/me", {
+        cache: 'no-store',
+        credentials: 'include', // Ensure cookies are sent for NextAuth session
+      })
         .then(async res => {
+          if (res.status === 401) {
+            const path = window.location.pathname;
+            if (path !== '/login' && path !== '/register') {
+              window.location.href = '/login';
+            }
+            return;
+          }
           if (res.ok) {
-            const user = await res.json();
             // Defensive: only set if id exists
-            if (user && user.id) setUser(user);
-            else setUser(null);
+            try {
+              const user = await res.json();
+              if (user && user.id) setUser(user);
+              else setUser(null);
+            } catch {
+              setUser(null); // If not JSON, treat as unauthenticated
+            }
           } else setUser(null);
         })
         .catch(() => setUser(null));
@@ -66,22 +79,24 @@ export default function NavBarClient() {
       {typeof user.email === 'string' && (
         <Typography level="body-md" sx={{ mr: 2, color: '#666', display: 'inline-block' }}>{user.email}</Typography>
       )}
-      <Link href="/logout">
-        <Button
-          color="primary"
-          variant="soft"
-          size="sm"
-          className="logout-btn"
-          sx={{
-            backgroundColor: '#000',
-            color: '#fff',
-            '&:hover': { backgroundColor: '#e8890c', color: '#fff' },
-            borderRadius: 0,
-          }}
-        >
-          Logout
-        </Button>
-      </Link>
+      <Button
+        color="primary"
+        variant="soft"
+        size="sm"
+        className="logout-btn"
+        sx={{
+          backgroundColor: '#000',
+          color: '#fff',
+          '&:hover': { backgroundColor: '#e8890c', color: '#fff' },
+          borderRadius: 0,
+        }}
+        onClick={async () => {
+          await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+          window.location.href = '/login';
+        }}
+      >
+        Logout
+      </Button>
     </>
   ) : (
     <>
@@ -150,7 +165,11 @@ export default function NavBarClient() {
                       </ListItemButton>
                     </ListItem>
                     <ListItem>
-                      <ListItemButton onClick={() => { window.location.href = '/logout'; setMobileOpen(false); }}>
+                      <ListItemButton onClick={async () => {
+                        await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+                        window.location.href = '/login';
+                        setMobileOpen(false);
+                      }}>
                         Logout
                       </ListItemButton>
                     </ListItem>

@@ -1,10 +1,12 @@
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import { NextResponse } from 'next/server';
-import { getSessionUserFromCookies } from '@/utils/session';
 
 export async function GET() {
-  const user = await getSessionUserFromCookies();
-  if (!user) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const session = await getServerSession(authOptions as Record<string, unknown>) as 
+    { user?: { id: number; email: string; roleName: string } } | null;
+  if (!session || !session.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  return NextResponse.json({ email: user.email, id: user.id, roleName: user.roleName });
+  return NextResponse.json({ email: session.user.email, id: session.user.id, roleName: session.user.roleName });
 }

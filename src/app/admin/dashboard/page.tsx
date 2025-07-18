@@ -1,13 +1,18 @@
-import { getSessionUserFromCookies } from '@/utils/session';
 import { redirect } from 'next/navigation';
 import ManageAdmins from '../manage-admins';
 import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { authOptions } from '@/lib/auth';
+import { getServerSession } from 'next-auth/next';
+
+type SessionUser = { isAdmin?: boolean };
 
 export default async function AdminDashboard() {
   // Server-side session check
-  const user = await getSessionUserFromCookies();
+  const session = await getServerSession(authOptions as Record<string, unknown>) as { user?: SessionUser } | null;
+  const user = session?.user;
+
   if (!user || !user.isAdmin) {
     redirect('/login');
   }
@@ -28,3 +33,5 @@ export default async function AdminDashboard() {
     </main>
   );
 }
+
+

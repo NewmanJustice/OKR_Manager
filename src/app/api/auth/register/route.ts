@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { limiter } from '../../_middleware/rateLimit';
@@ -10,6 +10,7 @@ import crypto from 'crypto';
 const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
+  // Registration logic (no authentication required for registration)
   try {
     const headers = limiter.checkNext(req, 20);
     const schema = z.object({

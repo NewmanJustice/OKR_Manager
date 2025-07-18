@@ -3,6 +3,8 @@ import * as React from "react";
 import Card from '@mui/joy/Card';
 import Table from '@mui/joy/Table';
 import Typography from '@mui/joy/Typography';
+import Link from 'next/link';
+import Button from '@mui/joy/Button';
 
 export interface KeyResult {
   id: number;
@@ -49,6 +51,7 @@ export default function UserObjectivesClient() {
                 <th>Quarter</th>
                 <th>Year</th>
                 <th>Key Results</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -64,6 +67,11 @@ export default function UserObjectivesClient() {
                         <li key={kr.id || i}>{kr.text || kr.title}</li>
                       ))}
                     </ul>
+                  </td>
+                  <td>
+                    <Link href={`/user/objective/${obj.id}`}>
+                      <Button size="sm" variant="soft">View Details</Button>
+                    </Link>
                   </td>
                 </tr>
               ))}

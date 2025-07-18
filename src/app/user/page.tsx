@@ -1,5 +1,7 @@
-import UserObjectivesClient from './UserObjectivesClient';
+"use client";
+
+import UserObjectivesClientWrapper from './UserObjectivesClientWrapper';
 
 export default function UserDashboardPage() {
-  return <UserObjectivesClient />;
+  return <UserObjectivesClientWrapper />;
 }

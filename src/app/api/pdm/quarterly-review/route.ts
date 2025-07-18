@@ -1,17 +1,20 @@
 import { limiter } from '../../_middleware/rateLimit';
 import { z } from 'zod';
 import { handleZodError } from '../../_middleware/handleZodError';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/utils/prisma';
-import { getSessionUserFromRequest } from '@/utils/session';
 import { withCORSHeaders, handleOptions } from '@/utils/cors';
 
 // GET: List or fetch a quarterly review
 export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions as Record<string, unknown>) as { user?: { id: number; isLineManager?: boolean } } | null;
+  if (!session || !session.user || !session.user.isLineManager) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const headers = withCORSHeaders(limiter.checkNext(req, 20));
-    const user = await getSessionUserFromRequest(req);
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers });
     const { searchParams } = new URL(req.url);
     const quarter = searchParams.get('quarter');
     const year = searchParams.get('year');
@@ -24,12 +27,12 @@ export async function GET(req: NextRequest) {
       });
       schema.parse({ quarter, year });
       const review = await prisma.quarterlyReview.findFirst({
-        where: { pdm_id: user.id, quarter: Number(quarter), year: Number(year) },
+        where: { pdm_id: session.user.id, quarter: Number(quarter), year: Number(year) },
       });
       response = review;
     } else {
       const reviews = await prisma.quarterlyReview.findMany({
-        where: { pdm_id: user.id },
+        where: { pdm_id: session.user.id },
         orderBy: [{ year: 'desc' }, { quarter: 'desc' }],
       });
       response = reviews;
@@ -45,10 +48,12 @@ export async function GET(req: NextRequest) {
 
 // POST: Create or update a quarterly review
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions as Record<string, unknown>) as { user?: { id: number; isLineManager?: boolean } } | null;
+  if (!session || !session.user || !session.user.isLineManager) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const headers = withCORSHeaders(limiter.checkNext(req, 20));
-    const user = await getSessionUserFromRequest(req);
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers });
     const schema = z.object({
       quarter: z.number().int().min(1).max(4),
       year: z.number().int().min(2000).max(2100),
@@ -60,7 +65,7 @@ export async function POST(req: NextRequest) {
     const body = schema.parse(await req.json());
     // Upsert: one review per user/quarter/year
     let review = await prisma.quarterlyReview.findFirst({
-      where: { pdm_id: user.id, quarter: body.quarter, year: body.year },
+      where: { pdm_id: session.user.id, quarter: body.quarter, year: body.year },
     });
     if (review) {
       review = await prisma.quarterlyReview.update({
@@ -75,7 +80,7 @@ export async function POST(req: NextRequest) {
     } else {
       review = await prisma.quarterlyReview.create({
         data: {
-          pdm_id: user.id,
+          pdm_id: session.user.id,
           quarter: body.quarter,
           year: body.year,
           okr_grading: body.okr_grading ?? '',
