@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
   try {
     const headers = limiter.checkNext(req, 20);
     const keyResult = await prisma.keyResult.findUnique({ where: { id: keyResultId }, select: { created_by_id: true } });
-    if (!keyResult || (keyResult.created_by_id !== session.user.id && !session.user.isLineManager)) {
+    if (!keyResult || (String(keyResult.created_by_id) !== String(session.user.id) && !session.user.isLineManager)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403, headers });
     }
     const schema = z.object({ text: z.string().min(1).max(2000) });
@@ -75,7 +75,7 @@ export async function PATCH(req: NextRequest) {
   try {
     const headers = limiter.checkNext(req, 20);
     const keyResult = await prisma.keyResult.findUnique({ where: { id: keyResultId }, select: { created_by_id: true } });
-    if (!keyResult || (keyResult.created_by_id !== session.user.id && !session.user.isLineManager)) {
+    if (!keyResult || (String(keyResult.created_by_id) !== String(session.user.id) && !session.user.isLineManager)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403, headers });
     }
     const schema = z.object({ id: z.number(), text: z.string().min(1).max(2000) });
@@ -106,7 +106,7 @@ export async function DELETE(req: NextRequest) {
   try {
     const headers = limiter.checkNext(req, 20);
     const keyResult = await prisma.keyResult.findUnique({ where: { id: keyResultId }, select: { created_by_id: true } });
-    if (!keyResult || (keyResult.created_by_id !== session.user.id && !session.user.isLineManager)) {
+    if (!keyResult || (String(keyResult.created_by_id) !== String(session.user.id) && !session.user.isLineManager)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403, headers });
     }
     const schema = z.object({ id: z.number() });

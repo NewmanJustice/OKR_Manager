@@ -13,71 +13,25 @@ import ListItem from '@mui/joy/ListItem';
 import ListItemButton from '@mui/joy/ListItemButton';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/joy/styles';
+import { useSession, signOut } from 'next-auth/react';
 
 export default function NavBarClient() {
-  const [user, setUser] = React.useState<Record<string, unknown> | null>(null);
+  const { data: session, status } = useSession();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
   const theme = useTheme();
-  // Always call useMediaQuery unconditionally
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  React.useEffect(() => {
-    const fetchUser = () => {
-      fetch("/api/user/me", {
-        cache: 'no-store',
-        credentials: 'include', // Ensure cookies are sent for NextAuth session
-      })
-        .then(async res => {
-          if (res.status === 401) {
-            const path = window.location.pathname;
-            if (path !== '/login' && path !== '/register') {
-              window.location.href = '/login';
-            }
-            return;
-          }
-          if (res.ok) {
-            // Defensive: only set if id exists
-            try {
-              const user = await res.json();
-              if (user && user.id) setUser(user);
-              else setUser(null);
-            } catch {
-              setUser(null); // If not JSON, treat as unauthenticated
-            }
-          } else setUser(null);
-        })
-        .catch(() => setUser(null));
-    };
-    fetchUser();
-    // Listen for storage events to update user state on logout/login in other tabs
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === "okr_session") fetchUser();
-    };
-    window.addEventListener("storage", onStorage);
-    // Also re-check user after navigation
-    const onFocus = () => fetchUser();
-    window.addEventListener("focus", onFocus);
-    // Listen for route changes to force user state refresh
-    const onPopState = () => fetchUser();
-    window.addEventListener("popstate", onPopState);
-    return () => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener("focus", onFocus);
-      window.removeEventListener("popstate", onPopState);
-    };
-  }, []);
-
   if (!mounted) return null;
 
-  const navLinks = user ? (
+  const navLinks = session?.user ? (
     <>
-      {typeof user.email === 'string' && (
-        <Typography level="body-md" sx={{ mr: 2, color: '#666', display: 'inline-block' }}>{user.email}</Typography>
+      {typeof session.user.email === 'string' && (
+        <Typography level="body-md" sx={{ mr: 2, color: '#666', display: 'inline-block' }}>{session.user.email}</Typography>
       )}
       <Button
         color="primary"
@@ -90,10 +44,7 @@ export default function NavBarClient() {
           '&:hover': { backgroundColor: '#e8890c', color: '#fff' },
           borderRadius: 0,
         }}
-        onClick={async () => {
-          await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-          window.location.href = '/login';
-        }}
+        onClick={() => signOut({ callbackUrl: '/login' })}
       >
         Logout
       </Button>
@@ -143,7 +94,7 @@ export default function NavBarClient() {
                     Home
                   </ListItemButton>
                 </ListItem>
-                {!user && (
+                {!session?.user && (
                   <>
                     <ListItem>
                       <ListItemButton onClick={() => { window.location.href = '/login'; setMobileOpen(false); }}>
@@ -157,19 +108,15 @@ export default function NavBarClient() {
                     </ListItem>
                   </>
                 )}
-                {user && (
+                {session?.user && (
                   <>
                     <ListItem>
                       <ListItemButton disabled>
-                        {typeof user.email === 'string' ? user.email : 'User'}
+                        {typeof session.user.email === 'string' ? session.user.email : 'User'}
                       </ListItemButton>
                     </ListItem>
                     <ListItem>
-                      <ListItemButton onClick={async () => {
-                        await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-                        window.location.href = '/login';
-                        setMobileOpen(false);
-                      }}>
+                      <ListItemButton onClick={() => { signOut({ callbackUrl: '/login' }); setMobileOpen(false); }}>
                         Logout
                       </ListItemButton>
                     </ListItem>

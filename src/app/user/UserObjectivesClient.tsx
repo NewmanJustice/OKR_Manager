@@ -5,6 +5,8 @@ import Table from '@mui/joy/Table';
 import Typography from '@mui/joy/Typography';
 import Link from 'next/link';
 import Button from '@mui/joy/Button';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export interface KeyResult {
   id: number;
@@ -24,16 +26,27 @@ export default function UserObjectivesClient() {
   const [objectives, setObjectives] = React.useState<Objective[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState('');
+  const { status } = useSession();
+  const router = useRouter();
 
   React.useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.replace('/login');
+      return;
+    }
+    if (status !== 'authenticated') return;
     fetch('/api/user/objectives').then(async res => {
+      if (res.status === 401) {
+        router.replace('/login');
+        return;
+      }
       if (res.ok) setObjectives(await res.json());
       else setError('Failed to load objectives');
       setLoading(false);
     });
-  }, []);
+  }, [status, router]);
 
-  if (loading) return <div>Loading...</div>;
+  if (status === 'loading' || loading) return <div>Loading...</div>;
   if (error) return <Typography color="danger">{error}</Typography>;
 
   return (
