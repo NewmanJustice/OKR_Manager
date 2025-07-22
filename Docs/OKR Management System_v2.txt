@@ -1,0 +1,47 @@
+# OKR Management System - Updated Scoping Document
+## Project Overview
+Build a Next.js web application to create, manage, and track objectives, key results (OKR’s) and success criteria for each key result. The app will have the concept of a hierarchy of objectives where a line managers objectives are viewable to reports and there is visibility of objectives and how they link up and down the hierarchy. 
+## Technical Stack
+- **Frontend**: Next.js 14+ with TypeScript
+- **Database**: Postgress with Prisma ORM
+- **Containerization**: Docker for Azure deployment
+- **Email Service**: GOV.UK Notify API
+- **Authentication**: Next-auth
+- **Styling**: mui/material
+- **UI Components**: https://mui.com/material-ui/all-components/
+## NFR’s
+-The application should be production ready. 
+-The application should be secure and cover the OWASP top 10. 
+-All packages used should be in long term support and not be deprecated. 
+-App should be containerized and deployable to Azure App services.  
+## Types of users
+-**Superuser**
+-**Linemanager**
+-**User**
+## User Roles & Permissions
+### Superuser 
+- **Full Access**: View, edit, delete all data
+### Line managers
+- **User Management**: Create/manage User accounts and send invites to users to register and validate their account. Uptake of users accepting the request and those that have not will form part of the management information. 
+- **Team Management**: Create teams and assign them to Users
+- **OKR Management**: Create OKRs and assign them to Users
+- **Reporting**: Visual reports on teams progress, uptake, last time the system was used etc. 
+-**Objective management**: A line manager is also a user and should be able to create their own objectives and record progress. 
+### Users
+- **View Access**: All team data across organization (read-only for other Users)
+- **Objective Access**: A user should be able to create, read, update, and delete their own objectives. For each objective they should be able to create multiple key results and for each key result, a user should be able to create multiple success criteria. 
+- **Input Capabilities**: Update progress, add comments.
+- **Review Screens**: Complete monthly and quarterly review forms
+- **Notifications**: Receive reminders and deadline alerts via email
+## Core Features
+### Account creation
+-**Register for an account**: A user should be able to register for an account which will be verified via an email process.
+-**Register for someone else**: A line manager should be able to send a link to a report for them to be able to register for an account. This should be via email. 
+-**CRUD on objectives**: A user should be able to conduct CRUD on their own objectives. 
+-**CURD on Key Results**: A user should be able to conduct CRUD on their own key results. 
+-**CURD on Success criteria**: A user should be able to conduct CRUD on their own success criteria for each key objective they have. 
+-**Record progress**: During each monthly review a user should be able to update and view progress of their objectives, key results, and success criteria. 
+-**View progress**: A line manager should be able to view all progress of their team against objectives, key results, and success criteria on a dashboard. The dashboard will contain management information such as when the next reviews are due, which ones have been completed etc. A line manager should be able to create a shareable, secure link to view this dashboard to share with stakeholders. 
+-**Create objective period**: A line manager should be able to set an objective review period for all objectives and users within their team. This will be the basses for monthly and quarterly reviews. Be default, the review period will be January to December each year.  
+
+
