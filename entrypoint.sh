@@ -3,7 +3,7 @@
 set -e
 
 # Run migrations (only new migrations are applied, existing data is preserved)
-npx prisma migrate deploy
+# npx prisma migrate deploy
 
 # Start the Next.js app
 npm start
