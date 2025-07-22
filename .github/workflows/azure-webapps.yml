@@ -9,7 +9,8 @@ env:
   AZURE_WEBAPP_NAME: OKR
   AZURE_WEBAPP_PACKAGE_PATH: .
   DOCKER_IMAGE_NAME: okr-manager
-  REGISTRY: docker.io/stevenewman065
+  DOCKERHUB_USERNAME: stevenewman065
+  REGISTRY: docker.io
 
 jobs:
   build-and-deploy:
@@ -31,10 +32,10 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+          tags: ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          images: ${{ env.REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+          images: ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
