@@ -1,10 +1,14 @@
 module.exports = {
+  preset: "ts-jest",
   testEnvironment: "jsdom",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   moduleNameMapper: {
-    "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+    "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+    "^@/(.*)$": "<rootDir>/src/$1",
   },
-  transformIgnorePatterns: ["/node_modules/(?!@mui|@babel|@emotion|react|react-dom|next-auth)"],
+  transformIgnorePatterns: [
+    "/node_modules/(?!jose|@panva/hkdf|preact-render-to-string|preact)"
+  ],
   transform: {
     "^.+\\.(js|jsx|ts|tsx)$": ["babel-jest", { configFile: "./test-config/babel.config.js" }],
   },
