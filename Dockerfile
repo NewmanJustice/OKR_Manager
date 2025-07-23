@@ -12,6 +12,12 @@ COPY . .
 # Set dummy DATABASE_URL for build (Azure will override at runtime)
 ENV DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=public"
 
+# Copy .env.production for build-time environment variables
+COPY .env.production .env.production
+
+# Debug: print .env.production contents to verify hCaptcha sitekey
+RUN cat .env.production
+
 # Switch Prisma provider to PostgreSQL and generate client
 # RUN npm run prisma:postgres
 # Run Prisma migrations (if needed)
