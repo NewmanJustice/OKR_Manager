@@ -20,7 +20,12 @@ const LoginForm: React.FC = () => {
       password,
     });
     if (res?.error) {
-      setError(res.error);
+      // Remove surrounding quotes from error message if present
+      let errorMsg = res.error;
+      if (errorMsg.startsWith('"') && errorMsg.endsWith('"')) {
+        errorMsg = errorMsg.slice(1, -1);
+      }
+      setError(errorMsg);
     } else {
       router.push("/");
     }
