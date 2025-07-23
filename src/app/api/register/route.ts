@@ -6,7 +6,7 @@ import crypto from "crypto";
 import { sendVerificationEmail } from "@/utils/sendVerificationEmail";
 
 async function verifyCaptcha(token: string): Promise<boolean> {
-  const secret = process.env.HCAPTCHA_SECRET_KEY;
+  const secret = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
   if (!secret) return false;
   const res = await fetch("https://hcaptcha.com/siteverify", {
     method: "POST",
