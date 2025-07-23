@@ -21,6 +21,8 @@ const RegisterPage: React.FC = () => {
   const [success, setSuccess] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
 
+  console.log("hCaptcha sitekey:", process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
