@@ -35,10 +35,10 @@ jobs:
         echo "GOV_NOTIFY_VERIFY_ACCOUNT_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_VERIFY_ACCOUNT_TEMPLATE_ID }}" >> .env
         # Add other frontend env vars as needed
 
-    - name: Run Prisma migrations on production DB
-      run: npx prisma migrate deploy
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    #- name: Run Prisma migrations on production DB
+     # run: npx prisma migrate deploy
+      #env:
+       # DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
