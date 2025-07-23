@@ -75,6 +75,7 @@ export async function POST(req: Request) {
     await sendVerificationEmail(name,email, verificationToken);
     return NextResponse.json({ message: "Registration successful. Please check your email to verify your account." }, { status: 201 });
   } catch (err: any) {
-    return NextResponse.json({ message: "Registration failed. Please try again." }, { status: 500 });
+    console.error("Registration API error:", err);
+    return NextResponse.json({ message: err?.message || "Registration failed. Please try again." }, { status: 500 });
   }
 }
