@@ -26,12 +26,19 @@ jobs:
         username: ${{ secrets.AzureAppService_ContainerUsername_9ce183ada55e4fdb9d80cdae25e964a6 }}
         password: ${{ secrets.AzureAppService_ContainerPassword_d5a5298b7a0f4865aab8305c98d57098 }}
 
-    - name: Generate Prisma Client
-      run: npx prisma generate
+    - name: Create .env file for build
+      run: |
+        echo "NEXT_PUBLIC_HCAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_HCAPTCHA_SITE_KEY }}" >> .env
+        echo "EMAIL_PROVIDER=govnotify" >> .env
+        echo "GOV_NOTIFY_API_KEY=${{ secrets.GOV_NOTIFY_API_KEY }}" >> .env
+        echo "GOV_NOTIFY_RESET_PASSWORD_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_RESET_PASSWORD_TEMPLATE_ID }}" >> .env
+        echo "GOV_NOTIFY_VERIFY_ACCOUNT_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_VERIFY_ACCOUNT_TEMPLATE_ID }}" >> .env
+        # Add other frontend env vars as needed
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
+        context: .
         push: true
         tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_9ce183ada55e4fdb9d80cdae25e964a6 }}/okr-manager:${{ github.sha }}
         file: ./Dockerfile
@@ -49,6 +56,5 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'OKR'
-        slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_e2cf51908226441f96a3a6a3a814d37d }}
         images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_9ce183ada55e4fdb9d80cdae25e964a6 }}/okr-manager:${{ github.sha }}'
