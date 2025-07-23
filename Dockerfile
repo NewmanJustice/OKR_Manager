@@ -35,8 +35,7 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-# Remove prisma copy if directory is empty or not needed
-# COPY --from=builder /app/prisma ./prisma/
+COPY --from=builder /app/prisma ./prisma/
 
 # Expose port 3000
 EXPOSE 3000
