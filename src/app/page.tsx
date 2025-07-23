@@ -1,6 +1,7 @@
 "use client";
 import { useSession } from "next-auth/react";
 import LoginForm from "../components/LoginForm";
+import UserDashboard from "../components/UserDashboard";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -10,6 +11,6 @@ export default function Home() {
   if (!session) {
     return <LoginForm />;
   }
-  return <div>Authenticated! Welcome to Objectives Manager.</div>;
+  return <UserDashboard />;
 }
 
