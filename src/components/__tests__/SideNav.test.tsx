@@ -5,6 +5,7 @@ import SideNav from "../SideNav";
 
 const navLinks = [
   "Dashboard",
+  "Create Objective",
   "Profile",
   "Settings",
   "Logout"
@@ -47,7 +48,7 @@ describe("SideNav", () => {
   it("calls onClose when a nav link is clicked", () => {
     const onClose = jest.fn();
     render(<SideNav open={true} onClose={onClose} />);
-    const link = screen.getByText("Dashboard");
+    const link = screen.getByText("Create Objective");
     fireEvent.click(link);
     expect(onClose).toHaveBeenCalled();
   });

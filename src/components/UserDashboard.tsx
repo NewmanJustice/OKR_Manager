@@ -31,7 +31,8 @@ const UserDashboard: React.FC = () => {
           sx={{
             position: 'absolute',
             top: 16,
-            left: 16,
+            right: 16, // Move to right
+            left: 'auto', // Remove left positioning
             zIndex: 1201,
             display: { xs: 'block', md: sideNavOpen ? 'none' : 'block' },
           }}
@@ -40,7 +41,7 @@ const UserDashboard: React.FC = () => {
         </IconButton>
         <Box sx={{ maxWidth: 600, mx: "auto", mt: 8, p: 4, boxShadow: 3, borderRadius: 2, bgcolor: "background.paper" }}>
           <Typography variant="h4" mb={2} color="black">
-            User Dashboard
+            OKR Manager
           </Typography>
           <Typography variant="body1" mb={4} color="black">
             Welcome, {session?.user?.name || session?.user?.email || "User"}!

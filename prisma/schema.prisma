@@ -23,6 +23,7 @@ model User {
   updatedAt     DateTime @updatedAt
 
   verificationTokens VerificationToken[]
+  objectives          Objective[]
 }
 
 model VerificationToken {
@@ -32,4 +33,34 @@ model VerificationToken {
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   expiresAt DateTime
+}
+
+model Objective {
+  id          Int           @id @default(autoincrement())
+  title       String
+  description String
+  dueDate     DateTime
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  user        User          @relation(fields: [userId], references: [id])
+  userId      Int
+  keyResults  KeyResult[]
+}
+
+model KeyResult {
+  id            Int                @id @default(autoincrement())
+  title         String
+  metric        String
+  targetValue   String
+  objective     Objective          @relation(fields: [objectiveId], references: [id])
+  objectiveId   Int
+  successCriteria SuccessCriteria[]
+}
+
+model SuccessCriteria {
+  id          Int        @id @default(autoincrement())
+  description String
+  threshold   String
+  keyResult   KeyResult  @relation(fields: [keyResultId], references: [id])
+  keyResultId Int
 }

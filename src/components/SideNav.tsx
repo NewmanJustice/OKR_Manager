@@ -11,6 +11,7 @@ import NextLink from "next/link";
 
 const navLinks = [
   { text: "Dashboard", icon: <DashboardIcon />, href: "/dashboard" },
+  { text: "Create Objective", icon: <DashboardIcon />, href: "/objectives/create" },
   { text: "Profile", icon: <PersonIcon />, href: "/profile" },
   { text: "Settings", icon: <SettingsIcon />, href: "/settings" },
   { text: "Logout", icon: <LogoutIcon />, href: "/logout" },
