@@ -6,6 +6,10 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { useRouter } from "next/navigation";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { enGB } from "date-fns/locale/en-GB";
 
 // Types for KR and SC
 interface SuccessCriteria {
@@ -14,6 +18,7 @@ interface SuccessCriteria {
 }
 interface KeyResult {
   title: string;
+  description?: string;
   metric: string;
   targetValue: string;
   successCriteria: SuccessCriteria[];
@@ -25,7 +30,7 @@ export default function CreateObjectiveWizard() {
   const [activeStep, setActiveStep] = useState(0);
   const [objective, setObjective] = useState({ title: "", description: "", dueDate: "" });
   const [keyResults, setKeyResults] = useState<KeyResult[]>([
-    { title: "", metric: "", targetValue: "", successCriteria: [{ description: "", threshold: "" }] }
+    { title: "", description: "", metric: "", targetValue: "", successCriteria: [{ description: "", threshold: "" }] }
   ]);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [error, setError] = useState("");
@@ -64,7 +69,7 @@ export default function CreateObjectiveWizard() {
 
   const confirmCancelAction = () => {
     setConfirmCancel(false);
-    router.push("/dashboard");
+    router.push("/"); // Redirect to root
   };
 
   const handleObjectiveChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,7 +83,7 @@ export default function CreateObjectiveWizard() {
   };
 
   const handleAddKR = () => {
-    setKeyResults([...keyResults, { title: "", metric: "", targetValue: "", successCriteria: [{ description: "", threshold: "" }] }]);
+    setKeyResults([...keyResults, { title: "", description: "", metric: "", targetValue: "", successCriteria: [{ description: "", threshold: "" }] }]);
   };
 
   const handleRemoveKR = (idx: number) => {
@@ -118,7 +123,7 @@ export default function CreateObjectiveWizard() {
         setError(data.error || "Failed to create objective.");
         return;
       }
-      router.push("/dashboard");
+      router.push("/"); // Redirect to root after submit
     } catch (e) {
       setError("Failed to create objective.");
     }
@@ -140,7 +145,22 @@ export default function CreateObjectiveWizard() {
             <Typography variant="h6" mb={2}>Enter Objective Details</Typography>
             <TextField label="Title" name="title" value={objective.title} onChange={handleObjectiveChange} fullWidth margin="normal" required />
             <TextField label="Description" name="description" value={objective.description} onChange={handleObjectiveChange} fullWidth margin="normal" multiline rows={2} />
-            <TextField label="Due Date" name="dueDate" type="date" value={objective.dueDate} onChange={handleObjectiveChange} fullWidth margin="normal" InputLabelProps={{ shrink: true }} required />
+            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enGB}>
+              <DatePicker
+                label="Due Date"
+                value={objective.dueDate ? new Date(objective.dueDate) : null}
+                onChange={(date: Date | null) => {
+                  if (date && date < new Date(new Date().toISOString().slice(0, 10))) {
+                    setError("Due date cannot be in the past.");
+                    return;
+                  }
+                  setObjective({ ...objective, dueDate: date ? date.toISOString().slice(0, 10) : "" });
+                }}
+                minDate={new Date(new Date().toISOString().slice(0, 10))}
+                format="dd/MM/yyyy"
+                slotProps={{ textField: { fullWidth: true, margin: "normal", required: true } }}
+              />
+            </LocalizationProvider>
           </Box>
         )}
         {activeStep === 1 && (
@@ -149,16 +169,21 @@ export default function CreateObjectiveWizard() {
             {keyResults.map((kr, idx) => (
               <Paper key={idx} sx={{ p: 2, mb: 2, position: 'relative' }} variant="outlined">
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
-                  <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 25%' } }}>
+                  <Box sx={{ flex: '1 1 100%' }}>
                     <TextField label="Title" value={kr.title} onChange={e => handleKRChange(idx, "title", e.target.value)} fullWidth required />
                   </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 25%' } }}>
+                </Box>
+                <Box sx={{ mt: 2 }}>
+                  <TextField label="Description (optional)" value={kr.description || ""} onChange={e => handleKRChange(idx, "description", e.target.value)} fullWidth multiline rows={2} />
+                </Box>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mt: 2 }}>
+                  <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 33%' } }}>
                     <TextField label="Metric" value={kr.metric} onChange={e => handleKRChange(idx, "metric", e.target.value)} fullWidth required />
                   </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 25%' } }}>
+                  <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 33%' } }}>
                     <TextField label="Target Value" value={kr.targetValue} onChange={e => handleKRChange(idx, "targetValue", e.target.value)} fullWidth required />
                   </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 16.666%' }, display: 'flex', gap: 1 }}>
+                  <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 33%' }, display: 'flex', gap: 1 }}>
                     <IconButton onClick={() => handleRemoveKR(idx)} disabled={keyResults.length === 1} color="error"><RemoveIcon /></IconButton>
                     <IconButton onClick={handleAddKR} color="primary"><AddIcon /></IconButton>
                   </Box>
@@ -194,26 +219,29 @@ export default function CreateObjectiveWizard() {
         {activeStep === 3 && (
           <Box>
             <Typography variant="h6" mb={2}>Review & Submit</Typography>
-            <Paper sx={{ p: 3, mb: 2, bgcolor: 'grey.100', borderRadius: 2 }} elevation={0}>
-              <Typography fontWeight="bold" variant="subtitle1" mb={1} color="primary.main">Objective</Typography>
+            <Paper sx={{ p: 3, mb: 2, border: '1px solid', borderColor: 'black', borderRadius: 2, bgcolor: 'background.paper' }} elevation={0}>
+              <Typography fontWeight="bold" variant="subtitle1" mb={1} color="primary.main" sx={{ color: 'black' }}>Objective</Typography>
               <Box mb={2}>
-                <Typography variant="body1"><strong>Title:</strong> {objective.title}</Typography>
-                <Typography variant="body1"><strong>Description:</strong> {objective.description || <em>No description</em>}</Typography>
-                <Typography variant="body1"><strong>Due Date:</strong> {objective.dueDate}</Typography>
+                <Typography variant="body1" sx={{ color: 'black' }}><strong>Title:</strong> {objective.title}</Typography>
+                <Typography variant="body1" sx={{ color: 'black' }}><strong>Description:</strong> {objective.description || <em>No description</em>}</Typography>
+                <Typography variant="body1" sx={{ color: 'black' }}><strong>Due Date:</strong> {objective.dueDate}</Typography>
               </Box>
-              <Typography fontWeight="bold" variant="subtitle1" mb={1} color="primary.main">Key Results</Typography>
+              <Typography fontWeight="bold" variant="subtitle1" mb={1} color="primary.main" sx={{ color: 'black' }}>Key Results</Typography>
               {keyResults.map((kr, idx) => (
-                <Paper key={idx} sx={{ p: 2, mb: 2, bgcolor: 'white', border: '1px solid', borderColor: 'grey.300', borderRadius: 1 }} elevation={0}>
-                  <Typography variant="body1" fontWeight="bold" color="secondary.main">KR {idx + 1}: {kr.title}</Typography>
-                  <Typography variant="body2" mb={1}>
+                <Paper key={idx} sx={{ p: 2, mb: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'black', borderRadius: 1 }} elevation={0}>
+                  <Typography variant="body1" fontWeight="bold" color="secondary.main" sx={{ color: 'black' }}>KR {idx + 1}: {kr.title}</Typography>
+                  <Typography variant="body2" mb={1} sx={{ color: 'black' }}>
                     <strong>Metric:</strong> {kr.metric} &nbsp; | &nbsp; <strong>Target:</strong> {kr.targetValue}
                   </Typography>
+                  {kr.description && (
+                    <Typography variant="body2" mb={1} sx={{ color: 'black' }}><strong>Description:</strong> {kr.description}</Typography>
+                  )}
                   <Box ml={2}>
                     <Typography variant="body2" fontWeight="bold" color="text.secondary" mb={0.5}>Success Criteria:</Typography>
                     <ul style={{ margin: 0, paddingLeft: 18 }}>
                       {kr.successCriteria.map((sc, scIdx) => (
                         <li key={scIdx} style={{ marginBottom: 4 }}>
-                          <span><strong>{sc.description}</strong> <span style={{ color: '#888' }}>(Threshold: {sc.threshold})</span></span>
+                          <span><strong style={{ color: 'black' }}>{sc.description}</strong> <span style={{ color: '#888' }}>(Threshold: {sc.threshold})</span></span>
                         </li>
                       ))}
                     </ul>

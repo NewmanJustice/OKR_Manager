@@ -11,6 +11,11 @@ const UserDashboard: React.FC = () => {
   const { data: session } = useSession();
   const [sideNavOpen, setSideNavOpen] = useState(true);
 
+  const isDesktop = typeof window !== 'undefined' && window.matchMedia('(min-width: 900px)').matches;
+  React.useEffect(() => {
+    if (isDesktop) setSideNavOpen(true);
+  }, [isDesktop]);
+
   // Responsive hamburger for mobile/tablet
   return (
     <Box sx={{ display: 'flex' }}>

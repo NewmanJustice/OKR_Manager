@@ -4,24 +4,30 @@ import '@testing-library/jest-dom';
 import SideNav from "../SideNav";
 
 const navLinks = [
-  "Dashboard",
-  "Create Objective",
-  "Profile",
-  "Settings",
-  "Logout"
+  { text: "Dashboard", href: "/" },
+  { text: "Create Objective", href: "/objectives/create" },
+  { text: "Profile", href: "/profile" },
+  { text: "Settings", href: "/settings" },
+  { text: "Logout", href: "/logout" },
 ];
 
 describe("SideNav", () => {
   it("renders all nav links when open", () => {
     render(<SideNav open={true} onClose={jest.fn()} />);
-    navLinks.forEach((text) => {
+    navLinks.forEach(({ text }) => {
       expect(screen.getByText(text)).toBeInTheDocument();
     });
   });
 
+  it("dashboard link points to root", () => {
+    render(<SideNav open={true} onClose={jest.fn()} />);
+    const dashboardLink = screen.getByText("Dashboard");
+    expect(dashboardLink.closest('a')).toHaveAttribute('href', '/');
+  });
+
   it("does not render nav links when closed (temporary)", () => {
     render(<SideNav open={false} onClose={jest.fn()} />);
-    navLinks.forEach((text) => {
+    navLinks.forEach(({ text }) => {
       expect(screen.queryByText(text)).not.toBeInTheDocument();
     });
   });

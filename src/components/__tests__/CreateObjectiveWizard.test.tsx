@@ -123,4 +123,54 @@ describe("CreateObjectiveWizard", () => {
     fireEvent.click(getByText("Submit"));
     await waitFor(() => expect(screen.getByText(/failed!/i)).toBeInTheDocument());
   });
+
+  it("renders key result description input and allows editing", () => {
+    render(<CreateObjectiveWizard />);
+    // Go to Key Results step
+    fireEvent.change(screen.getByLabelText("Title"), { target: { value: "My Objective" } });
+    fireEvent.change(screen.getByLabelText("Due Date"), { target: { value: "2025-12-31" } });
+    fireEvent.click(screen.getByText("Next"));
+    // Should see description input
+    expect(screen.getByLabelText(/description \(optional\)/i)).toBeInTheDocument();
+    // Should be able to type in description
+    fireEvent.change(screen.getByLabelText(/description \(optional\)/i), { target: { value: "KR description" } });
+    expect(screen.getByLabelText(/description \(optional\)/i)).toHaveValue("KR description");
+  });
+
+  it("shows key result description in review step if present", () => {
+    render(<CreateObjectiveWizard />);
+    fireEvent.change(screen.getByLabelText("Title"), { target: { value: "My Objective" } });
+    fireEvent.change(screen.getByLabelText("Due Date"), { target: { value: "2025-12-31" } });
+    fireEvent.click(screen.getByText("Next"));
+    fireEvent.change(screen.getAllByLabelText("Title")[0], { target: { value: "KR 1" } });
+    fireEvent.change(screen.getByLabelText(/description \(optional\)/i), { target: { value: "KR description" } });
+    fireEvent.change(screen.getByLabelText("Metric"), { target: { value: "%" } });
+    fireEvent.change(screen.getByLabelText("Target Value"), { target: { value: "100" } });
+    fireEvent.click(screen.getByText("Next"));
+    fireEvent.change(screen.getByLabelText("Description"), { target: { value: "SC 1" } });
+    fireEvent.change(screen.getByLabelText("Threshold"), { target: { value: "90" } });
+    fireEvent.click(screen.getByText("Next"));
+    // Should show KR description in review
+    expect(screen.getByText(/description:/i)).toBeInTheDocument();
+    expect(screen.getByText(/kr description/i)).toBeInTheDocument();
+  });
+
+  it("validates due date cannot be in the past", () => {
+    render(<CreateObjectiveWizard />);
+    const dueDateInput = screen.getByLabelText("Due Date");
+    fireEvent.change(dueDateInput, { target: { value: "2000-01-01" } });
+    fireEvent.click(screen.getByText("Next"));
+    expect(screen.getByText(/due date cannot be in the past/i)).toBeInTheDocument();
+  });
+
+  it("shows due date in UK format", () => {
+    render(<CreateObjectiveWizard />);
+    const dueDateInput = screen.getByLabelText("Due Date");
+    fireEvent.change(dueDateInput, { target: { value: "2025-12-31" } });
+    fireEvent.click(screen.getByText("Next"));
+    fireEvent.click(screen.getByText("Next"));
+    fireEvent.click(screen.getByText("Next"));
+    fireEvent.click(screen.getByText("Next"));
+    expect(screen.getByText(/31\/12\/2025|31-12-2025|31.12.2025/)).toBeInTheDocument();
+  });
 });
