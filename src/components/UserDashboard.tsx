@@ -4,6 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { Box, Typography, Button, IconButton } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import SideNav from "./SideNav";
+import ObjectivesList from "./ObjectivesList"; // Import the ObjectivesList component
 
 const DRAWER_WIDTH = 240;
 
@@ -51,9 +52,8 @@ const UserDashboard: React.FC = () => {
           <Typography variant="body1" mb={4} color="black">
             Welcome, {session?.user?.name || session?.user?.email || "User"}!
           </Typography>
-          <Button variant="contained" color="primary" onClick={() => signOut({ callbackUrl: "/" })}>
-            Logout
-          </Button>
+          {/* Objectives Section */}
+          <ObjectivesList userEmail={session?.user?.email} />
         </Box>
       </Box>
     </Box>
