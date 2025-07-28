@@ -9,6 +9,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
 import { useTheme, useMediaQuery } from "@mui/material";
 import NextLink from "next/link";
+import { signOut } from "next-auth/react";
 
 const navLinks = [
   { text: "Dashboard", icon: <DashboardIcon />, href: "/" },
@@ -53,12 +54,22 @@ const SideNav: React.FC<SideNavProps> = ({ open, onClose }) => {
         </IconButton>
       </Box>
       <List>
-        {navLinks.map((link) => (
-          <ListItem key={link.text} component={NextLink} href={link.href} onClick={onClose} sx={{ cursor: 'pointer' }}>
-            <ListItemIcon>{link.icon}</ListItemIcon>
-            <ListItemText primary={link.text} />
-          </ListItem>
-        ))}
+        {navLinks.map((link) => {
+          if (link.text === "Logout") {
+            return (
+              <ListItem key={link.text} sx={{ cursor: 'pointer' }} onClick={() => { signOut({ callbackUrl: "/" }); onClose(); }}>
+                <ListItemIcon>{link.icon}</ListItemIcon>
+                <ListItemText primary={link.text} />
+              </ListItem>
+            );
+          }
+          return (
+            <ListItem key={link.text} component={NextLink} href={link.href} onClick={onClose} sx={{ cursor: 'pointer' }}>
+              <ListItemIcon>{link.icon}</ListItemIcon>
+              <ListItemText primary={link.text} />
+            </ListItem>
+          );
+        })}
       </List>
     </Drawer>
   );
