@@ -3,7 +3,7 @@ import { Box, Typography, Button, CircularProgress, List, ListItem, ListItemText
 import Link from "next/link";
 
 interface Objective {
-  id: number;
+  guid: string;
   title: string;
   dueDate: string;
 }
@@ -51,11 +51,21 @@ const ObjectivesList: React.FC<ObjectivesListProps> = ({ userEmail }) => {
       ) : (
         <List>
           {objectives.map(obj => (
-            <ListItem key={obj.id} sx={{ borderBottom: '1px solid #eee' }}>
+            <ListItem key={obj.guid} sx={{ borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center' }}>
               <ListItemText
                 primary={<span style={{ color: 'black', fontWeight: 500 }}>{obj.title}</span>}
                 secondary={`Due: ${new Date(obj.dueDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}`}
               />
+              <Button
+                component={Link}
+                href={`/objectives/${obj.guid}`}
+                variant="outlined"
+                color="primary"
+                size="small"
+                sx={{ ml: 2 }}
+              >
+                View
+              </Button>
             </ListItem>
           ))}
         </List>
