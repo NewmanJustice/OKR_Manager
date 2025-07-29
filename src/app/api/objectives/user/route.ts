@@ -19,7 +19,7 @@ export async function GET(req: Request) {
   const objectives = await prisma.objective.findMany({
     where: { userId: user.id },
     orderBy: { dueDate: "asc" },
-    select: { id: true, title: true, dueDate: true },
+    select: { guid: true, title: true, dueDate: true },
   });
   return NextResponse.json({ objectives });
 }

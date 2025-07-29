@@ -37,6 +37,7 @@ model VerificationToken {
 
 model Objective {
   id          Int           @id @default(autoincrement())
+  guid        String        @unique @default(uuid())
   title       String
   description String
   dueDate     DateTime
