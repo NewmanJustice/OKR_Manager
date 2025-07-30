@@ -13,12 +13,14 @@ beforeEach(() => {
               guid: "obj-1",
               title: "Grow revenue",
               dueDate: "2025-12-31T00:00:00.000Z",
+              createdAt: "2025-06-01T00:00:00.000Z",
               keyResults: [
                 {
                   id: 1,
                   title: "Increase MRR",
                   metric: "MRR",
                   targetValue: "$100k",
+                  createdAt: "2025-08-01T00:00:00.000Z",
                   successCriteria: [
                     { id: 101, description: "MRR > $90k", threshold: "$90k" },
                     { id: 102, description: "MRR > $80k", threshold: "$80k" },
@@ -29,6 +31,7 @@ beforeEach(() => {
                   title: "Reduce churn",
                   metric: "Churn %",
                   targetValue: "<5%",
+                  // No createdAt, should fallback to obj.createdAt
                   successCriteria: [],
                 },
               ],
@@ -70,5 +73,17 @@ describe("OKRReviewPage", () => {
   it("shows loading state initially", () => {
     render(<OKRReviewPage />);
     expect(screen.getByText(/Loading.../)).toBeInTheDocument();
+  });
+
+  it("renders only correct months for each KR", async () => {
+    render(<OKRReviewPage />);
+    await waitFor(() => expect(screen.getByText(/KR 1: Increase MRR/)).toBeInTheDocument());
+    // Should show Aug 2025 to Dec 2025 for KR 1
+    expect(screen.getByText("Aug 2025")).toBeInTheDocument();
+    expect(screen.getByText("Dec 2025")).toBeInTheDocument();
+    expect(screen.queryByText("Jul 2025")).not.toBeInTheDocument();
+    // Should show Jun 2025 to Dec 2025 for KR 2 (fallback to obj.createdAt)
+    expect(screen.getByText("Jun 2025")).toBeInTheDocument();
+    expect(screen.getByText("Dec 2025")).toBeInTheDocument();
   });
 });
