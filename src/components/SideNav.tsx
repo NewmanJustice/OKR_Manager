@@ -13,11 +13,10 @@ import NextLink from "next/link";
 import { signOut } from "next-auth/react";
 
 const navLinks = [
+  { text: "Profile", icon: <PersonIcon />, href: "/profile" },
   { text: "Dashboard", icon: <DashboardIcon />, href: "/" },
   { text: "Create Objective", icon: <CreateIcon />, href: "/objectives/create" },
   { text: "Review OKR's", icon: <RateReviewIcon />, href: "/objectives/review" },
-  { text: "Profile", icon: <PersonIcon />, href: "/profile" },
-  { text: "Settings", icon: <SettingsIcon />, href: "/settings" },
   { text: "Logout", icon: <LogoutIcon />, href: "/logout" },
 ];
 
