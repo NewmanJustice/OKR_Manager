@@ -56,6 +56,7 @@ model KeyResult {
   objective     Objective          @relation(fields: [objectiveId], references: [id])
   objectiveId   Int
   successCriteria SuccessCriteria[]
+  reviews       KeyResultReview[]
 }
 
 model SuccessCriteria {
@@ -64,4 +65,18 @@ model SuccessCriteria {
   threshold   String
   keyResult   KeyResult  @relation(fields: [keyResultId], references: [id])
   keyResultId Int
+}
+
+model KeyResultReview {
+  id           Int      @id @default(autoincrement())
+  keyResult    KeyResult @relation(fields: [keyResultId], references: [id])
+  keyResultId  Int
+  month        Int      // 1-12
+  year         Int
+  progress     Int      // e.g., 0-100
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([keyResultId, month, year])
 }

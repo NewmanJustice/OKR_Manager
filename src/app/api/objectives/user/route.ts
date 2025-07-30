@@ -36,6 +36,15 @@ export async function GET(req: Request) {
               threshold: true,
             },
           },
+          reviews: {
+            select: {
+              id: true,
+              month: true,
+              year: true,
+              progress: true,
+              notes: true,
+            },
+          },
         },
       },
     },
