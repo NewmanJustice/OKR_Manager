@@ -7,6 +7,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
+import RateReviewIcon from "@mui/icons-material/RateReview";
 import { useTheme, useMediaQuery } from "@mui/material";
 import NextLink from "next/link";
 import { signOut } from "next-auth/react";
@@ -14,6 +15,7 @@ import { signOut } from "next-auth/react";
 const navLinks = [
   { text: "Dashboard", icon: <DashboardIcon />, href: "/" },
   { text: "Create Objective", icon: <CreateIcon />, href: "/objectives/create" },
+  { text: "Review OKR's", icon: <RateReviewIcon />, href: "/objectives/review" },
   { text: "Profile", icon: <PersonIcon />, href: "/profile" },
   { text: "Settings", icon: <SettingsIcon />, href: "/settings" },
   { text: "Logout", icon: <LogoutIcon />, href: "/logout" },
