@@ -23,12 +23,14 @@ export async function GET(req: Request) {
       guid: true,
       title: true,
       dueDate: true,
+      createdAt: true,
       keyResults: {
         select: {
           id: true,
           title: true,
           metric: true,
           targetValue: true,
+          createdAt: true,
           successCriteria: {
             select: {
               id: true,

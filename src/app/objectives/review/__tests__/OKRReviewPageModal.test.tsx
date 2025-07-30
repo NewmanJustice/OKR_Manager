@@ -13,17 +13,19 @@ beforeEach(() => {
               guid: "obj-1",
               title: "Grow revenue",
               dueDate: "2025-12-31T00:00:00.000Z",
+              createdAt: "2025-06-01T00:00:00.000Z",
               keyResults: [
                 {
                   id: 1,
                   title: "Increase MRR",
                   metric: "MRR",
                   targetValue: "$100k",
+                  createdAt: "2025-08-01T00:00:00.000Z",
                   successCriteria: [
                     { id: 101, description: "MRR > $90k", threshold: "$90k" },
                   ],
                   reviews: [
-                    { id: 201, month: 7, year: 2025, progress: 80, notes: "Good progress" },
+                    { id: 201, month: 8, year: 2025, progress: 80, notes: "Good progress" },
                   ],
                 },
               ],
@@ -76,5 +78,16 @@ describe("OKRReviewPage - Review Modal", () => {
     // Save button should have correct color
     const saveBtn = screen.getByRole("button", { name: /Save/i });
     expect(saveBtn).toHaveStyle({ backgroundColor: "#1976d2" });
+  });
+
+  it("modal only allows valid months/years", async () => {
+    render(<OKRReviewPage />);
+    await waitFor(() => expect(screen.getByText(/KR 1: Increase MRR/)).toBeInTheDocument());
+    fireEvent.click(screen.getAllByRole("button", { name: "RateReviewIcon" })[0]);
+    await waitFor(() => expect(screen.getByText(/Review Key Result/)).toBeInTheDocument());
+    // Only August-December 2025 should be available
+    expect(screen.getByText("August")).toBeInTheDocument();
+    expect(screen.getByText("December")).toBeInTheDocument();
+    expect(screen.queryByText("July")).not.toBeInTheDocument();
   });
 });
