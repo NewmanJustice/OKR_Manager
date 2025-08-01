@@ -46,6 +46,7 @@ model Objective {
   user        User          @relation(fields: [userId], references: [id])
   userId      Int
   keyResults  KeyResult[]
+  quarterlyReviews ObjectiveQuarterlyReview[]
 }
 
 model KeyResult {
@@ -81,4 +82,24 @@ model KeyResultReview {
   updatedAt    DateTime @updatedAt
 
   @@unique([keyResultId, month, year])
+}
+
+model ObjectiveQuarterlyReview {
+  id                Int      @id @default(autoincrement())
+  objective         Objective @relation(fields: [objectiveId], references: [id])
+  objectiveId       Int
+  quarter           Int      // 1-4
+  year              Int
+  grading           Float?   // 0.0-1.0, calculated from monthly reviews but editable
+  lessonsLearned    String?
+  strategicAdjustment String?
+  nextQuarterPlanning String?
+  engagement        String?
+  actionCompletion  String?
+  strategicAlignment String?
+  feedbackQuality   String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([objectiveId, quarter, year])
 }

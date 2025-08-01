@@ -49,6 +49,21 @@ export async function GET(req: Request) {
           },
         },
       },
+      quarterlyReviews: {
+        select: {
+          id: true,
+          quarter: true,
+          year: true,
+          grading: true,
+          lessonsLearned: true,
+          strategicAdjustment: true,
+          nextQuarterPlanning: true,
+          engagement: true,
+          actionCompletion: true,
+          strategicAlignment: true,
+          feedbackQuality: true,
+        },
+      },
     },
   });
   return NextResponse.json({ objectives });
