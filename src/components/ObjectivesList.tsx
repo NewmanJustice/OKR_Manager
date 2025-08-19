@@ -9,16 +9,16 @@ interface Objective {
 }
 
 interface ObjectivesListProps {
-  userEmail?: string | null;
+  userId?: string | number | null;
 }
 
-const ObjectivesList: React.FC<ObjectivesListProps> = ({ userEmail }) => {
+const ObjectivesList: React.FC<ObjectivesListProps> = ({ userId }) => {
   const [objectives, setObjectives] = useState<Objective[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!userEmail) return;
+    if (!userId) return;
     setLoading(true);
     fetch("/api/objectives/user")
       .then(res => res.json())
@@ -34,9 +34,9 @@ const ObjectivesList: React.FC<ObjectivesListProps> = ({ userEmail }) => {
         setError("Failed to fetch objectives.");
         setLoading(false);
       });
-  }, [userEmail]);
+  }, [userId]);
 
-  if (!userEmail) return null;
+  if (!userId) return null;
   if (loading) return <Box mt={4}><CircularProgress /></Box>;
   if (error) return <Typography color="error" mt={4}>{error}</Typography>;
 

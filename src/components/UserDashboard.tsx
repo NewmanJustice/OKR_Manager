@@ -53,7 +53,7 @@ const UserDashboard: React.FC = () => {
             Welcome, {session?.user?.name || session?.user?.email || "User"}!
           </Typography>
           {/* Objectives Section */}
-          <ObjectivesList userEmail={session?.user?.email} />
+          <ObjectivesList userId={session?.user && (session.user as any).id} />
         </Box>
       </Box>
     </Box>

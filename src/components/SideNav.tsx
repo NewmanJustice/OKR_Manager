@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton, Box } from "@mui/material";
+import { Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton, Box, Divider } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -8,9 +8,10 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
 import RateReviewIcon from "@mui/icons-material/RateReview";
+import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import { useTheme, useMediaQuery } from "@mui/material";
 import NextLink from "next/link";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 const navLinks = [
   { text: "Profile", icon: <PersonIcon />, href: "/profile" },
@@ -28,6 +29,8 @@ interface SideNavProps {
 const SideNav: React.FC<SideNavProps> = ({ open, onClose }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const { data: session } = useSession();
+  const isLineManager = !!(session?.user && (session.user as any).isLineManager);
 
   return (
     <Drawer
@@ -71,6 +74,13 @@ const SideNav: React.FC<SideNavProps> = ({ open, onClose }) => {
             </ListItem>
           );
         })}
+        {isLineManager && <>
+          <Divider sx={{ my: 1 }} />
+          <ListItem component={NextLink} href="/line-manager" onClick={onClose} sx={{ cursor: 'pointer' } }>
+            <ListItemIcon><SupervisorAccountIcon /></ListItemIcon>
+            <ListItemText primary="Line Manager" />
+          </ListItem>
+        </>}
       </List>
     </Drawer>
   );
