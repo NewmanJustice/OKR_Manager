@@ -17,7 +17,7 @@ global.fetch = jest.fn().mockImplementation(() =>
 
 describe("ObjectivesList", () => {
   it("renders objectives and view buttons with correct links", async () => {
-    render(<ObjectivesList userEmail="user@example.com" />);
+    render(<ObjectivesList userId={1} />);
     await waitFor(() => {
       expect(screen.getByText("Your Objectives")).toBeInTheDocument();
       expect(screen.getByText("Objective 1")).toBeInTheDocument();
@@ -31,7 +31,7 @@ describe("ObjectivesList", () => {
   });
 
   it("renders objectives with black title", async () => {
-    render(<ObjectivesList userEmail="user@example.com" />);
+    render(<ObjectivesList userId={1} />);
     await waitFor(() => {
       const title = screen.getByText("Objective 1");
       expect(title).toBeInTheDocument();
@@ -45,15 +45,15 @@ describe("ObjectivesList", () => {
         json: () => Promise.resolve({ objectives: [] })
       })
     );
-    render(<ObjectivesList userEmail="user@example.com" />);
+    render(<ObjectivesList userId={1} />);
     await waitFor(() => {
       expect(screen.getByText("You have no objectives yet.")).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /create objective/i })).toBeInTheDocument();
     });
   });
 
-  it("does not render if no userEmail", () => {
-    render(<ObjectivesList userEmail={undefined} />);
+  it("does not render if no userId", () => {
+    render(<ObjectivesList userId={undefined} />);
     expect(screen.queryByText("Your Objectives")).not.toBeInTheDocument();
   });
 });

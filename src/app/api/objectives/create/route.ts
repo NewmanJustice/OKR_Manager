@@ -24,8 +24,14 @@ export async function POST(req: Request) {
       }
     }
   }
-  // Find user
-  const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+  // Find user by id (preferred), fallback to email for legacy sessions
+  const userId = session.user && (session.user as any).id;
+  let user = null;
+  if (userId) {
+    user = await prisma.user.findUnique({ where: { id: Number(userId) } });
+  } else if (session.user?.email) {
+    user = await prisma.user.findUnique({ where: { email: session.user.email } });
+  }
   if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
