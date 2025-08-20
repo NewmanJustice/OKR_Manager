@@ -80,10 +80,8 @@ export default function ProfileLayout() {
       return;
     }
     setSuccess("Profile updated successfully");
-    if (data.sessionUpdate) {
-      // Update session with new email
-      await updateSession();
-    }
+    // Always update session after profile change
+    await updateSession();
     setForm(f => ({ ...f, currentPassword: "", newPassword: "" }));
   };
 

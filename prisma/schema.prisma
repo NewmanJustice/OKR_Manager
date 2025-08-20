@@ -23,7 +23,8 @@ model User {
   updatedAt     DateTime @updatedAt
 
   verificationTokens VerificationToken[]
-  objectives          Objective[]
+  objectives         Objective[]
+  invites            Invite[]            @relation("LineManagerInvites")
 }
 
 model VerificationToken {
@@ -36,70 +37,82 @@ model VerificationToken {
 }
 
 model Objective {
-  id          Int           @id @default(autoincrement())
-  guid        String        @unique @default(uuid())
-  title       String
-  description String
-  dueDate     DateTime
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  user        User          @relation(fields: [userId], references: [id])
-  userId      Int
-  keyResults  KeyResult[]
+  id               Int                        @id @default(autoincrement())
+  guid             String                     @unique @default(uuid())
+  title            String
+  description      String
+  dueDate          DateTime
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+  user             User                       @relation(fields: [userId], references: [id])
+  userId           Int
+  keyResults       KeyResult[]
   quarterlyReviews ObjectiveQuarterlyReview[]
 }
 
 model KeyResult {
-  id            Int                @id @default(autoincrement())
-  title         String
-  metric        String
-  targetValue   String
-  objective     Objective          @relation(fields: [objectiveId], references: [id])
-  objectiveId   Int
+  id              Int               @id @default(autoincrement())
+  title           String
+  metric          String
+  targetValue     String
+  objective       Objective         @relation(fields: [objectiveId], references: [id])
+  objectiveId     Int
   successCriteria SuccessCriteria[]
-  reviews       KeyResultReview[]
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
+  reviews         KeyResultReview[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 }
 
 model SuccessCriteria {
-  id          Int        @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   description String
   threshold   String
-  keyResult   KeyResult  @relation(fields: [keyResultId], references: [id])
+  keyResult   KeyResult @relation(fields: [keyResultId], references: [id])
   keyResultId Int
 }
 
 model KeyResultReview {
-  id           Int      @id @default(autoincrement())
-  keyResult    KeyResult @relation(fields: [keyResultId], references: [id])
-  keyResultId  Int
-  month        Int      // 1-12
-  year         Int
-  progress     Int      // e.g., 0-100
-  notes        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          Int       @id @default(autoincrement())
+  keyResult   KeyResult @relation(fields: [keyResultId], references: [id])
+  keyResultId Int
+  month       Int // 1-12
+  year        Int
+  progress    Int // e.g., 0-100
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@unique([keyResultId, month, year])
 }
 
 model ObjectiveQuarterlyReview {
-  id                Int      @id @default(autoincrement())
-  objective         Objective @relation(fields: [objectiveId], references: [id])
-  objectiveId       Int
-  quarter           Int      // 1-4
-  year              Int
-  grading           Float?   // 0.0-1.0, calculated from monthly reviews but editable
-  lessonsLearned    String?
+  id                  Int       @id @default(autoincrement())
+  objective           Objective @relation(fields: [objectiveId], references: [id])
+  objectiveId         Int
+  quarter             Int // 1-4
+  year                Int
+  grading             Float? // 0.0-1.0, calculated from monthly reviews but editable
+  lessonsLearned      String?
   strategicAdjustment String?
   nextQuarterPlanning String?
-  engagement        String?
-  actionCompletion  String?
-  strategicAlignment String?
-  feedbackQuality   String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  engagement          String?
+  actionCompletion    String?
+  strategicAlignment  String?
+  feedbackQuality     String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   @@unique([objectiveId, quarter, year])
+}
+
+model Invite {
+  id            Int       @id @default(autoincrement())
+  email         String
+  token         String    @unique
+  lineManager   User      @relation("LineManagerInvites", fields: [lineManagerId], references: [id])
+  lineManagerId Int
+  dateSent      DateTime
+  dateUsed      DateTime?
+  status        String    // "pending", "used", "expired", "invalidated", "resent"
+  expiresAt     DateTime  // Invite expiry (7 days after dateSent)
 }

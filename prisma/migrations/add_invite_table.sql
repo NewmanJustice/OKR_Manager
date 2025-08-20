@@ -1,0 +1,10 @@
+CREATE TABLE invite (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  token VARCHAR(255) UNIQUE NOT NULL,
+  lineManagerId INTEGER NOT NULL,
+  dateSent TIMESTAMP NOT NULL,
+  dateUsed TIMESTAMP,
+  status VARCHAR(20) NOT NULL,
+  FOREIGN KEY (lineManagerId) REFERENCES users(id)
+);
