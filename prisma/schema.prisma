@@ -25,6 +25,8 @@ model User {
   verificationTokens VerificationToken[]
   objectives         Objective[]
   invites            Invite[]            @relation("LineManagerInvites")
+  jobRoleId          Int?
+  jobRole            JobRole?           @relation(fields: [jobRoleId], references: [id])
 }
 
 model VerificationToken {
@@ -115,4 +117,10 @@ model Invite {
   dateUsed      DateTime?
   status        String    // "pending", "used", "expired", "invalidated", "resent"
   expiresAt     DateTime  // Invite expiry (7 days after dateSent)
+}
+
+model JobRole {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
 }

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { Box, Typography, Button, IconButton } from "@mui/material";
+import { Box, Typography, Button, IconButton, Alert } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import SideNav from "./SideNav";
 import ObjectivesList from "./ObjectivesList"; // Import the ObjectivesList component
@@ -9,13 +9,30 @@ import ObjectivesList from "./ObjectivesList"; // Import the ObjectivesList comp
 const DRAWER_WIDTH = 240;
 
 const UserDashboard: React.FC = () => {
-  const { data: session } = useSession();
+  const { data: session, update: updateSession, status } = useSession();
   const [sideNavOpen, setSideNavOpen] = useState(true);
+
+  // Helper: check if jobRole is missing
+  const missingJobRole = status === 'authenticated' && (!session?.user || !(session.user as any).jobRoleId);
 
   const isDesktop = typeof window !== 'undefined' && window.matchMedia('(min-width: 900px)').matches;
   React.useEffect(() => {
     if (isDesktop) setSideNavOpen(true);
   }, [isDesktop]);
+
+  // Automatically refresh session on mount
+  React.useEffect(() => {
+    updateSession && updateSession();
+  }, []);
+
+  // Show loading spinner while session is loading
+  if (status === 'loading') {
+    return (
+      <Box sx={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}>
+        <Typography variant="h6" color="text.secondary">Loading...</Typography>
+      </Box>
+    );
+  }
 
   // Responsive hamburger for mobile/tablet
   return (
@@ -30,6 +47,13 @@ const UserDashboard: React.FC = () => {
           width: '100%',
         }}
       >
+        {missingJobRole && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', mt: 2 }}>
+            <Alert severity="info" sx={{ maxWidth: 600, width: '100%', borderRadius: 2, py: 2, px: 4, display: 'flex', alignItems: 'center' }}>
+              <span>Please update your profile and select your job role.</span>
+            </Alert>
+          </Box>
+        )}
         <IconButton
           color="inherit"
           aria-label="open drawer"

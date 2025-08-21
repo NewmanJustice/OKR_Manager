@@ -2,7 +2,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import type { AuthOptions, SessionStrategy } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { JWT } from "next-auth/jwt";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -34,18 +33,20 @@ export const authOptions: AuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
-      // Always fetch user from DB for up-to-date isLineManager
+      // Always fetch user from DB for up-to-date isLineManager and jobRoleId
       if (token?.email) {
         const dbUser = await prisma.user.findUnique({ where: { email: token.email } });
         if (dbUser) {
           token.id = dbUser.id;
           token.isLineManager = dbUser.isLineManager;
+          token.jobRoleId = dbUser.jobRoleId;
         }
       }
       if (user) {
         token.id = user.id;
         token.isLineManager = (user as any).isLineManager;
         token.email = user.email;
+        token.jobRoleId = (user as any).jobRoleId;
       }
       return token;
     },
@@ -53,6 +54,7 @@ export const authOptions: AuthOptions = {
       if (session.user && token.id) {
         (session.user as any).id = token.id;
         (session.user as any).isLineManager = token.isLineManager;
+        (session.user as any).jobRoleId = token.jobRoleId;
       }
       return session;
     },
