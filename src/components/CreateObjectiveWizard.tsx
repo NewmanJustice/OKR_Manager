@@ -26,7 +26,7 @@ interface KeyResult {
 
 const steps = ["Objective Details", "Key Results", "Success Criteria", "Review & Submit"];
 
-export default function CreateObjectiveWizard() {
+export default function CreateObjectiveWizard({ disableAll = false }: { disableAll?: boolean }) {
   const [activeStep, setActiveStep] = useState(0);
   const [objective, setObjective] = useState({ title: "", description: "", dueDate: "" });
   const [keyResults, setKeyResults] = useState<KeyResult[]>([
@@ -130,7 +130,7 @@ export default function CreateObjectiveWizard() {
   };
 
   return (
-    <Paper sx={{ maxWidth: 800, mx: "auto", mt: 6, p: 4 }}>
+    <Paper sx={{ maxWidth: 800, mx: "auto", mt: 6, p: 4, opacity: disableAll ? 0.5 : 1, pointerEvents: disableAll ? 'none' : 'auto' }}>
       <Stepper activeStep={activeStep} alternativeLabel>
         {steps.map((label) => (
           <Step key={label}>
@@ -143,13 +143,14 @@ export default function CreateObjectiveWizard() {
         {activeStep === 0 && (
           <Box>
             <Typography variant="h6" mb={2}>Enter Objective Details</Typography>
-            <TextField label="Title" name="title" value={objective.title} onChange={handleObjectiveChange} fullWidth margin="normal" required />
-            <TextField label="Description" name="description" value={objective.description} onChange={handleObjectiveChange} fullWidth margin="normal" multiline rows={2} />
+            <TextField label="Title" name="title" value={objective.title} onChange={handleObjectiveChange} fullWidth margin="normal" required disabled={disableAll} />
+            <TextField label="Description" name="description" value={objective.description} onChange={handleObjectiveChange} fullWidth margin="normal" multiline rows={2} disabled={disableAll} />
             <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enGB}>
               <DatePicker
                 label="Due Date"
                 value={objective.dueDate ? new Date(objective.dueDate) : null}
                 onChange={(date: Date | null) => {
+                  if (disableAll) return;
                   if (date && date < new Date(new Date().toISOString().slice(0, 10))) {
                     setError("Due date cannot be in the past.");
                     return;
@@ -158,7 +159,7 @@ export default function CreateObjectiveWizard() {
                 }}
                 minDate={new Date(new Date().toISOString().slice(0, 10))}
                 format="dd/MM/yyyy"
-                slotProps={{ textField: { fullWidth: true, margin: "normal", required: true } }}
+                slotProps={{ textField: { fullWidth: true, margin: "normal", required: true, disabled: disableAll } }}
               />
             </LocalizationProvider>
           </Box>
@@ -170,22 +171,22 @@ export default function CreateObjectiveWizard() {
               <Paper key={idx} sx={{ p: 2, mb: 2, position: 'relative' }} variant="outlined">
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
                   <Box sx={{ flex: '1 1 100%' }}>
-                    <TextField label="Title" value={kr.title} onChange={e => handleKRChange(idx, "title", e.target.value)} fullWidth required />
+                    <TextField label="Title" value={kr.title} onChange={e => handleKRChange(idx, "title", e.target.value)} fullWidth required disabled={disableAll} />
                   </Box>
                 </Box>
                 <Box sx={{ mt: 2 }}>
-                  <TextField label="Description (optional)" value={kr.description || ""} onChange={e => handleKRChange(idx, "description", e.target.value)} fullWidth multiline rows={2} />
+                  <TextField label="Description (optional)" value={kr.description || ""} onChange={e => handleKRChange(idx, "description", e.target.value)} fullWidth multiline rows={2} disabled={disableAll} />
                 </Box>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mt: 2 }}>
                   <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 33%' } }}>
-                    <TextField label="Metric" value={kr.metric} onChange={e => handleKRChange(idx, "metric", e.target.value)} fullWidth required />
+                    <TextField label="Metric" value={kr.metric} onChange={e => handleKRChange(idx, "metric", e.target.value)} fullWidth required disabled={disableAll} />
                   </Box>
                   <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 33%' } }}>
-                    <TextField label="Target Value" value={kr.targetValue} onChange={e => handleKRChange(idx, "targetValue", e.target.value)} fullWidth required />
+                    <TextField label="Target Value" value={kr.targetValue} onChange={e => handleKRChange(idx, "targetValue", e.target.value)} fullWidth required disabled={disableAll} />
                   </Box>
                   <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 33%' }, display: 'flex', gap: 1 }}>
-                    <IconButton onClick={() => handleRemoveKR(idx)} disabled={keyResults.length === 1} color="error"><RemoveIcon /></IconButton>
-                    <IconButton onClick={handleAddKR} color="primary"><AddIcon /></IconButton>
+                    <IconButton onClick={() => handleRemoveKR(idx)} disabled={keyResults.length === 1 || disableAll} color="error"><RemoveIcon /></IconButton>
+                    <IconButton onClick={handleAddKR} color="primary" disabled={disableAll}><AddIcon /></IconButton>
                   </Box>
                 </Box>
               </Paper>
@@ -201,14 +202,14 @@ export default function CreateObjectiveWizard() {
                 {kr.successCriteria.map((sc, scIdx) => (
                   <Box key={scIdx} sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mb: 1 }}>
                     <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 41.666%' } }}>
-                      <TextField label="Description" value={sc.description} onChange={e => handleSCChange(krIdx, scIdx, "description", e.target.value)} fullWidth required />
+                      <TextField label="Description" value={sc.description} onChange={e => handleSCChange(krIdx, scIdx, "description", e.target.value)} fullWidth required disabled={disableAll} />
                     </Box>
                     <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 41.666%' } }}>
-                      <TextField label="Threshold" value={sc.threshold} onChange={e => handleSCChange(krIdx, scIdx, "threshold", e.target.value)} fullWidth required />
+                      <TextField label="Threshold" value={sc.threshold} onChange={e => handleSCChange(krIdx, scIdx, "threshold", e.target.value)} fullWidth required disabled={disableAll} />
                     </Box>
                     <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 16.666%' }, display: 'flex', gap: 1 }}>
-                      <IconButton onClick={() => handleRemoveSC(krIdx, scIdx)} disabled={kr.successCriteria.length === 1} color="error"><RemoveIcon /></IconButton>
-                      <IconButton onClick={() => handleAddSC(krIdx)} color="primary"><AddIcon /></IconButton>
+                      <IconButton onClick={() => handleRemoveSC(krIdx, scIdx)} disabled={kr.successCriteria.length === 1 || disableAll} color="error"><RemoveIcon /></IconButton>
+                      <IconButton onClick={() => handleAddSC(krIdx)} color="primary" disabled={disableAll}><AddIcon /></IconButton>
                     </Box>
                   </Box>
                 ))}
@@ -253,12 +254,12 @@ export default function CreateObjectiveWizard() {
         )}
       </Box>
       <Box mt={4} display="flex" justifyContent="space-between">
-        <Button disabled={activeStep === 0} onClick={handleBack}>Back</Button>
-        <Button color="error" onClick={handleCancel}>Cancel</Button>
+        <Button disabled={activeStep === 0 || disableAll} onClick={handleBack}>Back</Button>
+        <Button color="error" onClick={handleCancel} disabled={disableAll}>Cancel</Button>
         {activeStep < steps.length - 1 ? (
-          <Button variant="contained" onClick={handleNext}>Next</Button>
+          <Button variant="contained" onClick={handleNext} disabled={disableAll}>Next</Button>
         ) : (
-          <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
+          <Button variant="contained" color="primary" onClick={handleSubmit} disabled={disableAll}>Submit</Button>
         )}
       </Box>
       <Dialog open={confirmCancel} onClose={() => setConfirmCancel(false)}>
@@ -267,8 +268,8 @@ export default function CreateObjectiveWizard() {
           <Typography>Are you sure you want to cancel? All unsaved data will be lost.</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmCancel(false)}>No</Button>
-          <Button color="error" onClick={confirmCancelAction}>Yes, Cancel</Button>
+          <Button onClick={() => setConfirmCancel(false)} disabled={disableAll}>No</Button>
+          <Button color="error" onClick={confirmCancelAction} disabled={disableAll}>Yes, Cancel</Button>
         </DialogActions>
       </Dialog>
     </Paper>
