@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import SideNav from "@/components/SideNav";
-import { Box, Typography, Paper, TextField, Button, Checkbox, FormControlLabel, Alert, Select, MenuItem, InputLabel, FormControl, SelectChangeEvent } from "@mui/material";
+import { Box, Typography, Paper, TextField, Button, Checkbox, FormControlLabel, Alert, Select, MenuItem, InputLabel, FormControl, SelectChangeEvent, Autocomplete } from "@mui/material";
 import { useSession } from "next-auth/react";
 
 export default function ProfileLayout() {
@@ -13,9 +13,11 @@ export default function ProfileLayout() {
     currentPassword: "",
     newPassword: "",
     isLineManager: false,
-    jobRoleId: ""
+    jobRoleId: "",
+    gddRoleId: ""
   });
   const [jobRoles, setJobRoles] = useState<any[]>([]);
+  const [gddRoles, setGddRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
@@ -32,13 +34,25 @@ export default function ProfileLayout() {
   }, []);
 
   useEffect(() => {
+    async function fetchGddRoles() {
+      const res = await fetch("/api/gdd-roles");
+      if (res.ok) {
+        const data = await res.json();
+        setGddRoles(data.gddRoles || []);
+      }
+    }
+    fetchGddRoles();
+  }, []);
+
+  useEffect(() => {
     if (session?.user) {
       setForm(f => ({
         ...f,
         name: session.user?.name || "",
         email: session.user?.email || "",
         isLineManager: (session.user as any).isLineManager || false,
-        jobRoleId: (session.user as any).jobRoleId || ""
+        jobRoleId: (session.user as any).jobRoleId || "",
+        gddRoleId: (session.user as any).gddRoleId || ""
       }));
     }
   }, [session]);
@@ -49,7 +63,7 @@ export default function ProfileLayout() {
       const res = await fetch("/api/profile");
       if (res.ok) {
         const data = await res.json();
-        setForm(f => ({ ...f, isLineManager: data.user.isLineManager, jobRoleId: data.user.jobRoleId || "" }));
+        setForm(f => ({ ...f, isLineManager: data.user.isLineManager, jobRoleId: data.user.jobRoleId || "", gddRoleId: data.user.gddRoleId || "" }));
       }
     }
     fetchProfile();
@@ -66,7 +80,8 @@ export default function ProfileLayout() {
           name: data.user.name,
           email: data.user.email,
           isLineManager: data.user.isLineManager,
-          jobRoleId: data.user.jobRoleId || ""
+          jobRoleId: data.user.jobRoleId || "",
+          gddRoleId: data.user.gddRoleId || ""
         }));
       }
     }
@@ -82,6 +97,10 @@ export default function ProfileLayout() {
     setForm(f => ({ ...f, jobRoleId: e.target.value as string }));
   };
 
+  const handleGddRoleChange = (_event: any, value: any) => {
+    setForm(f => ({ ...f, gddRoleId: value ? value.id : "" }));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -89,6 +108,11 @@ export default function ProfileLayout() {
     setSuccess("");
     if (!form.jobRoleId) {
       setError("Job role is required.");
+      setLoading(false);
+      return;
+    }
+    if (!form.gddRoleId) {
+      setError("GDD role is required.");
       setLoading(false);
       return;
     }
@@ -196,6 +220,18 @@ export default function ProfileLayout() {
                   ))}
                 </Select>
               </FormControl>
+              <Autocomplete
+                options={gddRoles}
+                getOptionLabel={option => option.name}
+                value={gddRoles.find((r: any) => r.id === form.gddRoleId) || null}
+                onChange={handleGddRoleChange}
+                renderInput={params => (
+                  <TextField {...params} label="GDD Role" required margin="normal" />
+                )}
+                fullWidth
+                disableClearable
+                sx={{ mt: 2 }}
+              />
               <FormControlLabel
                 control={<Checkbox checked={form.isLineManager} onChange={handleChange} name="isLineManager" color="primary" />}
                 label="I am a line manager"

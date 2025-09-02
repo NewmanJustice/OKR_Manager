@@ -27,6 +27,8 @@ model User {
   invites            Invite[]            @relation("LineManagerInvites")
   jobRoleId          Int?
   jobRole            JobRole?           @relation(fields: [jobRoleId], references: [id])
+  gddRoleId          Int?
+  gddRole            GddRole?           @relation(fields: [gddRoleId], references: [id])
 }
 
 model VerificationToken {
@@ -120,6 +122,12 @@ model Invite {
 }
 
 model JobRole {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+}
+
+model GddRole {
   id    Int    @id @default(autoincrement())
   name  String @unique
   users User[]

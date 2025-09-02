@@ -20,10 +20,10 @@ const UserDashboard: React.FC = () => {
     if (isDesktop) setSideNavOpen(true);
   }, [isDesktop]);
 
-  // Automatically refresh session on mount
-  React.useEffect(() => {
-    updateSession && updateSession();
-  }, []);
+  // Remove automatic session refresh on mount to prevent flicker and backend polling
+  // React.useEffect(() => {
+  //   updateSession && updateSession();
+  // }, []);
 
   // Show loading spinner while session is loading
   if (status === 'loading') {
@@ -42,9 +42,14 @@ const UserDashboard: React.FC = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          ml: { xs: 0, md: sideNavOpen ? `${DRAWER_WIDTH}px` : 0 },
+          ml: { xs: 0, md: `${DRAWER_WIDTH}px` },
           transition: 'margin-left 0.3s',
           width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          pt: { xs: 4, md: 10 }, // Match review page top padding
+          minHeight: '100vh',
         }}
       >
         {missingJobRole && (
@@ -69,9 +74,9 @@ const UserDashboard: React.FC = () => {
         >
           <MenuIcon />
         </IconButton>
-        <Box sx={{ maxWidth: 600, mx: "auto", mt: 8, p: 4, boxShadow: 3, borderRadius: 2, bgcolor: "background.paper" }}>
-          <Typography variant="h4" mb={2} color="black">
-            OKR Manager
+        <Box sx={{ maxWidth: 600, width: '100%', p: 4, boxShadow: 3, borderRadius: 2, bgcolor: "background.paper", mt: 0 }}>
+          <Typography variant="h4" sx={{ color: 'black' }} mb={3} fontWeight={600} textAlign="left">
+            Dashboard
           </Typography>
           <Typography variant="body1" mb={4} color="black">
             Welcome, {session?.user?.name || session?.user?.email || "User"}!

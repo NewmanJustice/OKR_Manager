@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton, Box, Divider } from "@mui/material";
+import { Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton, Box, Divider, Typography } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -35,7 +35,7 @@ const SideNav: React.FC<SideNavProps> = ({ open, onClose }) => {
   return (
     <Drawer
       variant={isMobile ? "temporary" : "persistent"}
-      open={open}
+      open={isMobile ? open : true} // Always open on desktop/tablet
       onClose={onClose}
       ModalProps={{ keepMounted: true }}
       sx={{
@@ -46,17 +46,23 @@ const SideNav: React.FC<SideNavProps> = ({ open, onClose }) => {
           width: 240,
           boxSizing: 'border-box',
           position: isMobile ? undefined : 'relative',
-          height: '100vh', // Make the drawer full height
+          height: '100vh',
           top: 0,
         },
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', p: 2, justifyContent: 'space-between' }}>
-        <Box sx={{ fontWeight: 'bold', fontSize: 20 }}>Menu</Box>
-        <IconButton onClick={onClose} sx={{ display: { xs: 'block', md: 'none' } }}>
-          <CloseIcon />
-        </IconButton>
+        <Box sx={{ fontWeight: 'bold', fontSize: 20 }}>OKR Manager</Box>
+        {isMobile && (
+          <IconButton onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
+        )}
       </Box>
+      <Divider />
+      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', px: 2, pt: 2, pb: 1 }}>
+        Menu
+      </Typography>
       <List>
         {navLinks.map((link) => {
           if (link.text === "Logout") {
