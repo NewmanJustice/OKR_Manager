@@ -69,7 +69,7 @@ const SideNav: React.FC<SideNavProps> = ({ open, onClose }) => {
         {navLinks.map((link) => {
           if (link.text === "Logout") {
             return (
-              <ListItem key={link.text} sx={{ cursor: 'pointer' }} onClick={() => { signOut({ callbackUrl: "/" }); onClose(); }}>
+              <ListItem key={link.text} sx={{ cursor: 'pointer' }} onClick={() => { signOut({ callbackUrl: window.location.origin }); onClose(); }}>
                 <ListItemIcon>{link.icon}</ListItemIcon>
                 <ListItemText primary={link.text} />
               </ListItem>
