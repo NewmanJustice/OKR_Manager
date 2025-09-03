@@ -46,10 +46,11 @@ const UserDashboard: React.FC = () => {
           transition: 'margin-left 0.3s',
           width: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          pt: { xs: 4, md: 10 }, // Match review page top padding
+          flexDirection: 'row', // Change to row for side-by-side cards
+          alignItems: 'flex-start', // Top align both cards
+          pt: { xs: 4, md: 10 },
           minHeight: '100vh',
+          gap: 4, // Add gap between cards
         }}
       >
         {missingJobRole && (
@@ -74,7 +75,7 @@ const UserDashboard: React.FC = () => {
         >
           <MenuIcon />
         </IconButton>
-        <Box sx={{ maxWidth: 600, width: '100%', p: 4, boxShadow: 3, borderRadius: 2, bgcolor: "background.paper", mt: 0 }}>
+        <Box sx={{ maxWidth: 600, width: '100%', p: 4, boxShadow: 3, borderRadius: 2, bgcolor: "background.paper", mt: 0, alignSelf: 'flex-start' }}>
           <Typography variant="h4" sx={{ color: 'black' }} mb={3} fontWeight={600} textAlign="left">
             Dashboard
           </Typography>
@@ -84,6 +85,7 @@ const UserDashboard: React.FC = () => {
           {/* Objectives Section */}
           <ObjectivesList userId={session?.user && (session.user as any).id} />
         </Box>
+        {/* Add your second card here, e.g. <ObjectivesCard sx={{ mt: 0, alignSelf: 'flex-start' }} /> or similar */}
       </Box>
     </Box>
   );
