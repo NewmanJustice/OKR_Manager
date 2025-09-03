@@ -184,7 +184,7 @@ export default function LineManagerLayout() {
       <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, md: 6 }, display: 'flex', flexDirection: 'column', alignItems: 'center', bgcolor: 'black', minHeight: '100vh' }}>
         <Paper elevation={2} sx={{ width: 'fit-content', p: { xs: 2, md: 4 }, mt: 4, borderRadius: 3, boxShadow: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Typography variant="h4" fontWeight="bold" gutterBottom>
-            Line Manager Dashboard
+            Manage Invites
           </Typography>
           <Box component="form" onSubmit={handleSendInvite} sx={{ mt: 3, width: 400 }}>
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}

@@ -9,6 +9,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
 import RateReviewIcon from "@mui/icons-material/RateReview";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import GroupIcon from "@mui/icons-material/Group";
 import { useTheme, useMediaQuery } from "@mui/material";
 import NextLink from "next/link";
 import { signOut, useSession } from "next-auth/react";
@@ -82,9 +84,16 @@ const SideNav: React.FC<SideNavProps> = ({ open, onClose }) => {
         })}
         {isLineManager && <>
           <Divider sx={{ my: 1 }} />
+          <Typography variant="subtitle2" sx={{ fontWeight: 'bold', px: 2, pt: 2, pb: 1 }}>
+            Manage my team
+          </Typography>
           <ListItem component={NextLink} href="/line-manager" onClick={onClose} sx={{ cursor: 'pointer' } }>
-            <ListItemIcon><SupervisorAccountIcon /></ListItemIcon>
-            <ListItemText primary="Line Manager" />
+            <ListItemIcon><MailOutlineIcon /></ListItemIcon>
+            <ListItemText primary="Invites" />
+          </ListItem>
+          <ListItem component={NextLink} href="/line-manager/my-team" onClick={onClose} sx={{ cursor: 'pointer' } }>
+            <ListItemIcon><GroupIcon /></ListItemIcon>
+            <ListItemText primary="My Team" />
           </ListItem>
         </>}
       </List>

@@ -29,6 +29,8 @@ model User {
   jobRole            JobRole?           @relation(fields: [jobRoleId], references: [id])
   gddRoleId          Int?
   gddRole            GddRole?           @relation(fields: [gddRoleId], references: [id])
+  lineManagerTeams    LineManagerTeam[]  @relation("LineManager")
+  teamMemberOf       LineManagerTeam[]  @relation("TeamMember")
 }
 
 model VerificationToken {
@@ -131,4 +133,15 @@ model GddRole {
   id    Int    @id @default(autoincrement())
   name  String @unique
   users User[]
+}
+
+model LineManagerTeam {
+  id            Int      @id @default(autoincrement())
+  lineManager   User     @relation("LineManager", fields: [lineManagerId], references: [id])
+  lineManagerId Int
+  user          User     @relation("TeamMember", fields: [userId], references: [id])
+  userId        Int
+  assignedAt    DateTime @default(now())
+
+  @@unique([lineManagerId, userId])
 }
