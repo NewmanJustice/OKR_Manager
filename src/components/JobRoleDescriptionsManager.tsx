@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
   Typography,
@@ -21,7 +21,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent, EditorOptions } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { Editor as TiptapEditor } from '@tiptap/core';
 
@@ -48,15 +48,39 @@ export default function JobRoleDescriptionsManager() {
   const [openDialog, setOpenDialog] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState({ jobRoleId: "", content: "" });
+  const editorRef = useRef<any>(null);
 
-  // Set up Tiptap editor with explicit type
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: form.content,
-    onUpdate: ({ editor }: { editor: TiptapEditor }) => {
-      setForm((f) => ({ ...f, content: editor.getHTML() }));
-    },
-  });
+  // Editor lifecycle management
+  useEffect(() => {
+    if (openDialog) {
+      editorRef.current = useEditor({
+        extensions: [StarterKit],
+        content: form.content,
+        onUpdate: ({ editor }: { editor: TiptapEditor }) => {
+          setForm((f) => ({ ...f, content: editor.getHTML() }));
+        },
+      });
+    } else {
+      if (editorRef.current) {
+        editorRef.current.destroy();
+        editorRef.current = null;
+      }
+    }
+    // Clean up on unmount
+    return () => {
+      if (editorRef.current) {
+        editorRef.current.destroy();
+        editorRef.current = null;
+      }
+    };
+  }, [openDialog]);
+
+  useEffect(() => {
+    // Update editor content when editing
+    if (openDialog && editorRef.current) {
+      editorRef.current.commands.setContent(form.content || "");
+    }
+  }, [openDialog, form.content]);
 
   useEffect(() => {
     async function load() {
@@ -67,13 +91,6 @@ export default function JobRoleDescriptionsManager() {
     }
     load();
   }, []);
-
-  useEffect(() => {
-    // Update editor content when editing
-    if (openDialog && editor) {
-      editor.commands.setContent(form.content || "");
-    }
-  }, [openDialog, form.content, editor]);
 
   const handleOpenDialog = (desc?: any) => {
     if (desc) {
@@ -179,8 +196,12 @@ export default function JobRoleDescriptionsManager() {
             <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
               Description
             </Typography>
-            {/* Use EditorContent from @tiptap/react for the editor UI */}
-            {editor && <EditorContent editor={editor} />}
+            {/* Use EditorContent from @tiptap/react for the editor UI, with minHeight for visibility */}
+            {editorRef.current && (
+              <Box sx={{ border: '1px solid #ccc', borderRadius: 2, minHeight: 200, p: 1 }}>
+                <EditorContent editor={editorRef.current} />
+              </Box>
+            )}
           </Box>
         </DialogContent>
         <DialogActions>
