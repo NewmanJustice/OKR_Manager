@@ -11,6 +11,7 @@ import RateReviewIcon from "@mui/icons-material/RateReview";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import GroupIcon from "@mui/icons-material/Group";
+import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
 import { useTheme, useMediaQuery } from "@mui/material";
 import NextLink from "next/link";
 import { signOut, useSession } from "next-auth/react";
@@ -94,6 +95,10 @@ const SideNav: React.FC<SideNavProps> = ({ open, onClose }) => {
           <ListItem component={NextLink} href="/line-manager/my-team" onClick={onClose} sx={{ cursor: 'pointer' } }>
             <ListItemIcon><GroupIcon /></ListItemIcon>
             <ListItemText primary="My Team" />
+          </ListItem>
+          <ListItem component={NextLink} href="/line-manager/job-descriptions" onClick={onClose} sx={{ cursor: 'pointer' } }>
+            <ListItemIcon><WorkOutlineIcon /></ListItemIcon>
+            <ListItemText primary="Job Descriptions" />
           </ListItem>
         </>}
       </List>
