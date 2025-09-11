@@ -31,6 +31,7 @@ import CodeBlock from '@tiptap/extension-code-block';
 import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import Strike from '@tiptap/extension-strike';
+import Paragraph from '@tiptap/extension-paragraph';
 
 function TiptapToolbar({ editor }: { editor: any }) {
   if (!editor) return null;
@@ -142,6 +143,7 @@ export default function JobRoleDescriptionsManager() {
   const editor = useEditor({
     extensions: [
       StarterKit,
+      Paragraph,
       Heading,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Blockquote,
