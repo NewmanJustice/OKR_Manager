@@ -16,7 +16,6 @@ import {
   Tooltip,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
 import { useEditor, EditorContent } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { Editor as TiptapEditor } from '@tiptap/core';
@@ -25,6 +24,13 @@ import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import EditIcon from '@mui/icons-material/Edit';
+import { TextAlign } from '@tiptap/extension-text-align';
+import Heading from '@tiptap/extension-heading';
+import Blockquote from '@tiptap/extension-blockquote';
+import CodeBlock from '@tiptap/extension-code-block';
+import Link from '@tiptap/extension-link';
+import Underline from '@tiptap/extension-underline';
+import Strike from '@tiptap/extension-strike';
 
 function TiptapToolbar({ editor }: { editor: any }) {
   if (!editor) return null;
@@ -66,6 +72,62 @@ function TiptapToolbar({ editor }: { editor: any }) {
           <FormatListNumberedIcon />
         </IconButton>
       </Tooltip>
+      {/* Fix: Split heading buttons into separate tooltips */}
+      <Tooltip title="Heading 1">
+        <IconButton size="small" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} color={editor.isActive('heading', { level: 1 }) ? 'primary' : 'default'}>
+          <Typography variant="h6">H1</Typography>
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Heading 2">
+        <IconButton size="small" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} color={editor.isActive('heading', { level: 2 }) ? 'primary' : 'default'}>
+          <Typography variant="subtitle1">H2</Typography>
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Heading 3">
+        <IconButton size="small" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} color={editor.isActive('heading', { level: 3 }) ? 'primary' : 'default'}>
+          <Typography variant="body1">H3</Typography>
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Blockquote">
+        <IconButton size="small" onClick={() => editor.chain().focus().toggleBlockquote().run()} color={editor.isActive('blockquote') ? 'primary' : 'default'}>
+          <FormatItalicIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Code Block">
+        <IconButton size="small" onClick={() => editor.chain().focus().toggleCodeBlock().run()} color={editor.isActive('codeBlock') ? 'primary' : 'default'}>
+          <Typography variant="body2">{'</>'}</Typography>
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Underline">
+        <IconButton size="small" onClick={() => editor.chain().focus().toggleUnderline().run()} color={editor.isActive('underline') ? 'primary' : 'default'}>
+          <Typography variant="body2" sx={{ textDecoration: 'underline' }}>U</Typography>
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Strike">
+        <IconButton size="small" onClick={() => editor.chain().focus().toggleStrike().run()} color={editor.isActive('strike') ? 'primary' : 'default'}>
+          <Typography variant="body2" sx={{ textDecoration: 'line-through' }}>S</Typography>
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Align Left">
+        <IconButton size="small" onClick={() => editor.chain().focus().setTextAlign('left').run()} color={editor.isActive({ textAlign: 'left' }) ? 'primary' : 'default'}>
+          <Typography variant="body2">L</Typography>
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Align Center">
+        <IconButton size="small" onClick={() => editor.chain().focus().setTextAlign('center').run()} color={editor.isActive({ textAlign: 'center' }) ? 'primary' : 'default'}>
+          <Typography variant="body2">C</Typography>
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Align Right">
+        <IconButton size="small" onClick={() => editor.chain().focus().setTextAlign('right').run()} color={editor.isActive({ textAlign: 'right' }) ? 'primary' : 'default'}>
+          <Typography variant="body2">R</Typography>
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Justify">
+        <IconButton size="small" onClick={() => editor.chain().focus().setTextAlign('justify').run()} color={editor.isActive({ textAlign: 'justify' }) ? 'primary' : 'default'}>
+          <Typography variant="body2">J</Typography>
+        </IconButton>
+      </Tooltip>
     </Box>
   );
 }
@@ -78,7 +140,16 @@ export default function JobRoleDescriptionsManager() {
   const [editId, setEditId] = useState<number | null>(null);
   const [viewDesc, setViewDesc] = useState<any | null>(null);
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      Heading,
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      Blockquote,
+      CodeBlock,
+      Link,
+      Underline,
+      Strike,
+    ],
     content: form.content,
     onUpdate: ({ editor }: { editor: TiptapEditor }) => {
       setForm((f: any) => ({ ...f, content: editor.getHTML() }));
