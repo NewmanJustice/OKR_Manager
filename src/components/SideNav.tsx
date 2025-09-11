@@ -21,6 +21,7 @@ const navLinks = [
   { text: "Dashboard", icon: <DashboardIcon />, href: "/" },
   { text: "Create Objective", icon: <CreateIcon />, href: "/objectives/create" },
   { text: "Review OKR's", icon: <RateReviewIcon />, href: "/objectives/review" },
+  { text: "My Job Role", icon: <WorkOutlineIcon />, href: "/my-job-role" },
   { text: "Logout", icon: <LogoutIcon />, href: "/logout" },
 ];
 

@@ -88,4 +88,20 @@ describe("SideNav", () => {
     fireEvent.click(logoutLink);
     expect(onClose).toHaveBeenCalled();
   });
+
+  it("renders all main nav links including My Job Role", () => {
+    render(<SideNav open={true} onClose={jest.fn()} />);
+    expect(screen.getByText("Profile")).toBeInTheDocument();
+    expect(screen.getByText("Dashboard")).toBeInTheDocument();
+    expect(screen.getByText("Create Objective")).toBeInTheDocument();
+    expect(screen.getByText("Review OKR's")).toBeInTheDocument();
+    expect(screen.getByText("My Job Role")).toBeInTheDocument();
+    expect(screen.getByText("Logout")).toBeInTheDocument();
+  });
+
+  it("navigates to My Job Role page when clicked", () => {
+    render(<SideNav open={true} onClose={jest.fn()} />);
+    const link = screen.getByText("My Job Role");
+    expect(link.closest('a')).toHaveAttribute('href', '/my-job-role');
+  });
 });
