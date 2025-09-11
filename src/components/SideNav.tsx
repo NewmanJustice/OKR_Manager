@@ -15,6 +15,7 @@ import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
 import { useTheme, useMediaQuery } from "@mui/material";
 import NextLink from "next/link";
 import { signOut, useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 const navLinks = [
   { text: "Profile", icon: <PersonIcon />, href: "/profile" },
@@ -35,6 +36,7 @@ const SideNav: React.FC<SideNavProps> = ({ open, onClose }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const { data: session } = useSession();
   const isLineManager = !!(session?.user && (session.user as any).isLineManager);
+  const pathname = usePathname();
 
   return (
     <Drawer
@@ -69,16 +71,17 @@ const SideNav: React.FC<SideNavProps> = ({ open, onClose }) => {
       </Typography>
       <List>
         {navLinks.map((link) => {
+          const isActive = pathname === link.href;
           if (link.text === "Logout") {
             return (
-              <ListItem key={link.text} sx={{ cursor: 'pointer' }} onClick={() => { signOut({ callbackUrl: window.location.origin }); onClose(); }}>
+              <ListItem key={link.text} sx={{ cursor: 'pointer', fontWeight: isActive ? 'bold' : undefined, backgroundColor: isActive ? '#e3f2fd' : undefined, color: isActive ? '#1976d2' : undefined, borderRadius: isActive ? 1 : undefined }} onClick={() => { signOut({ callbackUrl: "/" }); onClose(); }}>
                 <ListItemIcon>{link.icon}</ListItemIcon>
                 <ListItemText primary={link.text} />
               </ListItem>
             );
           }
           return (
-            <ListItem key={link.text} component={NextLink} href={link.href} onClick={onClose} sx={{ cursor: 'pointer' }}>
+            <ListItem key={link.text} component={NextLink} href={link.href} onClick={onClose} sx={{ cursor: 'pointer', fontWeight: isActive ? 'bold' : undefined, backgroundColor: isActive ? '#e3f2fd' : undefined, color: isActive ? '#1976d2' : undefined, borderRadius: isActive ? 1 : undefined }}>
               <ListItemIcon>{link.icon}</ListItemIcon>
               <ListItemText primary={link.text} />
             </ListItem>
