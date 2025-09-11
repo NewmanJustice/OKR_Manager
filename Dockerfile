@@ -21,6 +21,7 @@ ENV DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=public
 # Switch Prisma provider to PostgreSQL and generate client
 # RUN npm run prisma:postgres
 # Run Prisma migrations (if needed)
+RUN npm install prisma @prisma/client
 RUN npx prisma generate
 
 # Build Next.js app
