@@ -25,41 +25,58 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-describe('JobRoleDescriptionsManager', () => {
-  it('renders job role descriptions table', async () => {
+describe("JobRoleDescriptionsManager", () => {
+  it("renders job roles and descriptions list", async () => {
     render(<JobRoleDescriptionsManager />);
-    expect(screen.getByText(/Manage Job Role Descriptions/i)).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByText('Engineer')).toBeInTheDocument());
-    expect(screen.getByText('Engineer role')).toBeInTheDocument();
+    expect(await screen.findByText(/Add Job Role Description/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Manager/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Developer/i)).toBeInTheDocument();
+    expect(await screen.findByText(/First description/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Second description/i)).toBeInTheDocument();
   });
 
-  it('opens dialog and allows adding a description', async () => {
+  it("can add a new description", async () => {
     render(<JobRoleDescriptionsManager />);
-    fireEvent.click(screen.getByText(/Add Description/i));
     await waitFor(() => expect(screen.getByLabelText(/Job Role/i)).toBeInTheDocument());
-    fireEvent.change(screen.getByLabelText(/Job Role/i), { target: { value: '2' } });
-    // Simulate rich text input
-    // For tiptap, you may need to simulate editor commands or set HTML directly
-    // Here, we just check the dialog and button
-    expect(screen.getByText(/Create/i)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/Job Role/i), { target: { value: "1" } });
+    fireEvent.input(screen.getByRole("textbox"), { target: { innerHTML: "<p>New description</p>" } });
+    fireEvent.click(screen.getByText(/Add Description/i));
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("job-role-descriptions"), expect.objectContaining({ method: "POST" })));
   });
 
-  it('shows loading and empty states', async () => {
-    (global.fetch as jest.Mock).mockImplementationOnce(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ jobRoles: [] }) }));
-    (global.fetch as jest.Mock).mockImplementationOnce(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ descriptions: [] }) }));
+  it("can edit a description and update", async () => {
     render(<JobRoleDescriptionsManager />);
-    await waitFor(() => expect(screen.getByText(/No descriptions found/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Manager/i)).toBeInTheDocument());
+    fireEvent.click(screen.getAllByLabelText(/Edit/i)[0]);
+    await waitFor(() => expect(screen.getByText(/Update Description/i)).toBeInTheDocument());
+    fireEvent.input(screen.getByRole("textbox"), { target: { innerHTML: "<p>Updated description</p>" } });
+    fireEvent.click(screen.getByText(/Update Description/i));
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("job-role-descriptions"), expect.objectContaining({ method: "PUT" })));
   });
 
-  it('allows editing and deleting a description', async () => {
+  it("can delete a description", async () => {
     render(<JobRoleDescriptionsManager />);
-    await waitFor(() => expect(screen.getByText('Engineer')).toBeInTheDocument());
-    fireEvent.click(screen.getByLabelText('Edit'));
-    await waitFor(() => expect(screen.getByText(/Update/i)).toBeInTheDocument());
-    fireEvent.click(screen.getByLabelText('Delete'));
-    await waitFor(() => expect(global.fetch).toHaveBeenCalledWith(
-      '/api/job-role-descriptions',
-      expect.objectContaining({ method: 'DELETE' })
-    ));
+    await waitFor(() => expect(screen.getByText(/Manager/i)).toBeInTheDocument());
+    fireEvent.click(screen.getAllByLabelText(/Delete/i)[0]);
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("job-role-descriptions"), expect.objectContaining({ method: "DELETE" })));
+  });
+
+  it("shows only preview in list and full description on row click", async () => {
+    render(<JobRoleDescriptionsManager />);
+    await waitFor(() => expect(screen.getByText(/First description/i)).toBeInTheDocument());
+    fireEvent.click(screen.getAllByRole("row")[1]); // First data row
+    expect(await screen.findByText(/Full Description/i)).toBeInTheDocument();
+    expect(screen.getByText(/First description for manager./i)).toBeInTheDocument();
+    fireEvent.click(screen.getByText(/Close/i));
+    expect(screen.queryByText(/Full Description/i)).not.toBeInTheDocument();
+  });
+
+  it("can cancel edit", async () => {
+    render(<JobRoleDescriptionsManager />);
+    await waitFor(() => expect(screen.getByText(/Manager/i)).toBeInTheDocument());
+    fireEvent.click(screen.getAllByLabelText(/Edit/i)[0]);
+    await waitFor(() => expect(screen.getByText(/Cancel Edit/i)).toBeInTheDocument());
+    fireEvent.click(screen.getByText(/Cancel Edit/i));
+    expect(screen.queryByText(/Update Description/i)).not.toBeInTheDocument();
   });
 });
