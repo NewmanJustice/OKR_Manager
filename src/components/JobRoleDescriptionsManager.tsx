@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -11,76 +11,96 @@ import {
   TableRow,
   Paper,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
   MenuItem,
+  Tooltip,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { useEditor, EditorContent, EditorOptions } from '@tiptap/react';
+import { useEditor, EditorContent } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { Editor as TiptapEditor } from '@tiptap/core';
+import FormatBoldIcon from '@mui/icons-material/FormatBold';
+import FormatItalicIcon from '@mui/icons-material/FormatItalic';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import EditIcon from '@mui/icons-material/Edit';
 
-// Fetch job roles from API
-async function fetchJobRoles() {
-  const res = await fetch("/api/job-roles");
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.jobRoles || [];
-}
-
-// Fetch descriptions from API
-async function fetchDescriptions() {
-  const res = await fetch("/api/job-role-descriptions");
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.descriptions || [];
+function TiptapToolbar({ editor }: { editor: any }) {
+  if (!editor) return null;
+  return (
+    <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+      <Tooltip title="Bold">
+        <IconButton
+          size="small"
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          color={editor.isActive('bold') ? 'primary' : 'default'}
+        >
+          <FormatBoldIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Italic">
+        <IconButton
+          size="small"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          color={editor.isActive('italic') ? 'primary' : 'default'}
+        >
+          <FormatItalicIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Bullet List">
+        <IconButton
+          size="small"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          color={editor.isActive('bulletList') ? 'primary' : 'default'}
+        >
+          <FormatListBulletedIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Numbered List">
+        <IconButton
+          size="small"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          color={editor.isActive('orderedList') ? 'primary' : 'default'}
+        >
+          <FormatListNumberedIcon />
+        </IconButton>
+      </Tooltip>
+    </Box>
+  );
 }
 
 export default function JobRoleDescriptionsManager() {
   const [jobRoles, setJobRoles] = useState<any[]>([]);
   const [descriptions, setDescriptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState({ jobRoleId: "", content: "" });
-  const editorRef = useRef<any>(null);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [viewDesc, setViewDesc] = useState<any | null>(null);
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: form.content,
+    onUpdate: ({ editor }: { editor: TiptapEditor }) => {
+      setForm((f: any) => ({ ...f, content: editor.getHTML() }));
+    },
+    immediatelyRender: false,
+  });
 
-  // Editor lifecycle management
-  useEffect(() => {
-    if (openDialog) {
-      editorRef.current = useEditor({
-        extensions: [StarterKit],
-        content: form.content,
-        onUpdate: ({ editor }: { editor: TiptapEditor }) => {
-          setForm((f) => ({ ...f, content: editor.getHTML() }));
-        },
-      });
-    } else {
-      if (editorRef.current) {
-        editorRef.current.destroy();
-        editorRef.current = null;
-      }
-    }
-    // Clean up on unmount
-    return () => {
-      if (editorRef.current) {
-        editorRef.current.destroy();
-        editorRef.current = null;
-      }
-    };
-  }, [openDialog]);
+  // Fetch job roles from API
+  async function fetchJobRoles() {
+    const res = await fetch("/api/job-roles");
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.jobRoles || [];
+  }
 
-  useEffect(() => {
-    // Update editor content when editing
-    if (openDialog && editorRef.current) {
-      editorRef.current.commands.setContent(form.content || "");
-    }
-  }, [openDialog, form.content]);
+  // Fetch descriptions from API
+  async function fetchDescriptions() {
+    const res = await fetch("/api/job-role-descriptions");
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.descriptions || [];
+  }
 
   useEffect(() => {
     async function load() {
@@ -92,25 +112,20 @@ export default function JobRoleDescriptionsManager() {
     load();
   }, []);
 
-  const handleOpenDialog = (desc?: any) => {
-    if (desc) {
-      setEditId(desc.id);
-      setForm({ jobRoleId: desc.jobRoleId, content: desc.content });
-    } else {
-      setEditId(null);
-      setForm({ jobRoleId: "", content: "" });
-    }
-    setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setEditId(null);
-    setForm({ jobRoleId: "", content: "" });
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleEdit = (desc: any) => {
+    setEditId(desc.id);
+    setForm({ jobRoleId: desc.jobRoleId, content: desc.content });
+    if (editor) editor.commands.setContent(desc.content || "");
+  };
+
+  const handleCancelEdit = () => {
+    setEditId(null);
+    setForm({ jobRoleId: "", content: "" });
+    if (editor) editor.commands.setContent("");
   };
 
   const handleSubmit = async () => {
@@ -124,7 +139,9 @@ export default function JobRoleDescriptionsManager() {
     });
     if (res.ok) {
       setDescriptions(await fetchDescriptions());
-      handleCloseDialog();
+      setForm({ jobRoleId: "", content: "" });
+      setEditId(null);
+      if (editor) editor.commands.setContent("");
     }
   };
 
@@ -142,17 +159,72 @@ export default function JobRoleDescriptionsManager() {
 
   return (
     <Box>
+      <Box sx={{ mb: 4, p: 2, border: '1px solid #ccc', borderRadius: 2, background: '#fafafa' }}>
+        <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: 'black' }}>
+          Add Job Role Description
+        </Typography>
+        <TextField
+          select
+          label="Job Role"
+          name="jobRoleId"
+          value={form.jobRoleId}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          InputLabelProps={{ style: { color: 'black' } }}
+        >
+          {jobRoles.map((role: any) => (
+            <MenuItem key={role.id} value={role.id}>{role.name}</MenuItem>
+          ))}
+        </TextField>
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ color: 'black' }}>
+            Description
+          </Typography>
+          {editor && (
+            <Box sx={{ border: '1px solid #ccc', borderRadius: 2, minHeight: 200, p: 1, width: '100%', background: '#fff', overflowY: 'auto', whiteSpace: 'normal', userSelect: 'text' }}>
+              <TiptapToolbar editor={editor} />
+              <EditorContent
+                editor={editor}
+                style={{
+                  minHeight: 150,
+                  width: '100%',
+                  outline: 'none',
+                  fontSize: '1rem',
+                  lineHeight: 1.5,
+                  wordBreak: 'break-word',
+                  whiteSpace: 'normal',
+                  userSelect: 'text',
+                  color: 'black', // Set editor text color to black
+                }}
+              />
+            </Box>
+          )}
+        </Box>
+        <Button
+          variant="contained"
+          sx={{ mt: 2 }}
+          onClick={handleSubmit}
+          disabled={!form.jobRoleId || !form.content.trim()}
+        >
+          {editId ? "Update Description" : "Add Description"}
+        </Button>
+        {editId && (
+          <Button sx={{ mt: 2, ml: 2 }} onClick={handleCancelEdit} color="secondary" variant="outlined">
+            Cancel Edit
+          </Button>
+        )}
+      </Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Typography variant="h5" fontWeight="bold">Manage Job Role Descriptions</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>Add Description</Button>
+        <Typography variant="h5" fontWeight="bold" sx={{ color: 'black' }}>Manage Job Role Descriptions</Typography>
       </Box>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Job Role</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell sx={{ color: 'black', fontWeight: 'bold' }}>Job Role</TableCell>
+              <TableCell sx={{ color: 'black', fontWeight: 'bold' }}>Description</TableCell>
+              <TableCell align="right" sx={{ color: 'black', fontWeight: 'bold' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -161,54 +233,46 @@ export default function JobRoleDescriptionsManager() {
             ) : descriptions.length === 0 ? (
               <TableRow><TableCell colSpan={3}>No descriptions found.</TableCell></TableRow>
             ) : (
-              descriptions.map((desc) => (
-                <TableRow key={desc.id}>
-                  <TableCell>{desc.jobRole?.name || desc.jobRoleId}</TableCell>
-                  <TableCell>{desc.content}</TableCell>
-                  <TableCell align="right">
-                    <IconButton onClick={() => handleOpenDialog(desc)}><EditIcon /></IconButton>
-                    <IconButton color="error" onClick={() => handleDelete(desc.id)}><DeleteIcon /></IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
+              descriptions.map((desc) => {
+                // Extract first few words from first line
+                const firstLine = desc.content.replace(/<[^>]+>/g, '').split('\n')[0];
+                const preview = firstLine.split(' ').slice(0, 8).join(' ') + (firstLine.split(' ').length > 8 ? '...' : '');
+                return (
+                  <TableRow key={desc.id} hover sx={{ cursor: 'pointer' }} onClick={() => setViewDesc(desc)}>
+                    <TableCell>{desc.jobRole?.name || desc.jobRoleId}</TableCell>
+                    <TableCell>
+                      <Box sx={{ wordBreak: 'break-word', maxWidth: 400 }}>
+                        {preview}
+                      </Box>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Tooltip title="Edit">
+                        <IconButton color="primary" onClick={e => { e.stopPropagation(); handleEdit(desc); }}><EditIcon /></IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete">
+                        <IconButton color="error" onClick={e => { e.stopPropagation(); handleDelete(desc.id); }}><DeleteIcon /></IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
       </TableContainer>
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editId ? "Edit Description" : "Add Description"}</DialogTitle>
-        <DialogContent>
-          <TextField
-            select
-            label="Job Role"
-            name="jobRoleId"
-            value={form.jobRoleId}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            disabled={!!editId}
-          >
-            {jobRoles.map((role) => (
-              <MenuItem key={role.id} value={role.id}>{role.name}</MenuItem>
-            ))}
-          </TextField>
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-              Description
-            </Typography>
-            {/* Use EditorContent from @tiptap/react for the editor UI, with minHeight for visibility */}
-            {editorRef.current && (
-              <Box sx={{ border: '1px solid #ccc', borderRadius: 2, minHeight: 200, p: 1 }}>
-                <EditorContent editor={editorRef.current} />
-              </Box>
-            )}
+      {viewDesc && (
+        <Box sx={{ mt: 4, p: 3, border: '2px solid #1976d2', borderRadius: 2, background: '#fff', maxWidth: 600, mx: 'auto' }}>
+          <Typography variant="h6" fontWeight="bold" sx={{ color: 'black', mb: 2 }}>
+            {viewDesc.jobRole?.name || viewDesc.jobRoleId} - Full Description
+          </Typography>
+          <Box sx={{ wordBreak: 'break-word', color: 'black' }}>
+            <span dangerouslySetInnerHTML={{ __html: viewDesc.content }} />
           </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit}>{editId ? "Update" : "Create"}</Button>
-        </DialogActions>
-      </Dialog>
+          <Button sx={{ mt: 2 }} variant="outlined" color="primary" onClick={() => setViewDesc(null)}>
+            Close
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 }
