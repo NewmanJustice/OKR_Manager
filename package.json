@@ -22,6 +22,7 @@
     "@tiptap/extension-code-block": "^3.4.2",
     "@tiptap/extension-heading": "^3.4.2",
     "@tiptap/extension-link": "^3.4.2",
+    "@tiptap/extension-paragraph": "^3.4.2",
     "@tiptap/extension-strike": "^3.4.2",
     "@tiptap/extension-text-align": "^3.4.2",
     "@tiptap/extension-underline": "^3.4.2",

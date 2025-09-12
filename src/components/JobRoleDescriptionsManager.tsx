@@ -89,6 +89,15 @@ function TiptapToolbar({ editor }: { editor: any }) {
           <Typography variant="body1">H3</Typography>
         </IconButton>
       </Tooltip>
+      <Tooltip title="Heading 4">
+        <IconButton
+          size="small"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+          color={editor.isActive('heading', { level: 4 }) ? 'primary' : 'default'}
+        >
+          <Typography variant="body2">H4</Typography>
+        </IconButton>
+      </Tooltip>
       <Tooltip title="Blockquote">
         <IconButton size="small" onClick={() => editor.chain().focus().toggleBlockquote().run()} color={editor.isActive('blockquote') ? 'primary' : 'default'}>
           <FormatItalicIcon />
@@ -127,6 +136,15 @@ function TiptapToolbar({ editor }: { editor: any }) {
       <Tooltip title="Justify">
         <IconButton size="small" onClick={() => editor.chain().focus().setTextAlign('justify').run()} color={editor.isActive({ textAlign: 'justify' }) ? 'primary' : 'default'}>
           <Typography variant="body2">J</Typography>
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Paragraph">
+        <IconButton
+          size="small"
+          onClick={() => editor.chain().focus().setParagraph().run()}
+          color={editor.isActive('paragraph') ? 'primary' : 'default'}
+        >
+          <Typography variant="body2">P</Typography>
         </IconButton>
       </Tooltip>
     </Box>
@@ -334,11 +352,22 @@ export default function JobRoleDescriptionsManager() {
         </Table>
       </TableContainer>
       {viewDesc && (
-        <Box sx={{ mt: 4, p: 3, border: '2px solid #1976d2', borderRadius: 2, background: '#fff', maxWidth: 600, mx: 'auto' }}>
+        <Box sx={{ mt: 4, p: 3, border: '2px solid #1976d2', borderRadius: 2, background: '#fff', maxWidth: 800, width: '100%', mx: 'auto' }}>
           <Typography variant="h6" fontWeight="bold" sx={{ color: 'black', mb: 2 }}>
             {viewDesc.jobRole?.name || viewDesc.jobRoleId} - Full Description
           </Typography>
-          <Box sx={{ wordBreak: 'break-word', color: 'black' }}>
+          <Box
+            sx={{
+              wordBreak: 'break-word',
+              color: 'black',
+              // Add spacing between headings and paragraphs
+              '& h1, & h2, & h3, & h4': { mt: 2, mb: 1 },
+              '& p': { mb: 2 },
+              '& blockquote': { mb: 2 },
+              '& ul, & ol': { mb: 2 },
+              '& code': { mb: 2 },
+            }}
+          >
             <span dangerouslySetInnerHTML={{ __html: viewDesc.content }} />
           </Box>
           <Button sx={{ mt: 2 }} variant="outlined" color="primary" onClick={() => setViewDesc(null)}>
