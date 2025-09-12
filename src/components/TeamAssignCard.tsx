@@ -148,7 +148,7 @@ const TeamAssignCard: React.FC = () => {
                   <span>
                     {member.user.email}
                     {member.user.jobRole?.name && <span> &mdash; {member.user.jobRole.name}</span>}
-                    <span style={{ marginLeft: 8 }}>
+                    <span style={{ marginLeft: 8, display: 'inline-block', verticalAlign: 'middle' }}>
                       <Chip label={`Assigned: ${new Date(member.assignedAt).toLocaleDateString()}`} size="small" />
                     </span>
                   </span>

@@ -92,18 +92,39 @@ const SideNav: React.FC<SideNavProps> = ({ open, onClose }) => {
           <Typography variant="subtitle2" sx={{ fontWeight: 'bold', px: 2, pt: 2, pb: 1 }}>
             Manage my team
           </Typography>
-          <ListItem component={NextLink} href="/line-manager" onClick={onClose} sx={{ cursor: 'pointer' } }>
-            <ListItemIcon><MailOutlineIcon /></ListItemIcon>
-            <ListItemText primary="Invites" />
-          </ListItem>
-          <ListItem component={NextLink} href="/line-manager/my-team" onClick={onClose} sx={{ cursor: 'pointer' } }>
-            <ListItemIcon><GroupIcon /></ListItemIcon>
-            <ListItemText primary="My Team" />
-          </ListItem>
-          <ListItem component={NextLink} href="/line-manager/job-descriptions" onClick={onClose} sx={{ cursor: 'pointer' } }>
-            <ListItemIcon><WorkOutlineIcon /></ListItemIcon>
-            <ListItemText primary="Job Descriptions" />
-          </ListItem>
+          {[{
+            text: "Invites",
+            href: "/line-manager",
+            icon: <MailOutlineIcon />
+          }, {
+            text: "My Team",
+            href: "/line-manager/my-team",
+            icon: <GroupIcon />
+          }, {
+            text: "Job Descriptions",
+            href: "/line-manager/job-descriptions",
+            icon: <WorkOutlineIcon />
+          }].map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <ListItem
+                key={link.text}
+                component={NextLink}
+                href={link.href}
+                onClick={onClose}
+                sx={{
+                  cursor: 'pointer',
+                  fontWeight: isActive ? 'bold' : undefined,
+                  backgroundColor: isActive ? '#e3f2fd' : undefined,
+                  color: isActive ? '#1976d2' : undefined,
+                  borderRadius: isActive ? 1 : undefined
+                }}
+              >
+                <ListItemIcon>{link.icon}</ListItemIcon>
+                <ListItemText primary={link.text} />
+              </ListItem>
+            );
+          })}
         </>}
       </List>
     </Drawer>
