@@ -20,7 +20,7 @@ export async function sendInviteEmailGovNotify(lineManagerName: string, inviteeN
     template_id: INVITE_TEMPLATE_ID,
     personalisation
   };
-  const res = await sendEmail(notifyJwt, JSON.stringify(payload));
+  const res = await sendEmail(notifyJwt, payload);
   if (!res.ok) {
     const data = await res.json();
     throw new Error(data.errors?.[0]?.message || "Failed to send invite email");

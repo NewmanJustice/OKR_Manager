@@ -1,6 +1,10 @@
-import React from "react";
+import React, { Suspense } from "react";
 import PasswordResetPage from "@/components/PasswordResetPage";
 
-const Page = () => <PasswordResetPage />;
-
-export default Page;
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PasswordResetPage />
+    </Suspense>
+  );
+}
