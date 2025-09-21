@@ -72,7 +72,7 @@ export async function POST(req: Request) {
       },
     });
     // Send verification email
-    await sendVerificationEmail(name,email, verificationToken);
+    await sendVerificationEmail(name, email, verificationToken);
     return NextResponse.json({ message: "Registration successful. Please check your email to verify your account." }, { status: 201 });
   } catch (err: any) {
     console.error("Registration API error:", err);

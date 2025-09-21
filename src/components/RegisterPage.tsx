@@ -23,7 +23,7 @@ const RegisterPage: React.FC = () => {
   const [captchaToken, setCaptchaToken] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const inviteToken = searchParams.get("invite");
+  const inviteToken = searchParams ? searchParams.get("invite") : null;
   const [inviteStatus, setInviteStatus] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState<string>("");
   const [inviteLoading, setInviteLoading] = useState(false);
