@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Box, Button, Link, TextField, Typography, Alert } from "@mui/material";
+import { Box, Button, Link, TextField, Typography, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import NextLink from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,10 @@ const LoginForm: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotMsg, setForgotMsg] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,8 +52,56 @@ const LoginForm: React.FC = () => {
           <Link component={NextLink} href="/register" underline="hover">
             Don't have an account? Register
           </Link>
+          <br />
+          <Button variant="text" color="primary" sx={{ mt: 1 }} onClick={() => setForgotOpen(true)}>
+            Forgot password?
+          </Button>
         </Box>
       </Box>
+      <Dialog open={forgotOpen} onClose={() => { setForgotOpen(false); setForgotMsg(""); setForgotEmail(""); }} maxWidth="xs" fullWidth>
+        <DialogTitle>Reset Password</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Email"
+            type="email"
+            fullWidth
+            margin="normal"
+            value={forgotEmail}
+            onChange={e => setForgotEmail(e.target.value)}
+            disabled={forgotLoading}
+          />
+          {forgotMsg && <Alert severity={forgotMsg.startsWith("Password reset link sent") ? "success" : "error"} sx={{ mt: 2 }}>{forgotMsg}</Alert>}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setForgotOpen(false); setForgotMsg(""); setForgotEmail(""); }} disabled={forgotLoading}>Cancel</Button>
+          <Button
+            onClick={async () => {
+              setForgotLoading(true);
+              setForgotMsg("");
+              try {
+                const res = await fetch("/api/password-reset", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ email: forgotEmail })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                  setForgotMsg("Password reset link sent to your email (if registered). Please check your inbox.");
+                } else {
+                  setForgotMsg(data.error || "Failed to send reset link.");
+                }
+              } catch {
+                setForgotMsg("Network error. Please try again.");
+              } finally {
+                setForgotLoading(false);
+              }
+            }}
+            disabled={!forgotEmail || forgotLoading}
+          >
+            Send Reset Link
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

@@ -1,5 +1,6 @@
 // GOV.UK Notify email sending utility for account verification
 import { createNotifyJwt } from './jwt_generater';
+import { sendEmail } from './sendGovNotifyEmail';
 
 const NOTIFY_API_KEY = process.env.GOV_NOTIFY_API_KEY;
 const VERIFY_TEMPLATE_ID = process.env.GOV_NOTIFY_VERIFY_ACCOUNT_TEMPLATE_ID;
@@ -18,14 +19,7 @@ export async function sendVerificationEmail(name: string, email: string, token: 
     template_id: VERIFY_TEMPLATE_ID,
     personalisation
   };
-  const res = await fetch('https://api.notifications.service.gov.uk/v2/notifications/email', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${notifyJwt}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+  const res = await sendEmail(notifyJwt, JSON.stringify(payload));
   if (!res.ok) {
     const data = await res.json();
     throw new Error(data.errors?.[0]?.message || "Failed to send verification email");
