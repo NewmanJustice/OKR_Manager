@@ -7,6 +7,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { email } = body;
     if (!email || typeof email !== 'string') {
+      console.error('Password reset request error: Email required.', { email });
       return new Response(JSON.stringify({ error: 'Email required.' }), { status: 400 });
     }
 
@@ -40,6 +41,7 @@ export async function POST(req: Request) {
 
     return new Response(JSON.stringify({ message: 'If your email is registered, you will receive a reset link.' }), { status: 200 });
   } catch (err: any) {
+    console.error('Password reset API error:', err);
     return new Response(JSON.stringify({ error: err?.message || 'Internal server error.' }), { status: 500 });
   }
 }
