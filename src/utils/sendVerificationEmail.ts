@@ -22,6 +22,7 @@ export async function sendVerificationEmail(name: string, email: string, token: 
   const res = await sendEmail(notifyJwt, payload);
   if (!res.ok) {
     const data = await res.json();
++    console.error("Send verification email error:", data);
     throw new Error(data.errors?.[0]?.message || "Failed to send verification email");
   }
   return true;

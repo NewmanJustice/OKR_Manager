@@ -21,6 +21,7 @@ export async function sendPasswordResetEmail(name: string, email: string, token:
   const res = await sendEmail(notifyJwt, payload);
   if (!res.ok) {
     const data = await res.json();
+    console.error("Failed to send password reset email:", data);
     throw new Error(data.errors?.[0]?.message || "Failed to send password reset email");
   }
   return true;
