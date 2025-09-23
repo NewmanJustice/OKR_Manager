@@ -50,7 +50,7 @@ await sendInviteEmailGovNotify(
   return NextResponse.json({ invite });
 }
 // GET: list invites for line manager
-export async function GET(req: Request) {w
+export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user || !(session.user as any).isLineManager) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
