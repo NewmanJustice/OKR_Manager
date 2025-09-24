@@ -7,6 +7,7 @@ export async function GET(req: Request) {
 
   // Validate token format (UUID v4)
   if (!token || !/^[0-9a-fA-F-]{36}$/.test(token)) {
+    console.error('Token is in valid', token)
     return NextResponse.json({ invite: null, error: "Invalid token format" }, { status: 400 });
   }
 
@@ -21,11 +22,13 @@ export async function GET(req: Request) {
       },
     });
     if (!invite) {
+      console.error('Invite is null - invite-by-token')
       return NextResponse.json({ invite: null }, { status: 404 });
     }
     // Optionally, check expiry/invalidated/used status here
     return NextResponse.json({ invite });
-  } catch (err) {
+  } 
+  catch (err) {
     return NextResponse.json({ invite: null, error: "Server error" }, { status: 500 });
   }
 }

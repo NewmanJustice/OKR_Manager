@@ -15,34 +15,33 @@ function getInviteStatus(invite: PrismaInvite) {
   if (invite.status === "resent") return "resent";
   return "pending";
 }
-
 // POST: create/send invite
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || !(session.user as any).isLineManager) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const userId = (session.user as any).id;
-  const { email, inviteeName } = await req.json();
-  if (!email) {
-    return NextResponse.json({ error: "Email required" }, { status: 400 });
-  }
-  // Generate unique token
-  const token = uuidv4();
-  const now = new Date();
-  // Save invite to DB
-  const invite = await db.invite.create({
-    data: {
-      email,
-      token,
-      lineManagerId: userId,
-      dateSent: now,
-      status: "pending",
-      expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days
-    },
-  });
-  // Send invite email via GOV Notify
-  await sendInviteEmailGovNotify(
+const session = await getServerSession(authOptions);
+if (!session?.user || !(session.user as any).isLineManager) {
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+}
+const userId = (session.user as any).id;
+const { email, inviteeName } = await req.json();
+if (!email) {
+  return NextResponse.json({ error: "Email required" }, { status: 400 });
+}
+// Generate unique token
+const token = uuidv4();
+const now = new Date();
+// Save invite to DB
+const invite = await db.invite.create({
+  data: {
+    email,
+    token,
+    lineManagerId: userId,
+    dateSent: now,
+    status: "pending",
+    expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days
+  },
+});
+// Send invite email via GOV Notify
+await sendInviteEmailGovNotify(
     session.user.name || "Line Manager",
     inviteeName || "User",
     email,
@@ -50,7 +49,6 @@ export async function POST(req: Request) {
   );
   return NextResponse.json({ invite });
 }
-
 // GET: list invites for line manager
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
@@ -66,3 +64,4 @@ export async function GET(req: Request) {
   invites = invites.map((invite: PrismaInvite) => ({ ...invite, status: getInviteStatus(invite) }));
   return NextResponse.json({ invites });
 }
+
